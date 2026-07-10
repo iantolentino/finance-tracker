@@ -1,0 +1,6 @@
+{
+  "name": "Personal Finance Management System",
+  "description": "A centralized system combining SPayLater tracking and cash loan lending management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

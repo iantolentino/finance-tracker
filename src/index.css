@@ -1,0 +1,339 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+/* ==========================================
+   LIGHT MODE (Default System styling)
+   ========================================== */
+body {
+  background-color: #f8fafc; /* bg-slate-50 */
+  color: #0f172a; /* text-slate-900 */
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom interactive input elements default styling in light mode */
+input[type="text"], 
+input[type="password"], 
+input[type="number"], 
+input[type="date"], 
+select, 
+textarea {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0; /* border-slate-200 */
+  color: #0f172a;
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: #6366f1; /* accent-indigo */
+  outline: none;
+  box-shadow: 0 0 0 1.5px rgba(99, 102, 241, 0.5), 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* High contrast custom scrollbars in light mode */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* ==========================================
+   DARK MODE OVERRIDES (When html has .dark class)
+   ========================================== */
+html.dark {
+  --bg-primary: #080c14;
+  --bg-secondary: #0f1524;
+  --bg-card: rgba(15, 22, 40, 0.75);
+  --bg-card-hover: rgba(22, 32, 57, 0.85);
+  --border-color: rgba(255, 255, 255, 0.07);
+  --border-color-hover: rgba(99, 102, 241, 0.3);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --accent-indigo: #6366f1;
+  --accent-purple: #a855f7;
+  --accent-pink: #ec4899;
+}
+
+html.dark body {
+  background-color: var(--bg-primary);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
+    radial-gradient(at 50% 0%, rgba(168, 85, 247, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.05) 0px, transparent 50%);
+  background-attachment: fixed;
+  color: var(--text-primary);
+}
+
+/* Background replacements in dark mode */
+html.dark .bg-slate-50, 
+html.dark .bg-slate-100 {
+  background-color: var(--bg-primary) !important;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
+    radial-gradient(at 50% 0%, rgba(168, 85, 247, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.05) 0px, transparent 50%) !important;
+  background-attachment: fixed !important;
+}
+
+/* Card panels - conversion to high-fidelity glassmorphism in dark mode */
+html.dark .bg-white {
+  background-color: var(--bg-card) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 
+    0 10px 30px -10px rgba(0, 0, 0, 0.5), 
+    inset 0 1px 1px rgba(255, 255, 255, 0.05) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html.dark .bg-white:hover {
+  box-shadow: 
+    0 15px 35px -5px rgba(0, 0, 0, 0.6), 
+    inset 0 1px 1px rgba(255, 255, 255, 0.07) !important;
+}
+
+/* Modals glassmorphic container overrides in dark mode */
+html.dark .fixed.inset-0.bg-black\/40, 
+html.dark .fixed.inset-0.bg-black\/50,
+html.dark .fixed.inset-0.bg-slate-900\/50 {
+  background-color: rgba(3, 5, 10, 0.8) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+/* Custom shadow cards and dynamic alerts in dark mode */
+html.dark .bg-red-50\/50, 
+html.dark .bg-red-50 {
+  background-color: rgba(239, 68, 68, 0.08) !important;
+  border-color: rgba(239, 68, 68, 0.2) !important;
+}
+
+html.dark .bg-indigo-50 {
+  background-color: rgba(99, 102, 241, 0.1) !important;
+  color: #818cf8 !important;
+}
+
+html.dark .bg-orange-50 {
+  background-color: rgba(249, 115, 22, 0.1) !important;
+  color: #fb923c !important;
+}
+
+html.dark .bg-emerald-50 {
+  background-color: rgba(16, 185, 129, 0.1) !important;
+  color: #34d399 !important;
+}
+
+html.dark .bg-slate-50\/50 {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+html.dark .bg-slate-800\/40 {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Border overrides in dark mode */
+html.dark .border,
+html.dark .border-slate-100, 
+html.dark .border-slate-200, 
+html.dark .border-slate-300,
+html.dark .border-slate-50 {
+  border-color: var(--border-color) !important;
+}
+
+/* Custom interactive input elements styling in dark mode */
+html.dark input[type="text"], 
+html.dark input[type="password"], 
+html.dark input[type="number"], 
+html.dark input[type="date"], 
+html.dark select, 
+html.dark textarea {
+  background-color: rgba(15, 21, 36, 0.75) !important;
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  color: #ffffff !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+html.dark input:focus, html.dark select:focus, html.dark textarea:focus {
+  border-color: var(--border-color-hover) !important;
+  outline: none !important;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Dropdown list item style for select in dark mode */
+html.dark select option {
+  background-color: #0f1524 !important;
+  color: #f8fafc !important;
+}
+
+/* Text elements color system mapping in dark mode */
+html.dark .text-slate-950, 
+html.dark .text-slate-900, 
+html.dark .text-slate-800 {
+  color: var(--text-primary) !important;
+}
+
+html.dark .text-slate-700, 
+html.dark .text-slate-600, 
+html.dark .text-slate-500 {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .text-slate-400 {
+  color: #64748b !important;
+}
+
+/* Text accent colors to keep theme intact in dark mode */
+html.dark .text-indigo-600 {
+  color: #818cf8 !important;
+}
+
+html.dark .text-indigo-700 {
+  color: #a5b4fc !important;
+}
+
+html.dark .text-indigo-800 {
+  color: #c7d2fe !important;
+}
+
+html.dark .text-emerald-600 {
+  color: #34d399 !important;
+}
+
+html.dark .text-orange-600 {
+  color: #fb923c !important;
+}
+
+html.dark .text-blue-600 {
+  color: #60a5fa !important;
+}
+
+/* Badge tags color correction in dark mode */
+html.dark .text-green-800, 
+html.dark .text-emerald-800 {
+  color: #34d399 !important;
+}
+
+html.dark .bg-green-100, 
+html.dark .bg-emerald-100 {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+  border: 1px solid rgba(16, 185, 129, 0.2) !important;
+}
+
+html.dark .text-red-800 {
+  color: #f87171 !important;
+}
+
+html.dark .bg-red-100 {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+  border: 1px solid rgba(239, 68, 68, 0.2) !important;
+}
+
+html.dark .text-orange-800 {
+  color: #fb923c !important;
+}
+
+html.dark .bg-orange-100 {
+  background-color: rgba(249, 115, 22, 0.15) !important;
+  border: 1px solid rgba(249, 115, 22, 0.2) !important;
+}
+
+html.dark .text-blue-800 {
+  color: #60a5fa !important;
+}
+
+html.dark .bg-blue-100 {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Table layout polishing in dark mode */
+html.dark table {
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+html.dark thead th {
+  background-color: rgba(15, 21, 36, 0.85) !important;
+  color: #cbd5e1 !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark tbody tr {
+  background-color: transparent !important;
+}
+
+html.dark tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+html.dark tbody td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+  color: #e2e8f0 !important;
+}
+
+/* High Contrast Scrollbar system for Sleek design in dark mode */
+html.dark ::-webkit-scrollbar-track {
+  background: rgba(15, 21, 36, 0.2);
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* Modal sizing & drop shadow correction in dark mode */
+html.dark .max-w-md.bg-white, 
+html.dark .max-w-lg.bg-white, 
+html.dark .max-w-xl.bg-white, 
+html.dark .max-w-2xl.bg-white, 
+html.dark .max-w-3xl.bg-white, 
+html.dark .max-w-sm.bg-white, 
+html.dark .max-w-4xl.bg-white, 
+html.dark .max-w-5xl.bg-white {
+  background-color: #0f1524 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Printing styling configurations */
+@media print {
+  body, .bg-slate-50, .bg-slate-100, .bg-white {
+    background: #ffffff !important;
+    background-image: none !important;
+    color: #000000 !important;
+  }
+  .text-slate-950, .text-slate-900, .text-slate-800, .text-slate-700, .text-slate-600, .text-slate-500 {
+    color: #000000 !important;
+  }
+  .bg-white {
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+}

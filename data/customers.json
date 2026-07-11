@@ -1,13 +1,79 @@
 [
   {
-    "id": "cust-1783746342000",
-    "fullName": "Smoke Test Customer",
-    "contactNumber": "09171234567",
+    "id": "cust-ian",
+    "fullName": "Ian",
+    "contactNumber": "",
     "messengerLink": "",
-    "notes": "",
+    "notes": "Primary SPayLater Account Holder",
     "status": "Active",
     "carriedOverBalance": 0,
     "billingCycle": "July 2026",
-    "createdAt": "2026-07-11T05:05:42.000Z"
+    "createdAt": "2026-07-10T05:33:00.000Z"
+  },
+  {
+    "id": "cust-shannen",
+    "fullName": "Shannen",
+    "contactNumber": "",
+    "messengerLink": "",
+    "notes": "SPayLater Family Member",
+    "status": "Active",
+    "carriedOverBalance": 0,
+    "billingCycle": "July 2026",
+    "createdAt": "2026-07-10T05:33:00.000Z"
+  },
+  {
+    "id": "cust-claudine",
+    "fullName": "Claudine",
+    "contactNumber": "",
+    "messengerLink": "",
+    "notes": "SPayLater Member",
+    "status": "Active",
+    "carriedOverBalance": 0,
+    "billingCycle": "July 2026",
+    "createdAt": "2026-07-10T05:33:00.000Z"
+  },
+  {
+    "id": "cust-manuel",
+    "fullName": "Tatay Manuel",
+    "contactNumber": "",
+    "messengerLink": "",
+    "notes": "SPayLater Account - Tatay Manuel",
+    "status": "Active",
+    "carriedOverBalance": 0,
+    "billingCycle": "July 2026",
+    "createdAt": "2026-07-10T05:33:00.000Z"
+  },
+  {
+    "id": "cust-lecel",
+    "fullName": "Lecel",
+    "contactNumber": "",
+    "messengerLink": "",
+    "notes": "SPayLater Account - Lecel (Paid)",
+    "status": "Fully Paid",
+    "carriedOverBalance": 0,
+    "billingCycle": "July 2026",
+    "createdAt": "2026-07-10T05:33:00.000Z"
+  },
+  {
+    "id": "cust-tricia",
+    "fullName": "Tricia",
+    "contactNumber": "",
+    "messengerLink": "",
+    "notes": "iPhone Installment Tracker",
+    "status": "Active",
+    "carriedOverBalance": 0,
+    "billingCycle": "July 2026",
+    "createdAt": "2026-07-10T05:33:00.000Z"
+  },
+  {
+    "id": "cust-ateshe",
+    "fullName": "Ate She",
+    "contactNumber": "",
+    "messengerLink": "",
+    "notes": "iPhone Installment Tracker",
+    "status": "Active",
+    "carriedOverBalance": 0,
+    "billingCycle": "July 2026",
+    "createdAt": "2026-07-10T05:33:00.000Z"
   }
 ]

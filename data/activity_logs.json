@@ -1,5 +1,11 @@
 [
   {
+    "id": "log-1783746357890-xk4p",
+    "action": "Purchase Added",
+    "details": "Added purchase: Smoke Test Item for amount 500 PHP",
+    "timestamp": "2026-07-11T05:05:57.890Z"
+  },
+  {
     "id": "log-1783746343678-71kc",
     "action": "Customer Added",
     "details": "Added new customer: Smoke Test Customer",

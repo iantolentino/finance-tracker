@@ -1,5 +1,11 @@
 [
   {
+    "id": "log-1783750365747-jglc",
+    "action": "Password Changed",
+    "details": "Master password was successfully updated.",
+    "timestamp": "2026-07-11T06:12:45.747Z"
+  },
+  {
     "id": "log-1783750308320-k8dr",
     "action": "Settings Updated",
     "details": "System configurations have been updated.",

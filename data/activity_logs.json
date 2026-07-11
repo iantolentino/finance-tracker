@@ -1,5 +1,11 @@
 [
   {
+    "id": "log-1783749828660-f3ii",
+    "action": "User Login",
+    "details": "Admin successfully logged into the system.",
+    "timestamp": "2026-07-11T06:03:48.660Z"
+  },
+  {
     "id": "log-1783748422858-nj6h",
     "action": "Settings Updated",
     "details": "System configurations have been updated.",

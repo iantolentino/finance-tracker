@@ -1,5 +1,29 @@
 [
   {
+    "id": "log-1783750404683-7b2u",
+    "action": "Backup Created",
+    "details": "Manual backup successfully generated.",
+    "timestamp": "2026-07-11T06:13:24.683Z"
+  },
+  {
+    "id": "log-1783750365747-jglc",
+    "action": "Password Changed",
+    "details": "Master password was successfully updated.",
+    "timestamp": "2026-07-11T06:12:45.747Z"
+  },
+  {
+    "id": "log-1783750308320-k8dr",
+    "action": "Settings Updated",
+    "details": "System configurations have been updated.",
+    "timestamp": "2026-07-11T06:11:48.320Z"
+  },
+  {
+    "id": "log-1783750291204-n4f6",
+    "action": "User Login",
+    "details": "Admin successfully logged into the system.",
+    "timestamp": "2026-07-11T06:11:31.204Z"
+  },
+  {
     "id": "log-1783750267796-6uiq",
     "action": "Customer Deleted",
     "details": "Removed customer: Vercel Smoke Test and cleared active purchases/payments.",

@@ -1,0 +1,39 @@
+{
+  "timestamp": "2026-07-11T05:05:32.714Z",
+  "type": "automatic",
+  "settings": {
+    "masterPassword": "admin",
+    "currency": "PHP",
+    "theme": "light",
+    "personalBusinessName": "Personal Finance Management System",
+    "defaultBillingDate": "15",
+    "defaultDueDate": "30",
+    "backupPreference": "manual"
+  },
+  "billingCycles": {
+    "activeCycle": "July 2026",
+    "cycles": [
+      "July 2026"
+    ]
+  },
+  "customers": [],
+  "purchases": [],
+  "payments": [],
+  "loans": [],
+  "budgets": [],
+  "archives": [],
+  "activityLogs": [
+    {
+      "id": "log-1783746329812-1vqf",
+      "action": "User Login",
+      "details": "Admin successfully logged into the system.",
+      "timestamp": "2026-07-11T05:05:29.812Z"
+    },
+    {
+      "id": "log-init",
+      "action": "System Initialized",
+      "details": "Personal Finance Management System successfully started.",
+      "timestamp": "2026-07-11T05:05:29.375Z"
+    }
+  ]
+}

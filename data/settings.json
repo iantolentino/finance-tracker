@@ -1,0 +1,9 @@
+{
+  "masterPassword": "admin",
+  "currency": "PHP",
+  "theme": "dark",
+  "personalBusinessName": "Personal Finance Management System",
+  "defaultBillingDate": "15",
+  "defaultDueDate": "30",
+  "backupPreference": "manual"
+}

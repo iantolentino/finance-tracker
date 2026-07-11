@@ -1,0 +1,206 @@
+[
+  {
+    "id": "log-1783748422858-nj6h",
+    "action": "Settings Updated",
+    "details": "System configurations have been updated.",
+    "timestamp": "2026-07-11T05:40:22.858Z"
+  },
+  {
+    "id": "log-1783748402641-eoub",
+    "action": "User Login",
+    "details": "Admin successfully logged into the system.",
+    "timestamp": "2026-07-11T05:40:02.641Z"
+  },
+  {
+    "id": "log-1783748175435-57wh",
+    "action": "Settings Updated",
+    "details": "System configurations have been updated.",
+    "timestamp": "2026-07-11T05:36:15.435Z"
+  },
+  {
+    "id": "log-1783748138280-g42u",
+    "action": "Settings Updated",
+    "details": "System configurations have been updated.",
+    "timestamp": "2026-07-11T05:35:38.280Z"
+  },
+  {
+    "id": "log-1783748114369-dd3h",
+    "action": "Settings Updated",
+    "details": "System configurations have been updated.",
+    "timestamp": "2026-07-11T05:35:14.369Z"
+  },
+  {
+    "id": "log-1783748013242-0brj",
+    "action": "Settings Updated",
+    "details": "System configurations have been updated.",
+    "timestamp": "2026-07-11T05:33:33.242Z"
+  },
+  {
+    "id": "log-1783748010908-r7ac",
+    "action": "Settings Updated",
+    "details": "System configurations have been updated.",
+    "timestamp": "2026-07-11T05:33:30.908Z"
+  },
+  {
+    "id": "log-1783748006778-yara",
+    "action": "Settings Updated",
+    "details": "System configurations have been updated.",
+    "timestamp": "2026-07-11T05:33:26.778Z"
+  },
+  {
+    "id": "log-1783748003265-0ycx",
+    "action": "Settings Updated",
+    "details": "System configurations have been updated.",
+    "timestamp": "2026-07-11T05:33:23.265Z"
+  },
+  {
+    "id": "log-1783747999008-htdv",
+    "action": "Settings Updated",
+    "details": "System configurations have been updated.",
+    "timestamp": "2026-07-11T05:33:19.008Z"
+  },
+  {
+    "id": "log-1783747990103-kvj1",
+    "action": "Settings Updated",
+    "details": "System configurations have been updated.",
+    "timestamp": "2026-07-11T05:33:10.103Z"
+  },
+  {
+    "id": "log-1783747962350-9vse",
+    "action": "User Login",
+    "details": "Admin successfully logged into the system.",
+    "timestamp": "2026-07-11T05:32:42.350Z"
+  },
+  {
+    "id": "log-1783747959174-5yoz",
+    "action": "User Login",
+    "details": "Admin successfully logged into the system.",
+    "timestamp": "2026-07-11T05:32:39.174Z"
+  },
+  {
+    "id": "log-1783747955823-bghc",
+    "action": "User Login",
+    "details": "Admin successfully logged into the system.",
+    "timestamp": "2026-07-11T05:32:35.823Z"
+  },
+  {
+    "id": "log-1783747947204-htq0",
+    "action": "Failed Login",
+    "details": "An unauthorized login attempt was blocked.",
+    "timestamp": "2026-07-11T05:32:27.204Z"
+  },
+  {
+    "id": "log-1783747355560-1e37",
+    "action": "Backup Imported",
+    "details": "A full external backup JSON was imported successfully.",
+    "timestamp": "2026-07-11T05:22:35.560Z"
+  },
+  {
+    "id": "log-1783692846018-4y0d",
+    "action": "Customer Updated",
+    "details": "Updated customer profile: Shannen",
+    "timestamp": "2026-07-10T14:14:06.018Z"
+  },
+  {
+    "id": "log-1783692836133-qiye",
+    "action": "Customer Updated",
+    "details": "Updated customer profile: Ian",
+    "timestamp": "2026-07-10T14:13:56.133Z"
+  },
+  {
+    "id": "log-1783692805842-v8ky",
+    "action": "Backup Imported",
+    "details": "A full external backup JSON was imported successfully.",
+    "timestamp": "2026-07-10T14:13:25.842Z"
+  },
+  {
+    "id": "log-1783692407577-uq8t",
+    "action": "Settings Updated",
+    "details": "System configurations have been updated.",
+    "timestamp": "2026-07-10T14:06:47.577Z"
+  },
+  {
+    "id": "log-1783692406377-9ezd",
+    "action": "Settings Updated",
+    "details": "System configurations have been updated.",
+    "timestamp": "2026-07-10T14:06:46.377Z"
+  },
+  {
+    "id": "log-1783692334729-5uow",
+    "action": "Payment Updated",
+    "details": "Updated payment record: 263 PHP",
+    "timestamp": "2026-07-10T14:05:34.730Z"
+  },
+  {
+    "id": "log-1783692317016-n0tw",
+    "action": "Payment Recorded",
+    "details": "Recorded payment: 5000 PHP via Maya",
+    "timestamp": "2026-07-10T14:05:17.016Z"
+  },
+  {
+    "id": "log-1783692285702-bz3g",
+    "action": "Backup Imported",
+    "details": "A full external backup JSON was imported successfully.",
+    "timestamp": "2026-07-10T14:04:45.702Z"
+  },
+  {
+    "id": "log-1783691181262-7cni",
+    "action": "Customer Updated",
+    "details": "Updated customer profile: Claudine",
+    "timestamp": "2026-07-10T13:46:21.262Z"
+  },
+  {
+    "id": "log-1783691082712-trh0",
+    "action": "Purchase Deleted",
+    "details": "Deleted purchase item: Lip Mallow",
+    "timestamp": "2026-07-10T13:44:42.712Z"
+  },
+  {
+    "id": "log-1783691030891-rpf4",
+    "action": "Purchase Updated",
+    "details": "Updated purchase: Hand Grip",
+    "timestamp": "2026-07-10T13:43:50.891Z"
+  },
+  {
+    "id": "log-1783691014079-icsc",
+    "action": "Purchase Updated",
+    "details": "Updated purchase: 50pcs  Mini Storage",
+    "timestamp": "2026-07-10T13:43:34.079Z"
+  },
+  {
+    "id": "log-1783691001829-msta",
+    "action": "Payment Deleted",
+    "details": "Removed payment record of 100 PHP",
+    "timestamp": "2026-07-10T13:43:21.829Z"
+  },
+  {
+    "id": "log-1783690993827-fua4",
+    "action": "Purchase Added",
+    "details": "Added purchase: Lip Mallow for amount 100 PHP",
+    "timestamp": "2026-07-10T13:43:13.827Z"
+  },
+  {
+    "id": "log-1783690970226-df15",
+    "action": "Purchase Added",
+    "details": "Added purchase: 50pcs  Mini Storage for amount 50 PHP",
+    "timestamp": "2026-07-10T13:42:50.226Z"
+  },
+  {
+    "id": "log-1783690826947-8mr1",
+    "action": "Purchase Added",
+    "details": "Added purchase: Hand Grip for amount 22 PHP",
+    "timestamp": "2026-07-10T13:40:26.947Z"
+  },
+  {
+    "id": "log-1783690805055-3mjt",
+    "action": "Database Seeded",
+    "details": "SpayLater tracker summary imported automatically via 1-click seeder.",
+    "timestamp": "2026-07-10T13:40:05.055Z"
+  },
+  {
+    "id": "log-seed-1",
+    "action": "Seeded SPayLater Data",
+    "details": "SPayLater Tracker data imported successfully including Ian, Shannen, Claudine, Tatay Manuel, Lecel, Tricia, and Ate She records.",
+    "timestamp": "2026-07-10T05:33:00.000Z"
+  }
+]

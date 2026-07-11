@@ -1,0 +1,13 @@
+[
+  {
+    "id": "cust-1783746342000",
+    "fullName": "Smoke Test Customer",
+    "contactNumber": "09171234567",
+    "messengerLink": "",
+    "notes": "",
+    "status": "Active",
+    "carriedOverBalance": 0,
+    "billingCycle": "July 2026",
+    "createdAt": "2026-07-11T05:05:42.000Z"
+  }
+]

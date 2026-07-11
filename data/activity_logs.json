@@ -1,5 +1,11 @@
 [
   {
+    "id": "log-1783746777070-zkxk",
+    "action": "Backup Deleted",
+    "details": "Backup file deleted: manual_2026-07-11_051155.json",
+    "timestamp": "2026-07-11T05:12:57.070Z"
+  },
+  {
     "id": "log-1783746742258-7cg3",
     "action": "System Restored",
     "details": "System restored successfully from backup file: manual_2026-07-11_051155.json",

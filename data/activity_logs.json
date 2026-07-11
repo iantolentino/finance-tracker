@@ -1,5 +1,11 @@
 [
   {
+    "id": "log-1783746397010-lfo8",
+    "action": "Payment Recorded",
+    "details": "Recorded payment: 200 PHP via GCash",
+    "timestamp": "2026-07-11T05:06:37.010Z"
+  },
+  {
     "id": "log-1783746357890-xk4p",
     "action": "Purchase Added",
     "details": "Added purchase: Smoke Test Item for amount 500 PHP",

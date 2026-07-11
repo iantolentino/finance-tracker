@@ -1,5 +1,11 @@
 [
   {
+    "id": "log-1783747955823-bghc",
+    "action": "User Login",
+    "details": "Admin successfully logged into the system.",
+    "timestamp": "2026-07-11T05:32:35.823Z"
+  },
+  {
     "id": "log-1783747947204-htq0",
     "action": "Failed Login",
     "details": "An unauthorized login attempt was blocked.",

@@ -1,11 +1,5 @@
 [
   {
-    "id": "log-1783746631812-k2ah",
-    "action": "Backup Created",
-    "details": "Manual backup successfully generated.",
-    "timestamp": "2026-07-11T05:10:31.812Z"
-  },
-  {
     "id": "log-1783746616919-fp0e",
     "action": "User Login",
     "details": "Admin successfully logged into the system.",

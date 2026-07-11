@@ -1,5 +1,11 @@
 [
   {
+    "id": "log-1783746616919-fp0e",
+    "action": "User Login",
+    "details": "Admin successfully logged into the system.",
+    "timestamp": "2026-07-11T05:10:16.919Z"
+  },
+  {
     "id": "log-1783746422741-tpnf",
     "action": "Backup Deleted",
     "details": "Backup file deleted: auto_2026-07-11_050531.json",

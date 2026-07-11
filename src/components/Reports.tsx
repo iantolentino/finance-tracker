@@ -152,7 +152,7 @@ export default function Reports({
       <div className="flex flex-col md:flex-row md:items-center md:justify-between bg-white p-5 rounded-2xl border border-slate-100 shadow-sm gap-4 print:hidden">
         <div>
           <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-indigo-500" />
+            <FileText className="w-5 h-5 text-brand-500" />
             Financial Report Center
           </h2>
           <p className="text-xs text-slate-500 mt-1">
@@ -173,10 +173,10 @@ export default function Reports({
       {/* Select Report Type Cards - Hide on print */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 print:hidden">
         {[
-          { id: "outstanding", title: "Outstanding Receivables", desc: "SPayLater pending amounts due", color: "indigo" },
+          { id: "outstanding", title: "Outstanding Receivables", desc: "SPayLater pending amounts due", color: "green" },
           { id: "collections", title: "Monthly Collections", desc: "GCash/cash payments received", color: "emerald" },
           { id: "overdue", title: "Overdue Customers", desc: "Overdue payments require focus", color: "red" },
-          { id: "loans", title: "Cash Loans (Lending)", desc: "Outstanding principal and interest", color: "blue" }
+          { id: "loans", title: "Cash Loans (Lending)", desc: "Outstanding principal and interest", color: "green" }
         ].map((rep) => (
           <button
             key={rep.id}
@@ -207,7 +207,7 @@ export default function Reports({
             placeholder={`Filter report records by name...`}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+            className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
           />
         </div>
         <div className="text-right text-xs text-slate-500">
@@ -228,7 +228,7 @@ export default function Reports({
             <span className="text-xs text-slate-400 block mt-0.5">Automated System Financial Ledger Report</span>
           </div>
           <div className="text-right">
-            <span className="text-sm font-bold uppercase text-indigo-600 block">
+            <span className="text-sm font-bold uppercase text-brand-600 block">
               {reportType === "outstanding" && "Outstanding Receivables Report"}
               {reportType === "collections" && "Monthly Collections Report"}
               {reportType === "overdue" && "Overdue Receivables Report"}
@@ -286,7 +286,7 @@ export default function Reports({
                       <td className="py-3 text-slate-500">{row.contactNumber || "—"}</td>
                       <td className="py-3 text-right text-slate-600">{formatCurrency(row.totalBuy)}</td>
                       <td className="py-3 text-right text-emerald-600">{formatCurrency(row.totalPaid)}</td>
-                      <td className="py-3 text-right font-extrabold text-indigo-600 px-2">{formatCurrency(row.remainingBalance)}</td>
+                      <td className="py-3 text-right font-extrabold text-brand-600 px-2">{formatCurrency(row.remainingBalance)}</td>
                     </tr>
                   ))
                 )}
@@ -396,9 +396,9 @@ export default function Reports({
                         <span className="block text-[10px] text-red-500 font-medium mt-0.5">Due: {row.dueDate || "N/A"}</span>
                       </td>
                       <td className="py-3 text-right text-slate-600">{formatCurrency(row.principalAmount)}</td>
-                      <td className="py-3 text-right text-blue-600 font-medium">+{formatCurrency(row.interestAmount)}</td>
+                      <td className="py-3 text-right text-brand-600 font-medium">+{formatCurrency(row.interestAmount)}</td>
                       <td className="py-3 text-right text-emerald-600">{formatCurrency(row.totalPaid)}</td>
-                      <td className="py-3 text-right font-extrabold text-indigo-600 px-2">{formatCurrency(row.remainingBalance)}</td>
+                      <td className="py-3 text-right font-extrabold text-brand-600 px-2">{formatCurrency(row.remainingBalance)}</td>
                     </tr>
                   ))
                 )}
@@ -409,14 +409,14 @@ export default function Reports({
 
         {/* Extra Lending stats block */}
         {reportType === "loans" && loansReportData.length > 0 && (
-          <div className="mt-6 p-4 bg-blue-50/50 rounded-2xl border border-blue-100 flex flex-col sm:flex-row justify-between items-center text-xs gap-4 print:hidden">
+          <div className="mt-6 p-4 bg-brand-50/50 rounded-2xl border border-brand-100 flex flex-col sm:flex-row justify-between items-center text-xs gap-4 print:hidden">
             <div>
-              <span className="font-bold text-blue-900">Computed Lending Interest Summary:</span>
+              <span className="font-bold text-brand-900">Computed Lending Interest Summary:</span>
               <p className="text-slate-500 text-[10px]">Total revenue interest generated across all cash loans granted.</p>
             </div>
             <div className="text-right">
               <span className="text-[10px] text-slate-400 block font-semibold">Total Revenue Interest:</span>
-              <span className="text-sm font-black text-blue-700">{formatCurrency(totalInterestEarnedOnLoans)}</span>
+              <span className="text-sm font-black text-brand-700">{formatCurrency(totalInterestEarnedOnLoans)}</span>
             </div>
           </div>
         )}

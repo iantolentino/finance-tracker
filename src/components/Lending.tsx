@@ -231,7 +231,7 @@ export default function Lending({
         <div>
           <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Module 02</span>
           <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-            <Calculator className="w-5 h-5 text-blue-500" />
+            <Calculator className="w-5 h-5 text-brand-500" />
             Lending Management (Cash Loans)
           </h2>
           <p className="text-xs text-slate-500 mt-1">
@@ -241,7 +241,7 @@ export default function Lending({
         <div>
           <button
             onClick={() => setLoanModal({ open: true, borrowerName: "", contactNumber: "", address: "", principalAmount: 0, loanDate: new Date().toISOString().split("T")[0], dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], paymentSchedule: "On Due Date", interestType: "Percentage", interestValue: 10, notes: "" })}
-            className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm hover:shadow transition"
+            className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-sm hover:shadow transition"
           >
             <Plus className="w-4 h-4 mr-2" />
             Issue New Cash Loan
@@ -266,7 +266,7 @@ export default function Lending({
                 placeholder="Search borrower, phone, notes..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-1.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50/50"
+                className="w-full pl-9 pr-4 py-1.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
               />
             </div>
 
@@ -278,7 +278,7 @@ export default function Lending({
                   onClick={() => setStatusFilter(status)}
                   className={`px-2.5 py-1 rounded-lg shrink-0 transition ${
                     statusFilter === status
-                      ? "bg-blue-50 text-blue-600 font-semibold"
+                      ? "bg-brand-50 text-brand-600 font-semibold"
                       : "hover:bg-slate-50 hover:text-slate-800"
                   }`}
                 >
@@ -317,7 +317,7 @@ export default function Lending({
                             ? "bg-emerald-100 text-emerald-800"
                             : l.status === "Overdue"
                             ? "bg-red-100 text-red-800"
-                            : "bg-blue-100 text-blue-800"
+                            : "bg-brand-100 text-brand-800"
                         }`}>
                           {l.status}
                         </span>
@@ -349,7 +349,7 @@ export default function Lending({
             </div>
             <div className="flex justify-between">
               <span>Computed Interest Revenue:</span>
-              <span className="font-semibold text-blue-600">+{formatCurrency(lendingTotals.totalInterestGained)}</span>
+              <span className="font-semibold text-brand-600">+{formatCurrency(lendingTotals.totalInterestGained)}</span>
             </div>
             <div className="flex justify-between">
               <span>Total Payments Collected:</span>
@@ -388,7 +388,7 @@ export default function Lending({
                           ? "bg-emerald-100 text-emerald-800"
                           : selectedLoanInfo.status === "Overdue"
                           ? "bg-red-100 text-red-800"
-                          : "bg-blue-100 text-blue-800"
+                          : "bg-brand-100 text-brand-800"
                       }`}>
                         {selectedLoanInfo.status}
                       </span>
@@ -456,15 +456,15 @@ export default function Lending({
                   </div>
                   <div className="p-3 bg-slate-50 rounded-xl">
                     <span className="block text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Interest Gain</span>
-                    <span className="block text-sm font-bold text-blue-600 mt-1">+{formatCurrency(selectedLoanInfo.interestAmount)}</span>
+                    <span className="block text-sm font-bold text-brand-600 mt-1">+{formatCurrency(selectedLoanInfo.interestAmount)}</span>
                   </div>
                   <div className="p-3 bg-slate-50 rounded-xl">
                     <span className="block text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Total Paid</span>
                     <span className="block text-sm font-bold text-emerald-600 mt-1">{formatCurrency(selectedLoanInfo.totalPaid)}</span>
                   </div>
-                  <div className="p-3 bg-indigo-50 rounded-xl">
-                    <span className="block text-[10px] text-indigo-700 uppercase tracking-wider font-semibold">Total Balance Due</span>
-                    <span className="block text-sm font-bold text-indigo-600 mt-1">{formatCurrency(selectedLoanInfo.remainingBalance)}</span>
+                  <div className="p-3 bg-brand-50 rounded-xl">
+                    <span className="block text-[10px] text-brand-700 uppercase tracking-wider font-semibold">Total Balance Due</span>
+                    <span className="block text-sm font-bold text-brand-600 mt-1">{formatCurrency(selectedLoanInfo.remainingBalance)}</span>
                   </div>
                 </div>
 
@@ -595,7 +595,7 @@ export default function Lending({
                   value={loanModal.borrowerName}
                   onChange={(e) => setLoanModal({ ...loanModal, borrowerName: e.target.value })}
                   placeholder="e.g. Maria Clara"
-                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50/50"
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                 />
               </div>
 
@@ -607,7 +607,7 @@ export default function Lending({
                     value={loanModal.contactNumber}
                     onChange={(e) => setLoanModal({ ...loanModal, contactNumber: e.target.value })}
                     placeholder="09187654321"
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   />
                 </div>
                 <div>
@@ -617,7 +617,7 @@ export default function Lending({
                     value={loanModal.address}
                     onChange={(e) => setLoanModal({ ...loanModal, address: e.target.value })}
                     placeholder="e.g. Manila"
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   />
                 </div>
               </div>
@@ -631,7 +631,7 @@ export default function Lending({
                     required
                     value={loanModal.principalAmount}
                     onChange={(e) => setLoanModal({ ...loanModal, principalAmount: Number(e.target.value) })}
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   />
                 </div>
                 <div>
@@ -639,7 +639,7 @@ export default function Lending({
                   <select
                     value={loanModal.paymentSchedule}
                     onChange={(e) => setLoanModal({ ...loanModal, paymentSchedule: e.target.value })}
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   >
                     <option value="On Due Date">Single Payment on Due</option>
                     <option value="Weekly">Weekly Installments</option>
@@ -655,7 +655,7 @@ export default function Lending({
                   <select
                     value={loanModal.interestType}
                     onChange={(e) => setLoanModal({ ...loanModal, interestType: e.target.value as any })}
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   >
                     <option value="Percentage">Percentage Rate (%)</option>
                     <option value="Fixed Amount">Fixed PHP Surcharge</option>
@@ -669,7 +669,7 @@ export default function Lending({
                     required
                     value={loanModal.interestValue}
                     onChange={(e) => setLoanModal({ ...loanModal, interestValue: Number(e.target.value) })}
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   />
                 </div>
               </div>
@@ -682,7 +682,7 @@ export default function Lending({
                     required
                     value={loanModal.loanDate}
                     onChange={(e) => setLoanModal({ ...loanModal, loanDate: e.target.value })}
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   />
                 </div>
                 <div>
@@ -692,7 +692,7 @@ export default function Lending({
                     required
                     value={loanModal.dueDate}
                     onChange={(e) => setLoanModal({ ...loanModal, dueDate: e.target.value })}
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   />
                 </div>
               </div>
@@ -704,7 +704,7 @@ export default function Lending({
                   onChange={(e) => setLoanModal({ ...loanModal, notes: e.target.value })}
                   placeholder="Record terms, bank reference IDs, special conditions..."
                   rows={2}
-                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50/50"
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                 />
               </div>
 
@@ -719,7 +719,7 @@ export default function Lending({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="flex-1 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition disabled:opacity-50"
+                  className="flex-1 py-2 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-xl transition disabled:opacity-50"
                 >
                   {isLoading ? "Saving..." : "Save Loan"}
                 </button>
@@ -750,7 +750,7 @@ export default function Lending({
                   required
                   value={paymentModal.amountPaid}
                   onChange={(e) => setPaymentModal({ ...paymentModal, amountPaid: Number(e.target.value) })}
-                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50/50"
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                 />
               </div>
 
@@ -762,7 +762,7 @@ export default function Lending({
                     required
                     value={paymentModal.paymentDate}
                     onChange={(e) => setPaymentModal({ ...paymentModal, paymentDate: e.target.value })}
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   />
                 </div>
                 <div>
@@ -770,7 +770,7 @@ export default function Lending({
                   <select
                     value={paymentModal.paymentMethod}
                     onChange={(e) => setPaymentModal({ ...paymentModal, paymentMethod: e.target.value })}
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   >
                     <option value="Cash">Cash</option>
                     <option value="GCash">GCash</option>
@@ -787,7 +787,7 @@ export default function Lending({
                   value={paymentModal.notes}
                   onChange={(e) => setPaymentModal({ ...paymentModal, notes: e.target.value })}
                   placeholder="e.g. Receipt No, installment count, note..."
-                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50/50"
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                 />
               </div>
 
@@ -802,7 +802,7 @@ export default function Lending({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="flex-1 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition disabled:opacity-50"
+                  className="flex-1 py-2 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-xl transition disabled:opacity-50"
                 >
                   {isLoading ? "Saving..." : "Log Repayment"}
                 </button>
@@ -843,7 +843,7 @@ export default function Lending({
             <div className="p-8 space-y-6 text-slate-800 bg-white print:p-0">
               <div className="flex justify-between items-start border-b border-slate-100 pb-4">
                 <div>
-                  <h1 className="text-lg font-extrabold text-blue-600 uppercase tracking-tight">
+                  <h1 className="text-lg font-extrabold text-brand-600 uppercase tracking-tight">
                     {settings.personalBusinessName || "Personal Finance System"}
                   </h1>
                   <span className="text-[10px] text-slate-400 font-medium block mt-0.5">Cash Lending Ledger & Agreement</span>
@@ -859,7 +859,7 @@ export default function Lending({
               <div className="grid grid-cols-2 gap-4 text-xs">
                 <div className="space-y-1 p-3 bg-slate-50 rounded-xl border border-slate-100 print:bg-white print:border-none print:p-0">
                   <span className="text-[9px] uppercase font-bold text-slate-400 block">Lender:</span>
-                  <h3 className="font-bold text-slate-900">Juan dela Cruz</h3>
+                  <h3 className="font-bold text-slate-900">Ian Tolentino</h3>
                   <p className="text-slate-500">Contact: System Administrator</p>
                 </div>
                 <div className="space-y-1 p-3 bg-slate-50 rounded-xl border border-slate-100 print:bg-white print:border-none print:p-0">
@@ -937,16 +937,16 @@ export default function Lending({
                   <span className="font-semibold text-emerald-600">-{formatCurrency(selectedLoanInfo.totalPaid)}</span>
                 </div>
                 <div className="h-px bg-slate-200 w-64 my-1" />
-                <div className="flex justify-between w-64 text-sm font-extrabold text-slate-900 bg-blue-50/50 p-2 rounded-lg print:bg-transparent print:p-0">
+                <div className="flex justify-between w-64 text-sm font-extrabold text-slate-900 bg-brand-50/50 p-2 rounded-lg print:bg-transparent print:p-0">
                   <span>Net Outstanding Balance:</span>
-                  <span className="text-blue-600">{formatCurrency(selectedLoanInfo.remainingBalance)}</span>
+                  <span className="text-brand-600">{formatCurrency(selectedLoanInfo.remainingBalance)}</span>
                 </div>
               </div>
 
               {/* Signatures */}
               <div className="grid grid-cols-2 gap-12 pt-12 text-center text-[10px] text-slate-400">
                 <div className="border-t border-dashed border-slate-200 pt-2">
-                  Juan dela Cruz <br />
+                  Ian Tolentino <br />
                   <span className="font-medium text-slate-300">Lender Signature / Date</span>
                 </div>
                 <div className="border-t border-dashed border-slate-200 pt-2">

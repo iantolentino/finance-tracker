@@ -6,7 +6,8 @@ import {
   Archive,
   SystemSettings,
   ActivityLog,
-  BackupRecord
+  BackupRecord,
+  MonthlyBudget
 } from "./types";
 
 const API_BASE = "/api";
@@ -312,6 +313,81 @@ export const api = {
 
   async importBackup(data: any): Promise<{ success: boolean }> {
     const res = await fetch(`${API_BASE}/backups/import`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify(data)
+    });
+    return handleResponse(res);
+  },
+
+  async seedSPayLater(): Promise<{ success: boolean }> {
+    const res = await fetch(`${API_BASE}/backups/seed-spaylater`, {
+      method: "POST",
+      headers: getHeaders()
+    });
+    return handleResponse(res);
+  },
+
+  // Budgets API
+  async getBudgets(): Promise<MonthlyBudget[]> {
+    const res = await fetch(`${API_BASE}/budgets`, { headers: getHeaders() });
+    return handleResponse(res);
+  },
+
+  async updateBudgetConfig(data: { month: string; salary: number; additionalIncome: number }): Promise<MonthlyBudget> {
+    const res = await fetch(`${API_BASE}/budgets/current`, {
+      method: "PUT",
+      headers: getHeaders(),
+      body: JSON.stringify(data)
+    });
+    return handleResponse(res);
+  },
+
+  async addBudgetAllocation(data: { month: string; category: string; allocatedAmount: number }): Promise<MonthlyBudget> {
+    const res = await fetch(`${API_BASE}/budgets/allocations`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify(data)
+    });
+    return handleResponse(res);
+  },
+
+  async updateBudgetAllocation(id: string, data: { month: string; category?: string; allocatedAmount?: number }): Promise<MonthlyBudget> {
+    const res = await fetch(`${API_BASE}/budgets/allocations/${id}`, {
+      method: "PUT",
+      headers: getHeaders(),
+      body: JSON.stringify(data)
+    });
+    return handleResponse(res);
+  },
+
+  async deleteBudgetAllocation(id: string, month: string): Promise<MonthlyBudget> {
+    const res = await fetch(`${API_BASE}/budgets/allocations/${id}?month=${encodeURIComponent(month)}`, {
+      method: "DELETE",
+      headers: getHeaders()
+    });
+    return handleResponse(res);
+  },
+
+  async addBudgetExpense(data: { month: string; allocationId: string; itemName: string; amount: number; date?: string; notes?: string }): Promise<MonthlyBudget> {
+    const res = await fetch(`${API_BASE}/budgets/expenses`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify(data)
+    });
+    return handleResponse(res);
+  },
+
+  async deleteBudgetExpense(id: string, month: string): Promise<MonthlyBudget> {
+    const res = await fetch(`${API_BASE}/budgets/expenses/${id}?month=${encodeURIComponent(month)}`, {
+      method: "DELETE",
+      headers: getHeaders()
+    });
+    return handleResponse(res);
+  },
+
+  async rolloverBudget(data: { sourceMonth: string; targetMonth: string }): Promise<MonthlyBudget> {
+    const res = await fetch(`${API_BASE}/budgets/reset`, {
       method: "POST",
       headers: getHeaders(),
       body: JSON.stringify(data)

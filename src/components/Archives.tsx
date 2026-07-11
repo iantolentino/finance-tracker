@@ -120,7 +120,7 @@ export default function Archives({ archives, settings, onRestoreArchive }: Archi
       {/* Header */}
       <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
         <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-          <ArchiveIcon className="w-5 h-5 text-indigo-500" />
+          <ArchiveIcon className="w-5 h-5 text-brand-500" />
           Completed Billing Archives (Read-Only)
         </h2>
         <p className="text-xs text-slate-500 mt-1">
@@ -157,7 +157,7 @@ export default function Archives({ archives, settings, onRestoreArchive }: Archi
                     <div className="flex justify-between items-start">
                       <div>
                         <h4 className="font-bold text-xs flex items-center gap-1.5">
-                          <Calendar className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                          <Calendar className="w-3.5 h-3.5 text-brand-500 shrink-0" />
                           {arch.cycle}
                         </h4>
                         <span className={`text-[10px] block mt-1 ${selectedArchiveId === arch.id ? "text-slate-300" : "text-slate-400"}`}>
@@ -202,7 +202,7 @@ export default function Archives({ archives, settings, onRestoreArchive }: Archi
               <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
                 <div className="flex justify-between items-center border-b border-slate-50 pb-3">
                   <div>
-                    <span className="text-[10px] bg-indigo-50 text-indigo-600 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Archived Content</span>
+                    <span className="text-[10px] bg-brand-50 text-brand-600 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Archived Content</span>
                     <h3 className="text-base font-bold text-slate-900 mt-1 flex items-center gap-1.5">
                       {selectedArchive.cycle} Summary
                     </h3>
@@ -263,7 +263,7 @@ export default function Archives({ archives, settings, onRestoreArchive }: Archi
                       placeholder="Search..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-8 pr-3 py-1.5 text-[10px] rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+                      className="w-full pl-8 pr-3 py-1.5 text-[10px] rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                     />
                   </div>
 
@@ -330,7 +330,7 @@ export default function Archives({ archives, settings, onRestoreArchive }: Archi
                           </div>
                           <div className="p-2 bg-slate-50 rounded-lg">
                             <span className="block text-slate-400">Unpaid Balance</span>
-                            <span className="block font-bold text-indigo-600 mt-0.5">{formatCurrency(archiveCustomerDetails.remaining)}</span>
+                            <span className="block font-bold text-brand-600 mt-0.5">{formatCurrency(archiveCustomerDetails.remaining)}</span>
                           </div>
                         </div>
                       </div>

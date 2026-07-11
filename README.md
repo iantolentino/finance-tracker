@@ -73,6 +73,3 @@ To instantly load your pre-populated SPayLater summary data:
 3. Locate the **Database Controls & Backups** card.
 4. Click **"Load SPayLater Data (1-Click)"** in the **SPayLater Tracker Seeder** section.
 5. The system will prompt you for confirmation and instantly populate the workspace with structured profiles (Ian, Shannen, Claudine, Tatay Manuel, Tricia, Ate She, Lecel) and their corresponding transactions.
-
-View the app in AI Studio: https://ai.studio/apps/9f41eaee-6ae5-4c57-b0bb-e346f7fc80c3
-

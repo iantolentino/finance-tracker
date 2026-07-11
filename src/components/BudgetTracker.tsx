@@ -1,0 +1,1015 @@
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import {
+  Wallet,
+  ArrowUpRight,
+  TrendingUp,
+  Percent,
+  Plus,
+  Trash2,
+  Edit2,
+  Calendar,
+  Sparkles,
+  RotateCcw,
+  Check,
+  AlertTriangle,
+  Receipt,
+  FileSpreadsheet,
+  Info,
+  DollarSign,
+  ChevronRight,
+  ArrowRightLeft,
+  X
+} from "lucide-react";
+import { MonthlyBudget, BudgetAllocation, BudgetExpense, SystemSettings, Customer, Purchase, Loan } from "../types";
+import { api } from "../api";
+
+interface BudgetTrackerProps {
+  settings: SystemSettings;
+  activeCycle: string;
+  availableCycles: string[];
+  customers: Customer[];
+  purchases: Purchase[];
+  loans: Loan[];
+  onRefreshLogs: () => Promise<void>;
+}
+
+export default function BudgetTracker({
+  settings,
+  activeCycle,
+  availableCycles,
+  customers,
+  purchases,
+  loans,
+  onRefreshLogs
+}: BudgetTrackerProps) {
+  // State variables
+  const [budgets, setBudgets] = useState<MonthlyBudget[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>("");
+
+  // Modals state
+  const [incomeModalOpen, setIncomeModalOpen] = useState<boolean>(false);
+  const [allocModalOpen, setAllocModalOpen] = useState<boolean>(false);
+  const [expenseModalOpen, setExpenseModalOpen] = useState<boolean>(false);
+  const [rolloverModalOpen, setRolloverModalOpen] = useState<boolean>(false);
+
+  // Selected or temp states for forms
+  const [tempSalary, setTempSalary] = useState<string>("");
+  const [tempAdditional, setTempAdditional] = useState<string>("");
+
+  const [selectedAlloc, setSelectedAlloc] = useState<BudgetAllocation | null>(null);
+  const [allocCategory, setAllocCategory] = useState<string>("");
+  const [allocAmount, setAllocAmount] = useState<string>("");
+
+  const [expenseAllocId, setExpenseAllocId] = useState<string>("");
+  const [expenseName, setExpenseName] = useState<string>("");
+  const [expenseAmount, setExpenseAmount] = useState<string>("");
+  const [expenseDate, setExpenseDate] = useState<string>("");
+  const [expenseNotes, setExpenseNotes] = useState<string>("");
+
+  const [rolloverSource, setRolloverSource] = useState<string>("");
+
+  // Load budgets from backend
+  const fetchBudgets = async () => {
+    setLoading(true);
+    try {
+      const data = await api.getBudgets();
+      setBudgets(data);
+    } catch (err: any) {
+      setError(err.message || "Failed to load budget records.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBudgets();
+  }, []);
+
+  // Find the current active month's budget, or fall back to a default-initialized local one if not saved yet
+  const activeBudget = budgets.find(b => b.month === activeCycle) || {
+    id: "temp-active",
+    month: activeCycle,
+    salary: 0,
+    additionalIncome: 0,
+    allocations: [],
+    expenses: [],
+    createdAt: new Date().toISOString()
+  };
+
+  // Helper to open income editor
+  const openIncomeModal = () => {
+    setTempSalary(activeBudget.salary.toString());
+    setTempAdditional(activeBudget.additionalIncome.toString());
+    setIncomeModalOpen(true);
+  };
+
+  // Handle saving income
+  const handleSaveIncome = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const updated = await api.updateBudgetConfig({
+        month: activeCycle,
+        salary: Number(tempSalary) || 0,
+        additionalIncome: Number(tempAdditional) || 0
+      });
+      // Update budgets list
+      setBudgets(prev => {
+        const idx = prev.findIndex(b => b.month === activeCycle);
+        if (idx === -1) {
+          return [...prev, updated];
+        }
+        return prev.map(b => b.month === activeCycle ? updated : b);
+      });
+      setIncomeModalOpen(false);
+      await onRefreshLogs();
+    } catch (err: any) {
+      alert(err.message || "Failed to update salary configuration.");
+    }
+  };
+
+  // Helper to open Allocation modal
+  const openAllocModal = (alloc: BudgetAllocation | null = null) => {
+    if (alloc) {
+      setSelectedAlloc(alloc);
+      setAllocCategory(alloc.category);
+      setAllocAmount(alloc.allocatedAmount.toString());
+    } else {
+      setSelectedAlloc(null);
+      setAllocCategory("");
+      setAllocAmount("");
+    }
+    setAllocModalOpen(true);
+  };
+
+  // Handle saving budget allocations
+  const handleSaveAllocation = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!allocCategory.trim() || !allocAmount) return;
+
+    try {
+      let updated: MonthlyBudget;
+      if (selectedAlloc) {
+        // Edit existing
+        updated = await api.updateBudgetAllocation(selectedAlloc.id, {
+          month: activeCycle,
+          category: allocCategory,
+          allocatedAmount: Number(allocAmount) || 0
+        });
+      } else {
+        // Create new
+        updated = await api.addBudgetAllocation({
+          month: activeCycle,
+          category: allocCategory,
+          allocatedAmount: Number(allocAmount) || 0
+        });
+      }
+
+      setBudgets(prev => {
+        const idx = prev.findIndex(b => b.month === activeCycle);
+        if (idx === -1) return [...prev, updated];
+        return prev.map(b => b.month === activeCycle ? updated : b);
+      });
+      setAllocModalOpen(false);
+      await onRefreshLogs();
+    } catch (err: any) {
+      alert(err.message || "Failed to save allocation.");
+    }
+  };
+
+  // Handle deleting allocation
+  const handleDeleteAllocation = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this budget category? This will also remove any logged expenses in this category!")) return;
+    try {
+      const updated = await api.deleteBudgetAllocation(id, activeCycle);
+      setBudgets(prev => prev.map(b => b.month === activeCycle ? updated : b));
+      await onRefreshLogs();
+    } catch (err: any) {
+      alert(err.message || "Failed to delete allocation.");
+    }
+  };
+
+  // Helper to open log expense modal
+  const openExpenseModal = (allocationId = "") => {
+    setExpenseAllocId(allocationId || (activeBudget.allocations[0]?.id || ""));
+    setExpenseName("");
+    setExpenseAmount("");
+    setExpenseDate(new Date().toISOString().split("T")[0]);
+    setExpenseNotes("");
+    setExpenseModalOpen(true);
+  };
+
+  // Handle logging a new expense
+  const handleSaveExpense = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!expenseAllocId || !expenseName.trim() || !expenseAmount) return;
+
+    try {
+      const updated = await api.addBudgetExpense({
+        month: activeCycle,
+        allocationId: expenseAllocId,
+        itemName: expenseName,
+        amount: Number(expenseAmount) || 0,
+        date: expenseDate,
+        notes: expenseNotes
+      });
+
+      setBudgets(prev => prev.map(b => b.month === activeCycle ? updated : b));
+      setExpenseModalOpen(false);
+      await onRefreshLogs();
+    } catch (err: any) {
+      alert(err.message || "Failed to log expense.");
+    }
+  };
+
+  // Handle deleting an expense
+  const handleDeleteExpense = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this expense transaction?")) return;
+    try {
+      const updated = await api.deleteBudgetExpense(id, activeCycle);
+      setBudgets(prev => prev.map(b => b.month === activeCycle ? updated : b));
+      await onRefreshLogs();
+    } catch (err: any) {
+      alert(err.message || "Failed to delete expense.");
+    }
+  };
+
+  // Handle budget template rollover (reset / rollover template)
+  const handleRolloverBudget = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!rolloverSource) return;
+
+    try {
+      const updated = await api.rolloverBudget({
+        sourceMonth: rolloverSource,
+        targetMonth: activeCycle
+      });
+
+      setBudgets(prev => {
+        const idx = prev.findIndex(b => b.month === activeCycle);
+        if (idx === -1) return [...prev, updated];
+        return prev.map(b => b.month === activeCycle ? updated : b);
+      });
+      setRolloverModalOpen(false);
+      await onRefreshLogs();
+    } catch (err: any) {
+      alert(err.message || "Rollover failed.");
+    }
+  };
+
+  // Smart Sync Dues calculations
+  // 1. Calculate SPayLater total bills due this billing cycle
+  const activeCyclePurchases = purchases.filter(p => p.billingCycle === activeCycle);
+  const totalSPayLaterDue = activeCyclePurchases.reduce((sum, p) => sum + p.totalAmount, 0);
+
+  // 2. Calculate Lending Portfolio interest/installments due from borrowers
+  // Let's count upcoming borrower dues as a negative/positive helper? Since lending loans are receivable, they might be extra income or borrower payments. 
+  // Let's focus on actual expenses which are SPayLater bills or Loan payments they themselves have to pay.
+  // Wait, if the user has Cash Loans, they might pay principal, or maybe they receive collections.
+  // Let's see active loans:
+  const activeLoansCount = loans.filter(l => l.status === "Active").length;
+  const totalPrincipalLent = loans.filter(l => l.status === "Active").reduce((sum, l) => sum + l.principalAmount, 0);
+
+  // Quick helper to add SPayLater directly as a recommended budget category
+  const handleAddSpayLaterRecommendation = async () => {
+    try {
+      const updated = await api.addBudgetAllocation({
+        month: activeCycle,
+        category: `SPayLater Bill (${activeCycle})`,
+        allocatedAmount: totalSPayLaterDue
+      });
+      setBudgets(prev => prev.map(b => b.month === activeCycle ? updated : b));
+      alert(`Success! Added 'SPayLater Bill (${activeCycle})' with a budget of ${settings.currency} ${totalSPayLaterDue.toLocaleString()}!`);
+      await onRefreshLogs();
+    } catch (err: any) {
+      alert(err.message || "Failed to add allocation.");
+    }
+  };
+
+  // Calculations for dashboard circles & stats
+  const totalIncome = activeBudget.salary + activeBudget.additionalIncome;
+  const totalAllocated = activeBudget.allocations.reduce((sum, a) => sum + a.allocatedAmount, 0);
+  const totalSpent = activeBudget.expenses.reduce((sum, e) => sum + e.amount, 0);
+
+  const unallocatedIncome = Math.max(0, totalIncome - totalAllocated);
+  const remainingCash = Math.max(0, totalIncome - totalSpent);
+  const allocationProgress = totalIncome > 0 ? (totalAllocated / totalIncome) * 100 : 0;
+  const spendingProgress = totalAllocated > 0 ? (totalSpent / totalAllocated) * 100 : 0;
+
+  // Render loading state
+  if (loading) {
+    return (
+      <div className="flex h-64 flex-col items-center justify-center gap-3">
+        <div className="w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full animate-spin" />
+        <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest">Loading Salary & Budgets...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-64 flex-col items-center justify-center gap-3 text-center">
+        <span className="text-sm font-semibold text-red-600 dark:text-red-400">{error}</span>
+        <button
+          onClick={() => { setError(""); fetchBudgets(); }}
+          className="px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg bg-brand-600 text-white hover:bg-brand-700"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* 1. Header & Active Cycle Selector */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800/80 shadow-sm">
+        <div className="space-y-1">
+          <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 rounded-lg text-[10px] font-bold uppercase tracking-wider">
+            <Calendar className="w-3.5 h-3.5" />
+            Active Budget Cycle
+          </div>
+          <h2 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            Salary & Monthly Budgeting Tracker
+            <span className="text-brand-600 dark:text-brand-400 font-medium">({activeCycle})</span>
+          </h2>
+          <p className="text-xs text-slate-400 dark:text-slate-500 max-w-xl">
+            Design dynamic budget allocations, track actual daily transactions, and configure recurring salaries.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => setRolloverModalOpen(true)}
+            className="inline-flex items-center justify-center px-3.5 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm transition"
+          >
+            <RotateCcw className="w-3.5 h-3.5 mr-1.5 text-brand-500" />
+            Rollover Template
+          </button>
+          <button
+            onClick={openIncomeModal}
+            className="inline-flex items-center justify-center px-4 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-sm transition"
+          >
+            <Wallet className="w-3.5 h-3.5 mr-1.5" />
+            Setup Monthly Income
+          </button>
+        </div>
+      </div>
+
+      {/* 2. Visual Statistics & Bento Grid Indicators */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Total Income Card */}
+        <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800/80 shadow-sm space-y-3 relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Total Monthly Cashflow</span>
+            <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-xl">
+              <TrendingUp className="w-4 h-4" />
+            </div>
+          </div>
+          <div>
+            <h3 className="text-xl font-black text-slate-900 dark:text-white">
+              {settings.currency} {totalIncome.toLocaleString()}
+            </h3>
+            <p className="text-[10px] text-slate-400 mt-1">
+              Salary: {settings.currency} {activeBudget.salary.toLocaleString()} • Addl: {settings.currency} {activeBudget.additionalIncome.toLocaleString()}
+            </p>
+          </div>
+          <div className="absolute bottom-0 inset-x-0 h-1 bg-emerald-500" />
+        </div>
+
+        {/* Allocated Budget Card */}
+        <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800/80 shadow-sm space-y-3 relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Allocated to Budget</span>
+            <div className="p-2 bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400 rounded-xl">
+              <ArrowUpRight className="w-4 h-4" />
+            </div>
+          </div>
+          <div>
+            <h3 className="text-xl font-black text-slate-900 dark:text-white">
+              {settings.currency} {totalAllocated.toLocaleString()}
+            </h3>
+            <div className="flex items-center gap-1.5 mt-1 text-[10px]">
+              <span className="text-brand-600 dark:text-brand-400 font-bold">{allocationProgress.toFixed(0)}%</span>
+              <span className="text-slate-400">of total cash flow allocated</span>
+            </div>
+          </div>
+          <div className="absolute bottom-0 inset-x-0 h-1 bg-brand-500" />
+        </div>
+
+        {/* Actual Spent Card */}
+        <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800/80 shadow-sm space-y-3 relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Total Actual Spending</span>
+            <div className="p-2 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-xl">
+              <Receipt className="w-4 h-4" />
+            </div>
+          </div>
+          <div>
+            <h3 className="text-xl font-black text-slate-900 dark:text-white">
+              {settings.currency} {totalSpent.toLocaleString()}
+            </h3>
+            <div className="flex items-center gap-1.5 mt-1 text-[10px]">
+              <span className={`${spendingProgress > 100 ? "text-red-500 font-extrabold" : "text-emerald-500 font-bold"}`}>
+                {spendingProgress.toFixed(0)}%
+              </span>
+              <span className="text-slate-400">spent of budgeted target</span>
+            </div>
+          </div>
+          <div className="absolute bottom-0 inset-x-0 h-1 bg-rose-500" />
+        </div>
+
+        {/* Free Capital / Remaining Cash */}
+        <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800/80 shadow-sm space-y-3 relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Remaining Safe Capital</span>
+            <div className="p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-xl">
+              <Sparkles className="w-4 h-4" />
+            </div>
+          </div>
+          <div>
+            <h3 className="text-xl font-black text-slate-900 dark:text-white">
+              {settings.currency} {remainingCash.toLocaleString()}
+            </h3>
+            <p className="text-[10px] text-slate-400 mt-1">
+              Unallocated Income: {settings.currency} {unallocatedIncome.toLocaleString()}
+            </p>
+          </div>
+          <div className="absolute bottom-0 inset-x-0 h-1 bg-amber-500" />
+        </div>
+      </div>
+
+      {/* 3. Deep Integration & Smart Warnings Container */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          {/* Header of allocations */}
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-extrabold uppercase text-slate-500 tracking-wider flex items-center gap-2">
+              <Wallet className="w-4 h-4 text-slate-400" />
+              Allocated Budget Categories ({activeBudget.allocations.length})
+            </h3>
+            <button
+              onClick={() => openAllocModal()}
+              className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-bold text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-950/40 hover:bg-brand-100/80 rounded-xl transition"
+            >
+              <Plus className="w-3.5 h-3.5 mr-1" />
+              Add Category
+            </button>
+          </div>
+
+          {activeBudget.allocations.length === 0 ? (
+            <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 space-y-3">
+              <div className="inline-flex p-3.5 bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-full">
+                <Wallet className="w-6 h-6" />
+              </div>
+              <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">No Budget Categories Created Yet</h4>
+              <p className="text-xs text-slate-400 dark:text-slate-500 max-w-sm mx-auto">
+                Allocating your income helps you plan expenses. You can initialize with a previous layout using the "Rollover Template" button.
+              </p>
+              <div className="pt-2">
+                <button
+                  onClick={() => openAllocModal()}
+                  className="px-4 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-sm transition"
+                >
+                  Create First Allocation Category
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {activeBudget.allocations.map((alloc) => {
+                const percent = alloc.allocatedAmount > 0 ? (alloc.spentAmount / alloc.allocatedAmount) * 100 : 0;
+                const isOverBudget = alloc.spentAmount > alloc.allocatedAmount;
+
+                return (
+                  <div
+                    key={alloc.id}
+                    className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-100 dark:border-slate-800/80 shadow-sm flex flex-col justify-between hover:shadow-md transition space-y-4"
+                  >
+                    {/* Allocation Card Header */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="space-y-0.5">
+                        <h4 className="font-bold text-slate-900 dark:text-slate-100 text-xs shrink-0 truncate">
+                          {alloc.category}
+                        </h4>
+                        <span className="text-[10px] text-slate-400 font-medium block">
+                          Budget: {settings.currency} {alloc.allocatedAmount.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => openAllocModal(alloc)}
+                          className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-brand-600 rounded-lg transition"
+                          title="Edit Category Name / Amount"
+                        >
+                          <Edit2 className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteAllocation(alloc.id)}
+                          className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-red-600 rounded-lg transition"
+                          title="Delete Category"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Allocated vs Spent Metrics */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span className="font-semibold text-slate-500">Spent: {settings.currency} {alloc.spentAmount.toLocaleString()}</span>
+                        <span className={`font-bold ${isOverBudget ? "text-red-500" : "text-slate-400"}`}>
+                          {percent.toFixed(0)}%
+                        </span>
+                      </div>
+
+                      {/* Progress slider bar */}
+                      <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-350 ${
+                            isOverBudget
+                              ? "bg-red-500"
+                              : percent > 85
+                              ? "bg-amber-500"
+                              : "bg-brand-600 dark:bg-brand-500"
+                          }`}
+                          style={{ width: `${Math.min(100, percent)}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Quick Add Expense inside this specific Category */}
+                    <div className="pt-2 border-t border-slate-50 dark:border-slate-800/50 flex items-center justify-between">
+                      <span className="text-[10px] text-slate-400 italic">
+                        {isOverBudget ? "Over budget limit" : `${settings.currency} ${(alloc.allocatedAmount - alloc.spentAmount).toLocaleString()} left`}
+                      </span>
+                      <button
+                        onClick={() => openExpenseModal(alloc.id)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 rounded-lg transition"
+                      >
+                        <Plus className="w-3 h-3" />
+                        Log Expense
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Sidebar panels for budget: Smart Sync with SPayLater & loans */}
+        <div className="space-y-6">
+          <h3 className="text-sm font-extrabold uppercase text-slate-500 tracking-wider flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-amber-500 animate-pulse" />
+            Smart Integrations
+          </h3>
+
+          {/* SPayLater Integration Sync widget */}
+          <div className="p-5 bg-gradient-to-br from-brand-900 to-slate-900 dark:from-brand-950 dark:to-slate-950 text-white rounded-2xl shadow-md border border-brand-500/20 relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-8 transform translate-x-4 -translate-y-4 opacity-5 pointer-events-none">
+              <TrendingUp className="w-48 h-48" />
+            </div>
+
+            <div className="space-y-4 relative z-10">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-brand-500/20 rounded-xl border border-brand-400/30">
+                  <TrendingUp className="w-4.5 h-4.5 text-brand-400" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-xs tracking-wide">SPayLater Active Cycle Sync</h4>
+                  <p className="text-[10px] text-brand-200">Sync purchases due in active cycle</p>
+                </div>
+              </div>
+
+              <div className="p-3 bg-white/5 rounded-xl border border-white/10 space-y-1">
+                <span className="text-[9px] uppercase font-bold text-brand-300 block">Total Due in {activeCycle}:</span>
+                <div className="flex items-baseline justify-between">
+                  <span className="text-lg font-black text-white">
+                    {settings.currency} {totalSPayLaterDue.toLocaleString()}
+                  </span>
+                  <span className="text-[10px] text-brand-200">{activeCyclePurchases.length} Purchase items</span>
+                </div>
+              </div>
+
+              {activeBudget.allocations.some(a => a.category.toLowerCase().includes("spaylater")) ? (
+                <div className="p-2.5 bg-emerald-500/15 text-emerald-300 text-[10px] rounded-xl border border-emerald-500/20 flex items-center gap-2">
+                  <Check className="w-4 h-4 shrink-0" />
+                  <span>SPayLater dues successfully integrated in your active budget categories!</span>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleAddSpayLaterRecommendation}
+                  className="w-full py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center justify-center gap-1.5"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Add SPayLater to Budget Category
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Lending portfolio collection statistics */}
+          <div className="p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800/80 shadow-sm space-y-4">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 rounded-xl">
+                <FileSpreadsheet className="w-4.5 h-4.5" />
+              </div>
+              <div>
+                <h4 className="font-bold text-slate-800 dark:text-slate-200 text-xs">Lending Active Outstanding</h4>
+                <p className="text-[10px] text-slate-400">Receivables tracking</p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                <span className="text-slate-500 font-medium">Active Borrowers:</span>
+                <span className="font-bold text-slate-900 dark:text-white">{activeLoansCount} People</span>
+              </div>
+              <div className="flex items-center justify-between text-xs p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                <span className="text-slate-500 font-medium">Outstanding Lent:</span>
+                <span className="font-bold text-brand-600 dark:text-brand-400">
+                  {settings.currency} {totalPrincipalLent.toLocaleString()}
+                </span>
+              </div>
+            </div>
+
+            <div className="p-2.5 bg-slate-50 dark:bg-slate-800/40 rounded-xl text-[10px] text-slate-400 dark:text-slate-500 flex items-start gap-2">
+              <Info className="w-3.5 h-3.5 shrink-0 mt-0.5 text-slate-400" />
+              <span>Outstanding borrower payments do not automatically adjust your basic salary, but repayments count toward available personal cash.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. Spent Log Transactions details */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800/80 shadow-sm p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="space-y-0.5">
+            <h3 className="font-extrabold text-slate-900 dark:text-white text-sm">Spent Log & Transaction History</h3>
+            <p className="text-[11px] text-slate-400">Individual expense payouts logged this billing month</p>
+          </div>
+          <button
+            onClick={() => openExpenseModal()}
+            disabled={activeBudget.allocations.length === 0}
+            className="inline-flex items-center justify-center px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow transition"
+          >
+            <Plus className="w-3.5 h-3.5 mr-1.5" />
+            Log New Outflow
+          </button>
+        </div>
+
+        {activeBudget.expenses.length === 0 ? (
+          <div className="py-12 text-center text-slate-400 dark:text-slate-500 text-xs">
+            No expenses logged for {activeCycle} yet. Keep tracking your spending.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400 uppercase font-bold text-[10px]">
+                  <th className="py-2.5 px-3">Date</th>
+                  <th className="py-2.5 px-3">Description</th>
+                  <th className="py-2.5 px-3">Category</th>
+                  <th className="py-2.5 px-3">Notes</th>
+                  <th className="py-2.5 px-3 text-right">Amount</th>
+                  <th className="py-2.5 px-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50 dark:divide-slate-800/40">
+                {activeBudget.expenses
+                  .slice()
+                  .sort((a, b) => b.date.localeCompare(a.date))
+                  .map((exp) => {
+                    const matchedAlloc = activeBudget.allocations.find(a => a.id === exp.allocationId);
+                    return (
+                      <tr key={exp.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 text-slate-700 dark:text-slate-300 transition">
+                        <td className="py-3 px-3 font-medium whitespace-nowrap">{exp.date}</td>
+                        <td className="py-3 px-3 font-bold text-slate-900 dark:text-white">{exp.itemName}</td>
+                        <td className="py-3 px-3">
+                          <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[10px] font-bold">
+                            {matchedAlloc ? matchedAlloc.category : "Unassigned"}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 text-slate-400 max-w-xs truncate">{exp.notes || "—"}</td>
+                        <td className="py-3 px-3 text-right font-black text-rose-600 dark:text-rose-400">
+                          {settings.currency} {exp.amount.toLocaleString()}
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <button
+                            onClick={() => handleDeleteExpense(exp.id)}
+                            className="p-1 text-slate-400 hover:text-red-500 rounded-lg transition"
+                            title="Delete transaction"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* ==================== MODALS INBUILT SECTION ==================== */}
+
+      {/* 1. Monthly Income Setup Modal Overlay */}
+      {incomeModalOpen && (
+        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-2xl w-full max-w-sm overflow-hidden shadow-xl"
+          >
+            <div className="p-4 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between">
+              <h4 className="font-bold text-slate-950 dark:text-white text-xs">Setup Cash Income ({activeCycle})</h4>
+              <button onClick={() => setIncomeModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <form onSubmit={handleSaveIncome} className="p-4 space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">
+                  Primary Monthly Salary ({settings.currency})
+                </label>
+                <input
+                  type="number"
+                  required
+                  value={tempSalary}
+                  onChange={(e) => setTempSalary(e.target.value)}
+                  placeholder="Enter monthly salary base..."
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 dark:text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">
+                  Additional Cash Inflow / Sideline Income ({settings.currency})
+                </label>
+                <input
+                  type="number"
+                  value={tempAdditional}
+                  onChange={(e) => setTempAdditional(e.target.value)}
+                  placeholder="Freelance or bonus earnings..."
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 dark:text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
+                />
+              </div>
+
+              <div className="pt-2 flex justify-end gap-2 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setIncomeModalOpen(false)}
+                  className="px-4 py-2 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl"
+                >
+                  Discard
+                </button>
+                <button type="submit" className="px-4 py-2 bg-brand-600 text-white font-bold rounded-xl shadow-sm">
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* 2. Allocation Add/Edit Modal Overlay */}
+      {allocModalOpen && (
+        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-2xl w-full max-w-sm overflow-hidden shadow-xl"
+          >
+            <div className="p-4 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between">
+              <h4 className="font-bold text-slate-950 dark:text-white text-xs">
+                {selectedAlloc ? "Edit Budget Category" : "Add Budget Category"}
+              </h4>
+              <button onClick={() => setAllocModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <form onSubmit={handleSaveAllocation} className="p-4 space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">
+                  Category Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={allocCategory}
+                  onChange={(e) => setAllocCategory(e.target.value)}
+                  placeholder="e.g. Groceries, Rent, Emergency Savings..."
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 dark:text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">
+                  Allocated Limit Amount ({settings.currency})
+                </label>
+                <input
+                  type="number"
+                  required
+                  value={allocAmount}
+                  onChange={(e) => setAllocAmount(e.target.value)}
+                  placeholder="Allocated maximum spent goal..."
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 dark:text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
+                />
+              </div>
+
+              <div className="pt-2 flex justify-end gap-2 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setAllocModalOpen(false)}
+                  className="px-4 py-2 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl"
+                >
+                  Discard
+                </button>
+                <button type="submit" className="px-4 py-2 bg-brand-600 text-white font-bold rounded-xl shadow-sm">
+                  {selectedAlloc ? "Update Allocation" : "Add to Budget"}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* 3. Log Expense Modal Overlay */}
+      {expenseModalOpen && (
+        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-2xl w-full max-w-sm overflow-hidden shadow-xl"
+          >
+            <div className="p-4 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between">
+              <h4 className="font-bold text-slate-950 dark:text-white text-xs">Log Outflow / Cash Spent</h4>
+              <button onClick={() => setExpenseModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <form onSubmit={handleSaveExpense} className="p-4 space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">
+                  Budget Allocation Category
+                </label>
+                <select
+                  value={expenseAllocId}
+                  onChange={(e) => setExpenseAllocId(e.target.value)}
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 dark:text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
+                >
+                  {activeBudget.allocations.map(a => (
+                    <option key={a.id} value={a.id}>
+                      {a.category} (Limit: {settings.currency} {a.allocatedAmount.toLocaleString()})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">
+                  Description / Item Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={expenseName}
+                  onChange={(e) => setExpenseName(e.target.value)}
+                  placeholder="e.g. Weekly grocery stock, Grab ride..."
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 dark:text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">
+                    Amount Paid
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    value={expenseAmount}
+                    onChange={(e) => setExpenseAmount(e.target.value)}
+                    placeholder="PHP"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 dark:text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">
+                    Transaction Date
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={expenseDate}
+                    onChange={(e) => setExpenseDate(e.target.value)}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 dark:text-white focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">
+                  Additional Memo / Notes (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={expenseNotes}
+                  onChange={(e) => setExpenseNotes(e.target.value)}
+                  placeholder="Notes, store location, receipt info..."
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 dark:text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
+                />
+              </div>
+
+              <div className="pt-2 flex justify-end gap-2 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setExpenseModalOpen(false)}
+                  className="px-4 py-2 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl"
+                >
+                  Discard
+                </button>
+                <button type="submit" className="px-4 py-2 bg-brand-600 text-white font-bold rounded-xl shadow-sm">
+                  Log Outflow
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* 4. Rollover / Reset Template Modal Overlay */}
+      {rolloverModalOpen && (
+        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-2xl w-full max-w-sm overflow-hidden shadow-xl"
+          >
+            <div className="p-4 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between">
+              <h4 className="font-bold text-slate-950 dark:text-white text-xs">Rollover Previous Month Layout</h4>
+              <button onClick={() => setRolloverModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <form onSubmit={handleRolloverBudget} className="p-4 space-y-4">
+              <div className="p-3 bg-brand-50 dark:bg-brand-950/30 text-brand-700 dark:text-brand-300 text-[11px] rounded-xl border border-brand-100 dark:border-brand-900/50 leading-relaxed flex gap-2">
+                <Info className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>
+                  This action copies your previous budget category limits and income settings from the chosen month into your current active month ({activeCycle}), starting fresh with 0 spent.
+                </span>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">
+                  Source Month Budget Template
+                </label>
+                <select
+                  required
+                  value={rolloverSource}
+                  onChange={(e) => setRolloverSource(e.target.value)}
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 dark:text-white focus:outline-none"
+                >
+                  <option value="">-- Choose past budget cycle --</option>
+                  {budgets
+                    .filter(b => b.month !== activeCycle)
+                    .map(b => (
+                      <option key={b.id} value={b.month}>
+                        {b.month} (Salary: {settings.currency} {b.salary.toLocaleString()})
+                      </option>
+                    ))}
+                </select>
+                {budgets.filter(b => b.month !== activeCycle).length === 0 && (
+                  <p className="text-[10px] text-red-500 mt-1">
+                    No other monthly budgets exist yet in the database.
+                  </p>
+                )}
+              </div>
+
+              <div className="pt-2 flex justify-end gap-2 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setRolloverModalOpen(false)}
+                  className="px-4 py-2 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={!rolloverSource}
+                  className="px-4 py-2 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-bold rounded-xl shadow-sm transition"
+                >
+                  Run Template Rollover
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+    </div>
+  );
+}

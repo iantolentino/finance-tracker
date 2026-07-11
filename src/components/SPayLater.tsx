@@ -321,17 +321,17 @@ export default function SPayLater({
         <div>
           <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Module 01</span>
           <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-            <CreditCard className="w-5 h-5 text-indigo-500" />
+            <CreditCard className="w-5 h-5 text-brand-500" />
             SPayLater Tracker
           </h2>
           <p className="text-xs text-slate-500 mt-1">
-            Current Billing Cycle: <strong className="text-indigo-600 font-semibold">{activeCycle}</strong>
+            Current Billing Cycle: <strong className="text-brand-600 font-semibold">{activeCycle}</strong>
           </p>
         </div>
         <div>
           <button
             onClick={() => setCompleteCycleConfirmOpen(true)}
-            className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm hover:shadow transition"
+            className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-sm hover:shadow transition"
           >
             <CheckCircle className="w-4 h-4 mr-2" />
             Payment Complete (Archive Month)
@@ -349,7 +349,7 @@ export default function SPayLater({
               <h3 className="font-semibold text-slate-800 text-sm">Customers ({filteredCustomers.length})</h3>
               <button
                 onClick={() => setCustomerModal({ open: true, fullName: "", contactNumber: "", messengerLink: "", notes: "", carriedOverBalance: 0 })}
-                className="p-1.5 text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition"
+                className="p-1.5 text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition"
                 title="Add New Customer"
               >
                 <Plus className="w-4 h-4" />
@@ -364,7 +364,7 @@ export default function SPayLater({
                 placeholder="Search name, contact, notes..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-1.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+                className="w-full pl-9 pr-4 py-1.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
               />
             </div>
 
@@ -376,7 +376,7 @@ export default function SPayLater({
                   onClick={() => setStatusFilter(status)}
                   className={`px-2.5 py-1 rounded-lg shrink-0 transition ${
                     statusFilter === status
-                      ? "bg-indigo-50 text-indigo-600 font-semibold"
+                      ? "bg-brand-50 text-brand-600 font-semibold"
                       : "hover:bg-slate-50 hover:text-slate-800"
                   }`}
                 >
@@ -504,9 +504,9 @@ export default function SPayLater({
                           href={selectedCustomerInfo.messengerLink}
                           target="_blank"
                           rel="noreferrer"
-                          className="flex items-center gap-1.5 text-indigo-600 hover:underline"
+                          className="flex items-center gap-1.5 text-brand-600 hover:underline"
                         >
-                          <MessageSquare className="w-3.5 h-3.5 text-indigo-400" />
+                          <MessageSquare className="w-3.5 h-3.5 text-brand-400" />
                           Chat on Messenger
                         </a>
                       )}
@@ -556,9 +556,9 @@ export default function SPayLater({
                     <span className="block text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Total Paid</span>
                     <span className="block text-sm font-bold text-emerald-600 mt-1">{formatCurrency(selectedCustomerInfo.totalPaid)}</span>
                   </div>
-                  <div className="p-3 bg-indigo-50/50 rounded-xl">
-                    <span className="block text-[10px] text-indigo-700 uppercase tracking-wider font-semibold">Remaining Due</span>
-                    <span className="block text-sm font-bold text-indigo-600 mt-1">{formatCurrency(selectedCustomerInfo.remainingBalance)}</span>
+                  <div className="p-3 bg-brand-50/50 rounded-xl">
+                    <span className="block text-[10px] text-brand-700 uppercase tracking-wider font-semibold">Remaining Due</span>
+                    <span className="block text-sm font-bold text-brand-600 mt-1">{formatCurrency(selectedCustomerInfo.remainingBalance)}</span>
                   </div>
                 </div>
 
@@ -586,7 +586,7 @@ export default function SPayLater({
                       installmentMonths: 1,
                       remarks: ""
                     })}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition"
                   >
                     <Plus className="w-3 h-3" /> Add Purchase
                   </button>
@@ -625,7 +625,7 @@ export default function SPayLater({
                             <td className="py-2.5">
                               <span className="font-bold text-slate-800 block">{p.itemName}</span>
                               {p.description && <span className="text-[10px] text-slate-400 block">{p.description}</span>}
-                              {p.remarks && <span className="text-[10px] text-indigo-500 italic block">*{p.remarks}</span>}
+                              {p.remarks && <span className="text-[10px] text-brand-500 italic block">*{p.remarks}</span>}
                             </td>
                             <td className="py-2.5 text-slate-500">
                               {p.purchaseDate}
@@ -788,7 +788,7 @@ export default function SPayLater({
                   value={customerModal.fullName}
                   onChange={(e) => setCustomerModal({ ...customerModal, fullName: e.target.value })}
                   placeholder="e.g. Juan dela Cruz"
-                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                 />
               </div>
 
@@ -800,7 +800,7 @@ export default function SPayLater({
                     value={customerModal.contactNumber}
                     onChange={(e) => setCustomerModal({ ...customerModal, contactNumber: e.target.value })}
                     placeholder="e.g. 09171234567"
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   />
                 </div>
                 <div>
@@ -811,7 +811,7 @@ export default function SPayLater({
                     onChange={(e) => setCustomerModal({ ...customerModal, carriedOverBalance: Number(e.target.value) })}
                     placeholder="0"
                     disabled={!!customerModal.editId}
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50 disabled:opacity-50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50 disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -823,7 +823,7 @@ export default function SPayLater({
                   value={customerModal.messengerLink}
                   onChange={(e) => setCustomerModal({ ...customerModal, messengerLink: e.target.value })}
                   placeholder="https://m.me/username"
-                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                 />
               </div>
 
@@ -834,7 +834,7 @@ export default function SPayLater({
                   onChange={(e) => setCustomerModal({ ...customerModal, notes: e.target.value })}
                   placeholder="Add details about billing, specific conditions..."
                   rows={3}
-                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                 />
               </div>
 
@@ -849,7 +849,7 @@ export default function SPayLater({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="flex-1 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition disabled:opacity-50"
+                  className="flex-1 py-2 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-xl transition disabled:opacity-50"
                 >
                   {isLoading ? "Saving..." : "Save Details"}
                 </button>
@@ -880,7 +880,7 @@ export default function SPayLater({
                   value={purchaseModal.itemName}
                   onChange={(e) => setPurchaseModal({ ...purchaseModal, itemName: e.target.value })}
                   placeholder="e.g. Air Fryer"
-                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                 />
               </div>
 
@@ -891,7 +891,7 @@ export default function SPayLater({
                   value={purchaseModal.description}
                   onChange={(e) => setPurchaseModal({ ...purchaseModal, description: e.target.value })}
                   placeholder="e.g. Xiaomi Smart 3.5L"
-                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                 />
               </div>
 
@@ -904,7 +904,7 @@ export default function SPayLater({
                     required
                     value={purchaseModal.quantity}
                     onChange={(e) => setPurchaseModal({ ...purchaseModal, quantity: Number(e.target.value) })}
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   />
                 </div>
                 <div>
@@ -915,7 +915,7 @@ export default function SPayLater({
                     required
                     value={purchaseModal.installmentMonths}
                     onChange={(e) => setPurchaseModal({ ...purchaseModal, installmentMonths: Number(e.target.value) })}
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   />
                 </div>
               </div>
@@ -929,7 +929,7 @@ export default function SPayLater({
                     required
                     value={purchaseModal.originalCost}
                     onChange={(e) => setPurchaseModal({ ...purchaseModal, originalCost: Number(e.target.value) })}
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   />
                 </div>
                 <div>
@@ -940,7 +940,7 @@ export default function SPayLater({
                     required
                     value={purchaseModal.totalAmount}
                     onChange={(e) => setPurchaseModal({ ...purchaseModal, totalAmount: Number(e.target.value) })}
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   />
                 </div>
               </div>
@@ -953,7 +953,7 @@ export default function SPayLater({
                     required
                     value={purchaseModal.dueDate}
                     onChange={(e) => setPurchaseModal({ ...purchaseModal, dueDate: e.target.value })}
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   />
                 </div>
                 <div>
@@ -963,7 +963,7 @@ export default function SPayLater({
                     value={purchaseModal.remarks}
                     onChange={(e) => setPurchaseModal({ ...purchaseModal, remarks: e.target.value })}
                     placeholder="e.g. GCash payments only"
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   />
                 </div>
               </div>
@@ -979,7 +979,7 @@ export default function SPayLater({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="flex-1 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition disabled:opacity-50"
+                  className="flex-1 py-2 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-xl transition disabled:opacity-50"
                 >
                   {isLoading ? "Saving..." : "Log Purchase"}
                 </button>
@@ -1010,7 +1010,7 @@ export default function SPayLater({
                   required
                   value={paymentModal.amountPaid}
                   onChange={(e) => setPaymentModal({ ...paymentModal, amountPaid: Number(e.target.value) })}
-                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                 />
               </div>
 
@@ -1022,7 +1022,7 @@ export default function SPayLater({
                     required
                     value={paymentModal.paymentDate}
                     onChange={(e) => setPaymentModal({ ...paymentModal, paymentDate: e.target.value })}
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   />
                 </div>
                 <div>
@@ -1030,7 +1030,7 @@ export default function SPayLater({
                   <select
                     value={paymentModal.paymentMethod}
                     onChange={(e) => setPaymentModal({ ...paymentModal, paymentMethod: e.target.value })}
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   >
                     <option value="GCash">GCash</option>
                     <option value="Cash">Cash</option>
@@ -1048,7 +1048,7 @@ export default function SPayLater({
                   value={paymentModal.notes}
                   onChange={(e) => setPaymentModal({ ...paymentModal, notes: e.target.value })}
                   placeholder="e.g. GCash reference No, remarks..."
-                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                 />
               </div>
 
@@ -1063,7 +1063,7 @@ export default function SPayLater({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="flex-1 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition disabled:opacity-50"
+                  className="flex-1 py-2 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-xl transition disabled:opacity-50"
                 >
                   {isLoading ? "Saving..." : "Log Payment"}
                 </button>
@@ -1078,7 +1078,7 @@ export default function SPayLater({
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-xl animate-in fade-in zoom-in p-5 space-y-4">
             <div className="text-center space-y-2">
-              <div className="inline-flex p-3 bg-indigo-50 text-indigo-600 rounded-full mb-2">
+              <div className="inline-flex p-3 bg-brand-50 text-brand-600 rounded-full mb-2">
                 <CheckCircle className="w-8 h-8" />
               </div>
               <h3 className="text-base font-bold text-slate-900">Archive Billing Cycle?</h3>
@@ -1101,7 +1101,7 @@ export default function SPayLater({
               <button
                 onClick={handleCompleteBillingCycleClick}
                 disabled={isLoading}
-                className="flex-1 py-2.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow transition disabled:opacity-50"
+                className="flex-1 py-2.5 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow transition disabled:opacity-50"
               >
                 {isLoading ? "Archiving..." : "Confirm Payment Complete"}
               </button>
@@ -1112,37 +1112,44 @@ export default function SPayLater({
 
       {/* 5. Invoices & Statements Generator Modal Overlay */}
       {invoiceModalOpen && selectedCustomerInfo && (
-        <div className="fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 overflow-y-auto print:bg-white print:p-0 print:absolute print:inset-0">
-          <div className="bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in print:shadow-none print:rounded-none print:w-full">
+        <div 
+          onClick={() => setInvoiceModalOpen(false)}
+          className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex justify-center items-center p-4 print:bg-white print:p-0 print:absolute print:inset-0"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-slate-900 rounded-xl w-full max-w-2xl flex flex-col max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in-50 zoom-in-95 print:shadow-none print:rounded-none print:w-full print:max-h-none"
+          >
             {/* Header: Hide when printing */}
-            <div className="p-4 border-b border-slate-100 flex items-center justify-between print:hidden">
-              <h4 className="font-bold text-slate-900 flex items-center gap-2 text-sm">
+            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between print:hidden shrink-0 bg-white dark:bg-slate-900">
+              <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2 text-sm">
                 <Printer className="w-4 h-4 text-slate-500" />
                 Statement Of Account / Invoice
               </h4>
               <div className="flex items-center gap-2">
                 <button
                   onClick={handlePrint}
-                  className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition"
+                  className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold text-white bg-slate-950 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 rounded-lg transition"
                 >
                   <Printer className="w-3.5 h-3.5 mr-1" />
                   Print Statement
                 </button>
                 <button
                   onClick={() => setInvoiceModalOpen(false)}
-                  className="p-1.5 hover:bg-slate-100 rounded-lg"
+                  className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
+                  aria-label="Close modal"
                 >
                   <X className="w-4 h-4 text-slate-400" />
                 </button>
               </div>
             </div>
 
-            {/* Print Friendly Canvas Sheet */}
-            <div className="p-8 space-y-6 text-slate-800 bg-white print:p-0">
+            {/* Print Friendly Canvas Sheet - Scrollable area inside the modal */}
+            <div className="p-6 md:p-8 space-y-6 text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900 overflow-y-auto flex-1 print:p-0 print:overflow-visible">
               {/* Print header */}
               <div className="flex justify-between items-start border-b border-slate-100 pb-4">
                 <div>
-                  <h1 className="text-lg font-extrabold text-indigo-600 uppercase tracking-tight">
+                  <h1 className="text-lg font-extrabold text-brand-600 uppercase tracking-tight">
                     {settings.personalBusinessName || "Personal Finance System"}
                   </h1>
                   <span className="text-[10px] text-slate-400 font-medium block mt-0.5">SPayLater Billing & Receivable Statement</span>
@@ -1257,14 +1264,14 @@ export default function SPayLater({
                 <div className="h-px bg-slate-200 w-64 my-1" />
                 <div className="flex justify-between w-64 text-sm font-extrabold text-slate-900 bg-slate-50 p-2 rounded-lg print:bg-transparent print:p-0">
                   <span>Remaining Balance:</span>
-                  <span className="text-indigo-600">{formatCurrency(selectedCustomerInfo.remainingBalance)}</span>
+                  <span className="text-brand-600">{formatCurrency(selectedCustomerInfo.remainingBalance)}</span>
                 </div>
               </div>
 
               {/* Signature lines */}
               <div className="grid grid-cols-2 gap-12 pt-12 text-center text-[10px] text-slate-400">
                 <div className="border-t border-dashed border-slate-200 pt-2">
-                  Juan dela Cruz <br />
+                  Ian Tolentino <br />
                   <span className="font-medium text-slate-300">PFMS System Manager</span>
                 </div>
                 <div className="border-t border-dashed border-slate-200 pt-2">
@@ -1272,6 +1279,25 @@ export default function SPayLater({
                   <span className="font-medium text-slate-300">Customer Signature / Date</span>
                 </div>
               </div>
+            </div>
+
+            {/* Bottom Actions Footer: Hidden when printing */}
+            <div className="p-4 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2.5 print:hidden shrink-0">
+              <button
+                type="button"
+                onClick={() => setInvoiceModalOpen(false)}
+                className="px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg transition shadow-xs"
+              >
+                Close / Dismiss
+              </button>
+              <button
+                type="button"
+                onClick={handlePrint}
+                className="inline-flex items-center justify-center px-4 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-xs transition"
+              >
+                <Printer className="w-3.5 h-3.5 mr-1.5" />
+                Print Statement
+              </button>
             </div>
           </div>
         </div>

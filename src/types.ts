@@ -94,3 +94,30 @@ export interface BackupRecord {
   createdAt: string;
   size: number;
 }
+
+export interface BudgetAllocation {
+  id: string;
+  category: string;
+  allocatedAmount: number;
+  spentAmount: number;
+}
+
+export interface BudgetExpense {
+  id: string;
+  allocationId: string;
+  itemName: string;
+  amount: number;
+  date: string;
+  notes: string;
+}
+
+export interface MonthlyBudget {
+  id: string;
+  month: string;
+  salary: number;
+  additionalIncome: number;
+  allocations: BudgetAllocation[];
+  expenses: BudgetExpense[];
+  createdAt: string;
+}
+

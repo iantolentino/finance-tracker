@@ -16,7 +16,8 @@ import {
   HelpCircle,
   Clock,
   Eye,
-  EyeOff
+  EyeOff,
+  Sparkles
 } from "lucide-react";
 import { SystemSettings, ActivityLog, BackupRecord } from "../types";
 import { api } from "../api";
@@ -60,6 +61,7 @@ export default function Settings({
   const [isCreatingBackup, setIsCreatingBackup] = useState(false);
   const [isRestoringBackup, setIsRestoringBackup] = useState<string | null>(null);
   const [isDeletingBackup, setIsDeletingBackup] = useState<string | null>(null);
+  const [isSeeding, setIsSeeding] = useState(false);
 
   // File import ref
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -170,9 +172,30 @@ export default function Settings({
     }
   };
 
-  // Handle Export download
-  const handleExportData = () => {
-    window.location.href = api.getExportUrl();
+  // Handle Export download - Blob based & fully safe for iframe sandboxes
+  const handleExportData = async () => {
+    try {
+      const response = await fetch(api.getExportUrl());
+      if (!response.ok) {
+        throw new Error(`Export failed: ${response.statusText}`);
+      }
+      const data = await response.json();
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = window.URL.createObjectURL(blob);
+      
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `pfms_export_${new Date().toISOString().split("T")[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Cleanup
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      alert("Failed to export database: " + err.message);
+    }
   };
 
   // Handle Import JSON file
@@ -183,16 +206,25 @@ export default function Settings({
     const reader = new FileReader();
     reader.onload = async (event) => {
       try {
-        const json = JSON.parse(event.target?.result as string);
+        let json;
+        try {
+          json = JSON.parse(event.target?.result as string);
+        } catch (parseErr) {
+          alert("Failed to parse file. Please upload a valid JSON file.");
+          return;
+        }
+
         if (confirm("Importing this JSON will overwrite your current active records! Are you sure you want to import?")) {
           const res = await api.importBackup(json);
           if (res.success) {
             alert("External system JSON successfully imported! Reloading workspace...");
             window.location.reload();
+          } else {
+            alert("Import failed. No success response received from the server.");
           }
         }
-      } catch (err) {
-        alert("Invalid backup file format. Must be a valid PFMS export JSON file.");
+      } catch (err: any) {
+        alert("Import failed: " + (err.message || "Unknown error occurred. Must be a valid PFMS export JSON file."));
       }
     };
     reader.readAsText(file);
@@ -200,12 +232,32 @@ export default function Settings({
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  // Handle 1-Click SPayLater Seeder
+  const handleSeedSPayLater = async () => {
+    if (confirm("Seeding this data will overwrite all current active SPayLater records with your custom table summary (Ian, Shannen, Claudine, etc.)! Are you sure you want to proceed?")) {
+      setIsSeeding(true);
+      try {
+        const res = await api.seedSPayLater();
+        if (res.success) {
+          alert("SPayLater summary data successfully seeded into your workspace! Reloading workspace...");
+          window.location.reload();
+        } else {
+          alert("Seeding failed. Please check if spaylater_import.json is present on the server.");
+        }
+      } catch (err) {
+        alert("An error occurred while seeding sample data.");
+      } finally {
+        setIsSeeding(false);
+      }
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
         <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-          <SettingsIcon className="w-5 h-5 text-indigo-500" />
+          <SettingsIcon className="w-5 h-5 text-brand-500" />
           System Settings &amp; Backups
         </h2>
         <p className="text-xs text-slate-500 mt-1">
@@ -227,7 +279,7 @@ export default function Settings({
                   required
                   value={personalBusinessName}
                   onChange={(e) => setPersonalBusinessName(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                 />
               </div>
 
@@ -237,7 +289,7 @@ export default function Settings({
                   <select
                     value={currency}
                     onChange={(e) => setCurrency(e.target.value)}
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   >
                     <option value="PHP">Philippine Peso (₱)</option>
                     <option value="USD">US Dollar ($)</option>
@@ -249,7 +301,7 @@ export default function Settings({
                   <select
                     value={backupPreference}
                     onChange={(e) => setBackupPreference(e.target.value as any)}
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   >
                     <option value="manual">Manual Backup Operations Only</option>
                     <option value="daily">Trigger Automatic Daily Backups</option>
@@ -269,7 +321,7 @@ export default function Settings({
                     value={defaultBillingDate}
                     onChange={(e) => setDefaultBillingDate(e.target.value)}
                     placeholder="15"
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   />
                 </div>
                 <div>
@@ -282,7 +334,7 @@ export default function Settings({
                     value={defaultDueDate}
                     onChange={(e) => setDefaultDueDate(e.target.value)}
                     placeholder="30"
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   />
                 </div>
               </div>
@@ -291,7 +343,7 @@ export default function Settings({
                 <button
                   type="submit"
                   disabled={isSavingSettings}
-                  className="px-5 py-2.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm transition disabled:opacity-50"
+                  className="px-5 py-2.5 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-sm transition disabled:opacity-50"
                 >
                   {isSavingSettings ? "Saving Settings..." : "Save General Configurations"}
                 </button>
@@ -315,7 +367,7 @@ export default function Settings({
                     value={oldPassword}
                     onChange={(e) => setOldPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50 pr-10"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50 pr-10"
                   />
                   <button
                     type="button"
@@ -336,7 +388,7 @@ export default function Settings({
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="Minimum 4 characters"
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   />
                 </div>
                 <div>
@@ -347,7 +399,7 @@ export default function Settings({
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Must match new password"
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   />
                 </div>
               </div>
@@ -373,7 +425,7 @@ export default function Settings({
               </div>
               <button
                 onClick={onRefreshLogs}
-                className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold"
+                className="text-xs text-brand-600 hover:text-brand-800 font-semibold"
               >
                 Refresh Logs
               </button>
@@ -398,7 +450,7 @@ export default function Settings({
         <div className="lg:col-span-1 space-y-6">
           <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
             <h3 className="font-bold text-slate-800 text-sm border-b border-slate-50 pb-2 flex items-center gap-1.5">
-              <Database className="w-4 h-4 text-indigo-500" />
+              <Database className="w-4 h-4 text-brand-500" />
               Backup &amp; Restore
             </h3>
 
@@ -406,16 +458,16 @@ export default function Settings({
             <div className="grid grid-cols-2 gap-2 text-center">
               <button
                 onClick={handleExportData}
-                className="flex flex-col items-center justify-center p-3 border border-slate-200 hover:border-indigo-500 rounded-xl bg-slate-50/50 hover:bg-white text-xs gap-1.5 transition font-semibold"
+                className="flex flex-col items-center justify-center p-3 border border-slate-200 hover:border-brand-500 rounded-xl bg-slate-50/50 hover:bg-white text-xs gap-1.5 transition font-semibold"
               >
-                <Download className="w-5 h-5 text-indigo-500" />
+                <Download className="w-5 h-5 text-brand-500" />
                 Export DB JSON
               </button>
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="flex flex-col items-center justify-center p-3 border border-slate-200 hover:border-indigo-500 rounded-xl bg-slate-50/50 hover:bg-white text-xs gap-1.5 transition font-semibold"
+                className="flex flex-col items-center justify-center p-3 border border-slate-200 hover:border-brand-500 rounded-xl bg-slate-50/50 hover:bg-white text-xs gap-1.5 transition font-semibold"
               >
-                <Upload className="w-5 h-5 text-indigo-500" />
+                <Upload className="w-5 h-5 text-brand-500" />
                 Import JSON
               </button>
               <input
@@ -427,11 +479,29 @@ export default function Settings({
               />
             </div>
 
+            {/* 1-Click SPayLater Tracker Data Seeder */}
+            <div className="p-3 bg-brand-50/50 dark:bg-brand-950/20 border border-brand-100 dark:border-brand-900/40 rounded-xl space-y-2">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-brand-900 dark:text-brand-400">
+                <Sparkles className="w-4 h-4 text-brand-500 animate-pulse" />
+                <span>SPayLater Tracker Seeder</span>
+              </div>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-normal">
+                Instantly seed your system with SPayLater summary data for Ian, Shannen, Claudine, and others.
+              </p>
+              <button
+                onClick={handleSeedSPayLater}
+                disabled={isSeeding}
+                className="w-full inline-flex items-center justify-center px-4 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-sm transition disabled:opacity-50"
+              >
+                {isSeeding ? "Seeding Data..." : "Load SPayLater Data (1-Click)"}
+              </button>
+            </div>
+
             {/* Create Manual Backup Trigger */}
             <button
               onClick={handleCreateBackup}
               disabled={isCreatingBackup}
-              className="w-full inline-flex items-center justify-center px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm transition disabled:opacity-50"
+              className="w-full inline-flex items-center justify-center px-4 py-2 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-sm transition disabled:opacity-50"
             >
               <Plus className="w-4 h-4 mr-1.5" />
               {isCreatingBackup ? "Generating Backup..." : "Create System Backup"}
@@ -461,7 +531,7 @@ export default function Settings({
                         <button
                           onClick={() => handleRestoreBackup(bak.id, bak.filename)}
                           disabled={!!isRestoringBackup}
-                          className="p-1 text-slate-500 hover:text-indigo-600 hover:bg-white border border-transparent hover:border-slate-200 rounded transition"
+                          className="p-1 text-slate-500 hover:text-brand-600 hover:bg-white border border-transparent hover:border-slate-200 rounded transition"
                           title="Restore System to this state"
                         >
                           {isRestoringBackup === bak.id ? (

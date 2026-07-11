@@ -1,6 +1,0 @@
-# Spaylater Manager — Python dependencies
-# All core libs (tkinter, csv, json, smtplib, pathlib, logging) are stdlib.
-# Only PyInstaller is needed for packaging.
-
-pyinstaller>=6.0        # EXE packaging (Windows)
-# pillow>=10.0          # Uncomment if you add image-based snapshots

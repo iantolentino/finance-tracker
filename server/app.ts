@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import seedData from "../spaylater_import.json" with { type: "json" };
-import { readDb, writeDb, writeDbBatch, listBackups, readBackup, writeBackup, deleteBackup } from "./githubStore.js";
+import { readDb, writeDb, writeDbBatch, listBackups, readBackup, writeBackup, deleteBackup } from "./postgresStore.js";
 
 export const app = express();
 
@@ -110,29 +110,25 @@ const createSystemBackup = async (isAuto = false) => {
     activityLogs
   };
 
-  await writeBackup(filename, backupData);
+  await writeBackup(filename, backupData, isAuto ? "automatic" : "manual");
   console.log(`Backup created: ${filename}`);
 };
 
 // Auto backup helper: once per day, if settings.backupPreference !== "disabled".
-// Runs on login only (not on every write) to avoid piling extra GitHub API
-// calls / latency onto every single request.
+// Runs on login only (not on every write) to keep the daily-backup feature
+// from adding extra latency to every single write request.
 const checkAndTriggerAutoBackup = async () => {
   const settings = await readDb("settings.json", DEFAULT_SETTINGS);
   if (settings.backupPreference === "disabled") return;
 
-  const backups = (await listBackups())
-    .map(b => b.name)
-    .filter(name => name.startsWith("auto_") && name.endsWith(".json"));
+  const autoBackups = (await listBackups()).filter(b => b.type === "automatic");
 
   let runBackup = false;
-  if (backups.length === 0) {
+  if (autoBackups.length === 0) {
     runBackup = true;
   } else {
-    backups.sort();
-    const latest = backups[backups.length - 1];
-    const dateStr = latest.substring(5, 15); // "YYYY-MM-DD"
-    const latestDate = new Date(dateStr);
+    // listBackups() returns newest first
+    const latestDate = new Date(autoBackups[0].createdAt);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     latestDate.setHours(0, 0, 0, 0);
@@ -1006,25 +1002,9 @@ app.get("/api/logs", verifyToken, h(async (req, res) => {
 
 // 10. BACKUP API
 app.get("/api/backups", verifyToken, h(async (req, res) => {
-  const files = await listBackups();
-  const backups = files.map(file => {
-    // Filenames look like: manual_YYYY-MM-DD_HHMMSS.json / auto_YYYY-MM-DD_HHMMSS.json
-    const isAuto = file.name.startsWith("auto_");
-    const dateMatch = file.name.match(/_(\d{4}-\d{2}-\d{2})_(\d{6})\.json$/);
-    const createdAt = dateMatch
-      ? `${dateMatch[1]}T${dateMatch[2].substring(0, 2)}:${dateMatch[2].substring(2, 4)}:${dateMatch[2].substring(4, 6)}.000Z`
-      : new Date(0).toISOString();
-
-    return {
-      id: file.name,
-      filename: file.name,
-      type: isAuto ? "automatic" : "manual",
-      createdAt,
-      size: file.size
-    };
-  });
-  backups.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-  res.json(backups);
+  const backups = await listBackups();
+  // listBackups() already returns newest-first with real name/type/createdAt/size
+  res.json(backups.map(b => ({ id: b.name, filename: b.name, ...b })));
 }));
 
 app.post("/api/backups", verifyToken, h(async (req, res) => {

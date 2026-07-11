@@ -1,0 +1,11 @@
+[
+  {
+    "id": "pay-1783746392968",
+    "customerId": "cust-1783746342000",
+    "paymentDate": "2026-07-11",
+    "amountPaid": 200,
+    "paymentMethod": "GCash",
+    "notes": "",
+    "billingCycle": "July 2026"
+  }
+]

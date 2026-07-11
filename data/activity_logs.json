@@ -1,5 +1,11 @@
 [
   {
+    "id": "log-1783746742258-7cg3",
+    "action": "System Restored",
+    "details": "System restored successfully from backup file: manual_2026-07-11_051155.json",
+    "timestamp": "2026-07-11T05:12:22.258Z"
+  },
+  {
     "id": "log-1783746712376-1jo0",
     "action": "User Login",
     "details": "Admin successfully logged into the system.",

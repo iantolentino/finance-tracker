@@ -1,5 +1,11 @@
 [
   {
+    "id": "log-1783747947204-htq0",
+    "action": "Failed Login",
+    "details": "An unauthorized login attempt was blocked.",
+    "timestamp": "2026-07-11T05:32:27.204Z"
+  },
+  {
     "id": "log-1783747355560-1e37",
     "action": "Backup Imported",
     "details": "A full external backup JSON was imported successfully.",

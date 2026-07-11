@@ -1,11 +1,20 @@
 [
   {
-    "id": "pay-1783746392968",
-    "customerId": "cust-1783746342000",
-    "paymentDate": "2026-07-11",
-    "amountPaid": 200,
-    "paymentMethod": "GCash",
-    "notes": "",
+    "id": "pay-lecel-1",
+    "customerId": "cust-lecel",
+    "paymentDate": "2026-07-10",
+    "amountPaid": 263,
+    "paymentMethod": "Maya",
+    "notes": "Already Moved in Maya",
+    "billingCycle": "July 2026"
+  },
+  {
+    "id": "pay-1783692317015",
+    "customerId": "cust-ateshe",
+    "paymentDate": "2026-07-06",
+    "amountPaid": 5000,
+    "paymentMethod": "Maya",
+    "notes": "Already moved in maya",
     "billingCycle": "July 2026"
   }
 ]

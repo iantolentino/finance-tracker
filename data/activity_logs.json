@@ -1,5 +1,11 @@
 [
   {
+    "id": "log-1783750223803-pvpp",
+    "action": "User Login",
+    "details": "Admin successfully logged into the system.",
+    "timestamp": "2026-07-11T06:10:23.803Z"
+  },
+  {
     "id": "log-1783750159258-w26i",
     "action": "User Login",
     "details": "Admin successfully logged into the system.",

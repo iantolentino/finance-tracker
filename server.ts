@@ -1,5 +1,5 @@
 import path from "path";
-import { app } from "./server/app";
+import { app } from "./server/app.js";
 
 const PORT = 3000;
 

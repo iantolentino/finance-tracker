@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import seedData from "../spaylater_import.json";
-import { readDb, writeDb, writeDbBatch, listBackups, readBackup, writeBackup, deleteBackup } from "./githubStore";
+import { readDb, writeDb, writeDbBatch, listBackups, readBackup, writeBackup, deleteBackup } from "./githubStore.js";
 
 export const app = express();
 

@@ -1,5 +1,11 @@
 [
   {
+    "id": "log-1783747355560-1e37",
+    "action": "Backup Imported",
+    "details": "A full external backup JSON was imported successfully.",
+    "timestamp": "2026-07-11T05:22:35.560Z"
+  },
+  {
     "id": "log-1783692846018-4y0d",
     "action": "Customer Updated",
     "details": "Updated customer profile: Shannen",

@@ -338,18 +338,18 @@ export default function Dashboard({
               Manage Module <ArrowRight className="w-3 h-3" />
             </button>
           </div>
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="p-3 bg-slate-50 rounded-lg">
-              <span className="block text-[10px] uppercase font-semibold text-slate-400">Receivables</span>
-              <span className="block text-sm font-bold text-slate-800 mt-1">{formatCurrency(spayLaterMetrics.receivables)}</span>
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-2 text-center">
+            <div className="p-2 sm:p-3 bg-slate-50 rounded-lg">
+              <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-slate-400">Receivables</span>
+              <span className="block text-[11px] sm:text-sm font-bold text-slate-800 mt-1 break-words">{formatCurrency(spayLaterMetrics.receivables)}</span>
             </div>
-            <div className="p-3 bg-slate-50 rounded-lg">
-              <span className="block text-[10px] uppercase font-semibold text-slate-400">Total Paid</span>
-              <span className="block text-sm font-bold text-emerald-600 mt-1">{formatCurrency(spayLaterMetrics.paid)}</span>
+            <div className="p-2 sm:p-3 bg-slate-50 rounded-lg">
+              <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-slate-400">Total Paid</span>
+              <span className="block text-[11px] sm:text-sm font-bold text-emerald-600 mt-1 break-words">{formatCurrency(spayLaterMetrics.paid)}</span>
             </div>
-            <div className="p-3 bg-orange-50/50 rounded-lg">
-              <span className="block text-[10px] uppercase font-semibold text-orange-700">Remaining</span>
-              <span className="block text-sm font-bold text-orange-600 mt-1">{formatCurrency(spayLaterMetrics.outstanding)}</span>
+            <div className="p-2 sm:p-3 bg-orange-50/50 rounded-lg">
+              <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-orange-700">Remaining</span>
+              <span className="block text-[11px] sm:text-sm font-bold text-orange-600 mt-1 break-words">{formatCurrency(spayLaterMetrics.outstanding)}</span>
             </div>
           </div>
         </div>
@@ -368,18 +368,18 @@ export default function Dashboard({
               Manage Module <ArrowRight className="w-3 h-3" />
             </button>
           </div>
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="p-3 bg-slate-50 rounded-lg">
-              <span className="block text-[10px] uppercase font-semibold text-slate-400">Total Due</span>
-              <span className="block text-sm font-bold text-slate-800 mt-1">{formatCurrency(lendingMetrics.totalDue)}</span>
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-2 text-center">
+            <div className="p-2 sm:p-3 bg-slate-50 rounded-lg">
+              <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-slate-400">Total Due</span>
+              <span className="block text-[11px] sm:text-sm font-bold text-slate-800 mt-1 break-words">{formatCurrency(lendingMetrics.totalDue)}</span>
             </div>
-            <div className="p-3 bg-slate-50 rounded-lg">
-              <span className="block text-[10px] uppercase font-semibold text-slate-400">Interest Earned</span>
-              <span className="block text-sm font-bold text-brand-600 mt-1">{formatCurrency(lendingMetrics.interestEarned)}</span>
+            <div className="p-2 sm:p-3 bg-slate-50 rounded-lg">
+              <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-slate-400">Interest Earned</span>
+              <span className="block text-[11px] sm:text-sm font-bold text-brand-600 mt-1 break-words">{formatCurrency(lendingMetrics.interestEarned)}</span>
             </div>
-            <div className="p-3 bg-brand-50/50 rounded-lg">
-              <span className="block text-[10px] uppercase font-semibold text-brand-700">Outstanding</span>
-              <span className="block text-sm font-bold text-brand-600 mt-1">{formatCurrency(lendingMetrics.outstanding)}</span>
+            <div className="p-2 sm:p-3 bg-brand-50/50 rounded-lg">
+              <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-brand-700">Outstanding</span>
+              <span className="block text-[11px] sm:text-sm font-bold text-brand-600 mt-1 break-words">{formatCurrency(lendingMetrics.outstanding)}</span>
             </div>
           </div>
         </div>
@@ -402,9 +402,18 @@ export default function Dashboard({
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={customerOutstandingData} margin={{ top: 10, right: 10, left: -10, bottom: 5 }}>
+                <BarChart data={customerOutstandingData} margin={{ top: 10, right: 10, left: -10, bottom: 24 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255, 255, 255, 0.06)" />
-                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 10, fill: "#94a3b8" }}
+                    axisLine={false}
+                    tickLine={false}
+                    interval={0}
+                    angle={-35}
+                    textAnchor="end"
+                    height={40}
+                  />
                   <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
                   <Tooltip 
                     contentStyle={{ backgroundColor: "#0f172a", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.08)", color: "#fff", fontSize: "12px" }}

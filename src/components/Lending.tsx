@@ -873,6 +873,7 @@ export default function Lending({
               {/* Loan parameters */}
               <div className="space-y-2">
                 <h4 className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Lending Terms Sheet</h4>
+                <div className="overflow-x-auto print:overflow-visible">
                 <table className="w-full text-xs text-left border-collapse">
                   <thead>
                     <tr className="border-b border-slate-200 text-slate-400 font-medium bg-slate-50/50 print:bg-transparent">
@@ -895,6 +896,7 @@ export default function Lending({
                     </tr>
                   </tbody>
                 </table>
+                </div>
               </div>
 
               {/* Payment histories */}
@@ -903,6 +905,7 @@ export default function Lending({
                 {selectedLoanInfo.payments.length === 0 ? (
                   <p className="text-xs text-slate-400 italic">No repayments logged on this ledger.</p>
                 ) : (
+                  <div className="overflow-x-auto print:overflow-visible">
                   <table className="w-full text-xs text-left border-collapse">
                     <thead>
                       <tr className="border-b border-slate-200 text-slate-400 font-medium bg-slate-50/50 print:bg-transparent">
@@ -923,6 +926,7 @@ export default function Lending({
                       ))}
                     </tbody>
                   </table>
+                  </div>
                 )}
               </div>
 

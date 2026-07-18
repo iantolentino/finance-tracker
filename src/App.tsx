@@ -567,14 +567,14 @@ export default function App() {
               const nextTheme = settings.theme === "dark" ? "light" : "dark";
               await handleUpdateSettings({ theme: nextTheme });
             }}
-            className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+            className="p-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
             title={settings.theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
           >
             {settings.theme === "dark" ? <Sun className="w-5 h-5 text-amber-500" /> : <Moon className="w-5 h-5 text-brand-500" />}
           </button>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg transition"
+            className="p-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg transition"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -727,7 +727,7 @@ export default function App() {
               <div className="bg-slate-100 dark:bg-slate-800/40 p-3 rounded-lg border border-slate-200 dark:border-slate-800/60 flex flex-col gap-1 text-xs text-slate-700 dark:text-slate-300">
                 <div className="flex items-center gap-2">
                   <User className="w-3.5 h-3.5 text-brand-500 dark:text-brand-400 shrink-0" />
-                  <span className="truncate font-bold">Ian Tolentino</span>
+                  <span className="truncate font-bold">{displayName || "PFMS User"}</span>
                 </div>
                 <span className="text-[10px] text-slate-400 font-medium ml-5">PFMS System Manager</span>
               </div>
@@ -752,7 +752,7 @@ export default function App() {
       )}
 
       {/* Main Content canvas view container */}
-      <main className="flex-1 p-4 md:p-8 overflow-x-hidden min-h-0 print:p-0">
+      <main className="flex-1 p-4 pb-24 md:p-8 overflow-x-hidden min-h-0 print:p-0">
         <Suspense fallback={
           <div className="flex h-64 flex-col items-center justify-center gap-3">
             <div className="w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full animate-spin" />
@@ -859,15 +859,80 @@ export default function App() {
         </Suspense>
       </main>
 
-      {/* Quick Log - the fastest path to record money regardless of where it goes */}
+      {/* Quick Log FAB - desktop only; mobile gets the elevated center button in the bottom nav below */}
       <button
         type="button"
         onClick={() => setQuickLogOpen(true)}
         title="Log Money"
-        className="fixed bottom-5 right-5 z-40 w-14 h-14 rounded-full bg-brand-600 hover:bg-brand-700 text-white shadow-lg shadow-brand-600/30 flex items-center justify-center transition print:hidden"
+        className="hidden md:flex fixed bottom-5 right-5 z-40 w-14 h-14 rounded-full bg-brand-600 hover:bg-brand-700 text-white shadow-lg shadow-brand-600/30 items-center justify-center transition print:hidden"
       >
         <Plus className="w-6 h-6" />
       </button>
+
+      {/* Mobile Bottom Navigation - 1 tap to switch between the most-used
+          tabs instead of hamburger-then-drawer, plus the Quick Log action
+          front and center. "More" reuses the existing drawer for the rest. */}
+      <nav
+        className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-stretch justify-around print:hidden"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
+        {[
+          { id: "dashboard", label: "Home", icon: LayoutDashboard },
+          { id: "spaylater", label: "SPayLater", icon: CreditCard }
+        ].map(item => {
+          const Icon = item.icon;
+          const active = currentTab === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => setCurrentTab(item.id)}
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 min-h-[56px] ${
+                active ? "text-brand-600 dark:text-brand-400" : "text-slate-500 dark:text-slate-400"
+              }`}
+            >
+              <Icon className="w-5 h-5" />
+              <span className="text-[9px] font-semibold">{item.label}</span>
+            </button>
+          );
+        })}
+
+        <button
+          onClick={() => setQuickLogOpen(true)}
+          className="flex-1 flex flex-col items-center justify-center"
+          title="Log Money"
+        >
+          <span className="-mt-6 w-12 h-12 rounded-full bg-brand-600 text-white shadow-lg shadow-brand-600/30 flex items-center justify-center">
+            <Plus className="w-6 h-6" />
+          </span>
+        </button>
+
+        {[
+          { id: "budget", label: "Budget", icon: Wallet }
+        ].map(item => {
+          const Icon = item.icon;
+          const active = currentTab === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => setCurrentTab(item.id)}
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 min-h-[56px] ${
+                active ? "text-brand-600 dark:text-brand-400" : "text-slate-500 dark:text-slate-400"
+              }`}
+            >
+              <Icon className="w-5 h-5" />
+              <span className="text-[9px] font-semibold">{item.label}</span>
+            </button>
+          );
+        })}
+
+        <button
+          onClick={() => setMobileMenuOpen(true)}
+          className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 min-h-[56px] text-slate-500 dark:text-slate-400"
+        >
+          <Menu className="w-5 h-5" />
+          <span className="text-[9px] font-semibold">More</span>
+        </button>
+      </nav>
 
       {quickLogOpen && (
         <Suspense fallback={null}>

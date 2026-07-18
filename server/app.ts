@@ -474,10 +474,10 @@ app.post("/api/purchases", verifyToken, h(async (req, res) => {
   purchases.push(newPurchase);
   await writeDb("purchases.json", purchases);
 
-  await updateCustomerStatus(newPurchase.customerId);
+  const updatedCustomer = await updateCustomerStatus(newPurchase.customerId);
 
   await addLog("Purchase Added", `Added purchase: ${newPurchase.itemName} for amount ${newPurchase.totalAmount} PHP`);
-  res.json(newPurchase);
+  res.json({ purchase: newPurchase, updatedCustomer });
 }));
 
 app.put("/api/purchases/:id", verifyToken, h(async (req, res) => {
@@ -498,10 +498,10 @@ app.put("/api/purchases/:id", verifyToken, h(async (req, res) => {
   };
 
   await writeDb("purchases.json", purchases);
-  await updateCustomerStatus(customerId);
+  const updatedCustomer = await updateCustomerStatus(customerId);
 
   await addLog("Purchase Updated", `Updated purchase: ${purchases[index].itemName}`);
-  res.json(purchases[index]);
+  res.json({ purchase: purchases[index], updatedCustomer });
 }));
 
 app.delete("/api/purchases/:id", verifyToken, h(async (req, res) => {
@@ -514,10 +514,10 @@ app.delete("/api/purchases/:id", verifyToken, h(async (req, res) => {
 
   purchases = purchases.filter((p: any) => p.id !== req.params.id);
   await writeDb("purchases.json", purchases);
-  await updateCustomerStatus(purchase.customerId);
+  const updatedCustomer = await updateCustomerStatus(purchase.customerId);
 
   await addLog("Purchase Deleted", `Deleted purchase item: ${purchase.itemName}`);
-  res.json({ success: true });
+  res.json({ success: true, updatedCustomer });
 }));
 
 // 6. PAYMENTS API
@@ -544,10 +544,10 @@ app.post("/api/payments", verifyToken, h(async (req, res) => {
   payments.push(newPayment);
   await writeDb("payments.json", payments);
 
-  await updateCustomerStatus(newPayment.customerId);
+  const updatedCustomer = await updateCustomerStatus(newPayment.customerId);
 
   await addLog("Payment Recorded", `Recorded payment: ${newPayment.amountPaid} PHP via ${newPayment.paymentMethod}`);
-  res.json(newPayment);
+  res.json({ payment: newPayment, updatedCustomer });
 }));
 
 app.put("/api/payments/:id", verifyToken, h(async (req, res) => {
@@ -566,10 +566,10 @@ app.put("/api/payments/:id", verifyToken, h(async (req, res) => {
   };
 
   await writeDb("payments.json", payments);
-  await updateCustomerStatus(customerId);
+  const updatedCustomer = await updateCustomerStatus(customerId);
 
   await addLog("Payment Updated", `Updated payment record: ${payments[index].amountPaid} PHP`);
-  res.json(payments[index]);
+  res.json({ payment: payments[index], updatedCustomer });
 }));
 
 app.delete("/api/payments/:id", verifyToken, h(async (req, res) => {
@@ -582,14 +582,16 @@ app.delete("/api/payments/:id", verifyToken, h(async (req, res) => {
 
   payments = payments.filter((p: any) => p.id !== req.params.id);
   await writeDb("payments.json", payments);
-  await updateCustomerStatus(payment.customerId);
+  const updatedCustomer = await updateCustomerStatus(payment.customerId);
 
   await addLog("Payment Deleted", `Removed payment record of ${payment.amountPaid} PHP`);
-  res.json({ success: true });
+  res.json({ success: true, updatedCustomer });
 }));
 
-// Helper to auto update customer status
-const updateCustomerStatus = async (customerId: string) => {
+// Helper to auto update customer status. Returns the updated customer so
+// callers can merge it into a response instead of the frontend having to
+// refetch the entire customer list after every purchase/payment write.
+const updateCustomerStatus = async (customerId: string): Promise<any> => {
   const [customers, purchases, payments] = await Promise.all([
     readDb("customers.json", []),
     readDb("purchases.json", []),
@@ -597,7 +599,7 @@ const updateCustomerStatus = async (customerId: string) => {
   ]);
 
   const custIndex = customers.findIndex((c: any) => c.id === customerId);
-  if (custIndex === -1) return;
+  if (custIndex === -1) return null;
 
   const customer = customers[custIndex];
   const cycle = customer.billingCycle;
@@ -618,6 +620,7 @@ const updateCustomerStatus = async (customerId: string) => {
   }
 
   await writeDb("customers.json", customers);
+  return customers[custIndex];
 };
 
 // 7. LENDING MANAGEMENT API

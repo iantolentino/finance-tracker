@@ -156,7 +156,7 @@ export const api = {
     return handleResponse(res);
   },
 
-  async createPurchase(purchase: Partial<Purchase>): Promise<Purchase> {
+  async createPurchase(purchase: Partial<Purchase>): Promise<{ purchase: Purchase; updatedCustomer: Customer | null }> {
     const res = await fetch(`${API_BASE}/purchases`, {
       method: "POST",
       headers: getHeaders(),
@@ -165,7 +165,7 @@ export const api = {
     return handleResponse(res);
   },
 
-  async updatePurchase(id: string, purchase: Partial<Purchase>): Promise<Purchase> {
+  async updatePurchase(id: string, purchase: Partial<Purchase>): Promise<{ purchase: Purchase; updatedCustomer: Customer | null }> {
     const res = await fetch(`${API_BASE}/purchases/${id}`, {
       method: "PUT",
       headers: getHeaders(),
@@ -174,7 +174,7 @@ export const api = {
     return handleResponse(res);
   },
 
-  async deletePurchase(id: string): Promise<{ success: boolean }> {
+  async deletePurchase(id: string): Promise<{ success: boolean; updatedCustomer: Customer | null }> {
     const res = await fetch(`${API_BASE}/purchases/${id}`, {
       method: "DELETE",
       headers: getHeaders()
@@ -188,7 +188,7 @@ export const api = {
     return handleResponse(res);
   },
 
-  async createPayment(payment: Partial<Payment>): Promise<Payment> {
+  async createPayment(payment: Partial<Payment>): Promise<{ payment: Payment; updatedCustomer: Customer | null }> {
     const res = await fetch(`${API_BASE}/payments`, {
       method: "POST",
       headers: getHeaders(),
@@ -197,7 +197,7 @@ export const api = {
     return handleResponse(res);
   },
 
-  async updatePayment(id: string, payment: Partial<Payment>): Promise<Payment> {
+  async updatePayment(id: string, payment: Partial<Payment>): Promise<{ payment: Payment; updatedCustomer: Customer | null }> {
     const res = await fetch(`${API_BASE}/payments/${id}`, {
       method: "PUT",
       headers: getHeaders(),
@@ -206,7 +206,7 @@ export const api = {
     return handleResponse(res);
   },
 
-  async deletePayment(id: string): Promise<{ success: boolean }> {
+  async deletePayment(id: string): Promise<{ success: boolean; updatedCustomer: Customer | null }> {
     const res = await fetch(`${API_BASE}/payments/${id}`, {
       method: "DELETE",
       headers: getHeaders()

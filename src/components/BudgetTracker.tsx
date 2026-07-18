@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Wallet,
@@ -31,7 +31,6 @@ interface BudgetTrackerProps {
   customers: Customer[];
   purchases: Purchase[];
   loans: Loan[];
-  onRefreshLogs: () => Promise<void>;
 }
 
 export default function BudgetTracker({
@@ -40,13 +39,13 @@ export default function BudgetTracker({
   availableCycles,
   customers,
   purchases,
-  loans,
-  onRefreshLogs
+  loans
 }: BudgetTrackerProps) {
   // State variables
   const [budgets, setBudgets] = useState<MonthlyBudget[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
+  const [isSaving, setIsSaving] = useState<boolean>(false);
 
   // Modals state
   const [incomeModalOpen, setIncomeModalOpen] = useState<boolean>(false);
@@ -85,7 +84,10 @@ export default function BudgetTracker({
 
   useEffect(() => {
     fetchBudgets();
-  }, []);
+    // Refetch when the active cycle changes (e.g. after completing a billing
+    // cycle or restoring an archive) so a newly auto-created budget for the
+    // new cycle actually shows up without requiring a full page reload.
+  }, [activeCycle]);
 
   // Find the current active month's budget, or fall back to a default-initialized local one if not saved yet
   const activeBudget = budgets.find(b => b.month === activeCycle) || {
@@ -108,6 +110,7 @@ export default function BudgetTracker({
   // Handle saving income
   const handleSaveIncome = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
     try {
       const updated = await api.updateBudgetConfig({
         month: activeCycle,
@@ -123,9 +126,10 @@ export default function BudgetTracker({
         return prev.map(b => b.month === activeCycle ? updated : b);
       });
       setIncomeModalOpen(false);
-      await onRefreshLogs();
     } catch (err: any) {
       alert(err.message || "Failed to update salary configuration.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -148,6 +152,7 @@ export default function BudgetTracker({
     e.preventDefault();
     if (!allocCategory.trim() || !allocAmount) return;
 
+    setIsSaving(true);
     try {
       let updated: MonthlyBudget;
       if (selectedAlloc) {
@@ -172,21 +177,24 @@ export default function BudgetTracker({
         return prev.map(b => b.month === activeCycle ? updated : b);
       });
       setAllocModalOpen(false);
-      await onRefreshLogs();
     } catch (err: any) {
       alert(err.message || "Failed to save allocation.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
   // Handle deleting allocation
   const handleDeleteAllocation = async (id: string) => {
     if (!confirm("Are you sure you want to delete this budget category? This will also remove any logged expenses in this category!")) return;
+    setIsSaving(true);
     try {
       const updated = await api.deleteBudgetAllocation(id, activeCycle);
       setBudgets(prev => prev.map(b => b.month === activeCycle ? updated : b));
-      await onRefreshLogs();
     } catch (err: any) {
       alert(err.message || "Failed to delete allocation.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -205,6 +213,7 @@ export default function BudgetTracker({
     e.preventDefault();
     if (!expenseAllocId || !expenseName.trim() || !expenseAmount) return;
 
+    setIsSaving(true);
     try {
       const updated = await api.addBudgetExpense({
         month: activeCycle,
@@ -217,21 +226,24 @@ export default function BudgetTracker({
 
       setBudgets(prev => prev.map(b => b.month === activeCycle ? updated : b));
       setExpenseModalOpen(false);
-      await onRefreshLogs();
     } catch (err: any) {
       alert(err.message || "Failed to log expense.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
   // Handle deleting an expense
   const handleDeleteExpense = async (id: string) => {
     if (!confirm("Are you sure you want to delete this expense transaction?")) return;
+    setIsSaving(true);
     try {
       const updated = await api.deleteBudgetExpense(id, activeCycle);
       setBudgets(prev => prev.map(b => b.month === activeCycle ? updated : b));
-      await onRefreshLogs();
     } catch (err: any) {
       alert(err.message || "Failed to delete expense.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -240,6 +252,7 @@ export default function BudgetTracker({
     e.preventDefault();
     if (!rolloverSource) return;
 
+    setIsSaving(true);
     try {
       const updated = await api.rolloverBudget({
         sourceMonth: rolloverSource,
@@ -252,27 +265,36 @@ export default function BudgetTracker({
         return prev.map(b => b.month === activeCycle ? updated : b);
       });
       setRolloverModalOpen(false);
-      await onRefreshLogs();
     } catch (err: any) {
       alert(err.message || "Rollover failed.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
   // Smart Sync Dues calculations
   // 1. Calculate SPayLater total bills due this billing cycle
-  const activeCyclePurchases = purchases.filter(p => p.billingCycle === activeCycle);
-  const totalSPayLaterDue = activeCyclePurchases.reduce((sum, p) => sum + p.totalAmount, 0);
+  const activeCyclePurchases = useMemo(
+    () => purchases.filter(p => p.billingCycle === activeCycle),
+    [purchases, activeCycle]
+  );
+  const totalSPayLaterDue = useMemo(
+    () => activeCyclePurchases.reduce((sum, p) => sum + p.totalAmount, 0),
+    [activeCyclePurchases]
+  );
 
-  // 2. Calculate Lending Portfolio interest/installments due from borrowers
-  // Let's count upcoming borrower dues as a negative/positive helper? Since lending loans are receivable, they might be extra income or borrower payments. 
-  // Let's focus on actual expenses which are SPayLater bills or Loan payments they themselves have to pay.
-  // Wait, if the user has Cash Loans, they might pay principal, or maybe they receive collections.
-  // Let's see active loans:
-  const activeLoansCount = loans.filter(l => l.status === "Active").length;
-  const totalPrincipalLent = loans.filter(l => l.status === "Active").reduce((sum, l) => sum + l.principalAmount, 0);
+  // 2. Active lending portfolio stats
+  const { activeLoansCount, totalPrincipalLent } = useMemo(() => {
+    const active = loans.filter(l => l.status === "Active");
+    return {
+      activeLoansCount: active.length,
+      totalPrincipalLent: active.reduce((sum, l) => sum + l.principalAmount, 0)
+    };
+  }, [loans]);
 
   // Quick helper to add SPayLater directly as a recommended budget category
   const handleAddSpayLaterRecommendation = async () => {
+    setIsSaving(true);
     try {
       const updated = await api.addBudgetAllocation({
         month: activeCycle,
@@ -281,16 +303,23 @@ export default function BudgetTracker({
       });
       setBudgets(prev => prev.map(b => b.month === activeCycle ? updated : b));
       alert(`Success! Added 'SPayLater Bill (${activeCycle})' with a budget of ${settings.currency} ${totalSPayLaterDue.toLocaleString()}!`);
-      await onRefreshLogs();
     } catch (err: any) {
       alert(err.message || "Failed to add allocation.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
   // Calculations for dashboard circles & stats
   const totalIncome = activeBudget.salary + activeBudget.additionalIncome;
-  const totalAllocated = activeBudget.allocations.reduce((sum, a) => sum + a.allocatedAmount, 0);
-  const totalSpent = activeBudget.expenses.reduce((sum, e) => sum + e.amount, 0);
+  const totalAllocated = useMemo(
+    () => activeBudget.allocations.reduce((sum, a) => sum + a.allocatedAmount, 0),
+    [activeBudget]
+  );
+  const totalSpent = useMemo(
+    () => activeBudget.expenses.reduce((sum, e) => sum + e.amount, 0),
+    [activeBudget]
+  );
 
   const unallocatedIncome = Math.max(0, totalIncome - totalAllocated);
   const remainingCash = Math.max(0, totalIncome - totalSpent);
@@ -507,7 +536,8 @@ export default function BudgetTracker({
                         </button>
                         <button
                           onClick={() => handleDeleteAllocation(alloc.id)}
-                          className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-red-600 rounded-lg transition"
+                          disabled={isSaving}
+                          className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-red-600 rounded-lg transition disabled:opacity-50"
                           title="Delete Category"
                         >
                           <Trash2 className="w-3 h-3" />
@@ -602,10 +632,11 @@ export default function BudgetTracker({
                 <button
                   type="button"
                   onClick={handleAddSpayLaterRecommendation}
-                  className="w-full py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center justify-center gap-1.5"
+                  disabled={isSaving}
+                  className="w-full py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center justify-center gap-1.5 disabled:opacity-60"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  Add SPayLater to Budget Category
+                  {isSaving ? "Adding..." : "Add SPayLater to Budget Category"}
                 </button>
               )}
             </div>
@@ -700,7 +731,8 @@ export default function BudgetTracker({
                         <td className="py-3 px-3 text-right">
                           <button
                             onClick={() => handleDeleteExpense(exp.id)}
-                            className="p-1 text-slate-400 hover:text-red-500 rounded-lg transition"
+                            disabled={isSaving}
+                            className="p-1 text-slate-400 hover:text-red-500 rounded-lg transition disabled:opacity-50"
                             title="Delete transaction"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -767,8 +799,8 @@ export default function BudgetTracker({
                 >
                   Discard
                 </button>
-                <button type="submit" className="px-4 py-2 bg-brand-600 text-white font-bold rounded-xl shadow-sm">
-                  Save Changes
+                <button type="submit" disabled={isSaving} className="px-4 py-2 bg-brand-600 text-white font-bold rounded-xl shadow-sm disabled:opacity-60">
+                  {isSaving ? "Saving..." : "Save Changes"}
                 </button>
               </div>
             </form>
@@ -829,8 +861,8 @@ export default function BudgetTracker({
                 >
                   Discard
                 </button>
-                <button type="submit" className="px-4 py-2 bg-brand-600 text-white font-bold rounded-xl shadow-sm">
-                  {selectedAlloc ? "Update Allocation" : "Add to Budget"}
+                <button type="submit" disabled={isSaving} className="px-4 py-2 bg-brand-600 text-white font-bold rounded-xl shadow-sm disabled:opacity-60">
+                  {isSaving ? "Saving..." : selectedAlloc ? "Update Allocation" : "Add to Budget"}
                 </button>
               </div>
             </form>
@@ -933,8 +965,8 @@ export default function BudgetTracker({
                 >
                   Discard
                 </button>
-                <button type="submit" className="px-4 py-2 bg-brand-600 text-white font-bold rounded-xl shadow-sm">
-                  Log Outflow
+                <button type="submit" disabled={isSaving} className="px-4 py-2 bg-brand-600 text-white font-bold rounded-xl shadow-sm disabled:opacity-60">
+                  {isSaving ? "Saving..." : "Log Outflow"}
                 </button>
               </div>
             </form>
@@ -1000,10 +1032,10 @@ export default function BudgetTracker({
                 </button>
                 <button
                   type="submit"
-                  disabled={!rolloverSource}
+                  disabled={!rolloverSource || isSaving}
                   className="px-4 py-2 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-bold rounded-xl shadow-sm transition"
                 >
-                  Run Template Rollover
+                  {isSaving ? "Rolling over..." : "Run Template Rollover"}
                 </button>
               </div>
             </form>

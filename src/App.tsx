@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   LayoutDashboard,
@@ -26,13 +26,13 @@ import { api, getAuthToken, setAuthToken, getDisplayName, setDisplayName } from 
 import { Customer, Purchase, Payment, Loan, SystemSettings, ActivityLog, BackupRecord } from "./types";
 
 // Components
-import Dashboard from "./components/Dashboard";
-import SPayLater from "./components/SPayLater";
-import Lending from "./components/Lending";
-import BudgetTracker from "./components/BudgetTracker";
-import Archives from "./components/Archives";
-import Reports from "./components/Reports";
-import Settings from "./components/Settings";
+const Dashboard = React.lazy(() => import("./components/Dashboard"));
+const SPayLater = React.lazy(() => import("./components/SPayLater"));
+const Lending = React.lazy(() => import("./components/Lending"));
+const BudgetTracker = React.lazy(() => import("./components/BudgetTracker"));
+const Archives = React.lazy(() => import("./components/Archives"));
+const Reports = React.lazy(() => import("./components/Reports"));
+const Settings = React.lazy(() => import("./components/Settings"));
 
 export default function App() {
   // Authentication states
@@ -75,6 +75,15 @@ export default function App() {
       document.documentElement.classList.remove("dark");
     }
   }, [settings.theme]);
+
+  // Activity logs are an audit trail, not something that needs to stay live
+  // after every click - fetch fresh only when the Settings tab (which
+  // displays them) is actually opened, instead of after every mutation.
+  useEffect(() => {
+    if (currentTab === "settings" && isAuthenticated) {
+      refreshLogs();
+    }
+  }, [currentTab, isAuthenticated]);
 
   // Global Session Check
   useEffect(() => {
@@ -200,14 +209,12 @@ export default function App() {
   const handleAddCustomer = async (c: Partial<Customer>) => {
     const newCust = await api.createCustomer(c);
     setCustomers(prev => [...prev, newCust]);
-    await refreshLogs();
     return newCust;
   };
 
   const handleEditCustomer = async (id: string, c: Partial<Customer>) => {
     const updatedCust = await api.updateCustomer(id, c);
     setCustomers(prev => prev.map(cust => cust.id === id ? updatedCust : cust));
-    await refreshLogs();
     return updatedCust;
   };
 
@@ -218,44 +225,39 @@ export default function App() {
       setPurchases(prev => prev.filter(p => p.customerId !== id));
       setPayments(prev => prev.filter(p => p.customerId !== id));
     }
-    await refreshLogs();
     return res;
+  };
+
+  // Merges a server-recalculated customer (returned alongside purchase/payment
+  // writes) into local state, instead of refetching the entire customer list.
+  const mergeUpdatedCustomer = (updatedCustomer: Customer | null) => {
+    if (!updatedCustomer) return;
+    setCustomers(prev => prev.map(c => c.id === updatedCustomer.id ? updatedCustomer : c));
   };
 
   // ==========================================
   // PURCHASES OPERATIONS
   // ==========================================
   const handleAddPurchase = async (p: Partial<Purchase>) => {
-    const newPurch = await api.createPurchase(p);
-    setPurchases(prev => [...prev, newPurch]);
-    // Refresh customers list since status might have changed automatically
-    const updatedCustsList = await api.getCustomers();
-    setCustomers(updatedCustsList);
-    await refreshLogs();
-    return newPurch;
+    const { purchase, updatedCustomer } = await api.createPurchase(p);
+    setPurchases(prev => [...prev, purchase]);
+    mergeUpdatedCustomer(updatedCustomer);
+    return purchase;
   };
 
   const handleEditPurchase = async (id: string, p: Partial<Purchase>) => {
-    const updatedPurch = await api.updatePurchase(id, p);
-    setPurchases(prev => prev.map(item => item.id === id ? updatedPurch : item));
-    const updatedCustsList = await api.getCustomers();
-    setCustomers(updatedCustsList);
-    await refreshLogs();
-    return updatedPurch;
+    const { purchase, updatedCustomer } = await api.updatePurchase(id, p);
+    setPurchases(prev => prev.map(item => item.id === id ? purchase : item));
+    mergeUpdatedCustomer(updatedCustomer);
+    return purchase;
   };
 
   const handleDeletePurchase = async (id: string) => {
-    const purchase = purchases.find(p => p.id === id);
     const res = await api.deletePurchase(id);
     if (res.success) {
       setPurchases(prev => prev.filter(item => item.id !== id));
-      if (purchase) {
-        // Refresh customer list since status recalculated
-        const updatedCustsList = await api.getCustomers();
-        setCustomers(updatedCustsList);
-      }
+      mergeUpdatedCustomer(res.updatedCustomer);
     }
-    await refreshLogs();
     return res;
   };
 
@@ -263,34 +265,25 @@ export default function App() {
   // PAYMENTS OPERATIONS
   // ==========================================
   const handleAddPayment = async (pay: Partial<Payment>) => {
-    const newPay = await api.createPayment(pay);
-    setPayments(prev => [...prev, newPay]);
-    const updatedCustsList = await api.getCustomers();
-    setCustomers(updatedCustsList);
-    await refreshLogs();
-    return newPay;
+    const { payment, updatedCustomer } = await api.createPayment(pay);
+    setPayments(prev => [...prev, payment]);
+    mergeUpdatedCustomer(updatedCustomer);
+    return payment;
   };
 
   const handleEditPayment = async (id: string, pay: Partial<Payment>) => {
-    const updatedPay = await api.updatePayment(id, pay);
-    setPayments(prev => prev.map(p => p.id === id ? updatedPay : p));
-    const updatedCustsList = await api.getCustomers();
-    setCustomers(updatedCustsList);
-    await refreshLogs();
-    return updatedPay;
+    const { payment, updatedCustomer } = await api.updatePayment(id, pay);
+    setPayments(prev => prev.map(p => p.id === id ? payment : p));
+    mergeUpdatedCustomer(updatedCustomer);
+    return payment;
   };
 
   const handleDeletePayment = async (id: string) => {
-    const payment = payments.find(p => p.id === id);
     const res = await api.deletePayment(id);
     if (res.success) {
       setPayments(prev => prev.filter(p => p.id !== id));
-      if (payment) {
-        const updatedCustsList = await api.getCustomers();
-        setCustomers(updatedCustsList);
-      }
+      mergeUpdatedCustomer(res.updatedCustomer);
     }
-    await refreshLogs();
     return res;
   };
 
@@ -300,14 +293,12 @@ export default function App() {
   const handleAddLoan = async (loan: Partial<Loan>) => {
     const newLoan = await api.createLoan(loan);
     setLoans(prev => [...prev, newLoan]);
-    await refreshLogs();
     return newLoan;
   };
 
   const handleEditLoan = async (id: string, loan: Partial<Loan>) => {
     const updatedLoan = await api.updateLoan(id, loan);
     setLoans(prev => prev.map(l => l.id === id ? updatedLoan : l));
-    await refreshLogs();
     return updatedLoan;
   };
 
@@ -316,7 +307,6 @@ export default function App() {
     if (res.success) {
       setLoans(prev => prev.filter(l => l.id !== id));
     }
-    await refreshLogs();
     return res;
   };
 
@@ -324,21 +314,18 @@ export default function App() {
   const handleAddLoanPayment = async (loanId: string, pay: any) => {
     const updatedLoan = await api.createLoanPayment(loanId, pay);
     setLoans(prev => prev.map(l => l.id === loanId ? updatedLoan : l));
-    await refreshLogs();
     return updatedLoan;
   };
 
   const handleEditLoanPayment = async (loanId: string, paymentId: string, pay: any) => {
     const updatedLoan = await api.updateLoanPayment(loanId, paymentId, pay);
     setLoans(prev => prev.map(l => l.id === loanId ? updatedLoan : l));
-    await refreshLogs();
     return updatedLoan;
   };
 
   const handleDeleteLoanPayment = async (loanId: string, paymentId: string) => {
     const updatedLoan = await api.deleteLoanPayment(loanId, paymentId);
     setLoans(prev => prev.map(l => l.id === loanId ? updatedLoan : l));
-    await refreshLogs();
     return updatedLoan;
   };
 
@@ -350,7 +337,6 @@ export default function App() {
     if (res.success) {
       setSettings(res.settings);
     }
-    await refreshLogs();
     return res;
   };
 
@@ -359,14 +345,28 @@ export default function App() {
     if (res.success) {
       setAuthToken(res.token);
     }
-    await refreshLogs();
     return res;
   };
 
   const handleCompleteBillingCycle = async () => {
     const res = await api.completeBillingCycle();
     if (res.success) {
-      await loadAllData();
+      // Narrower than a full loadAllData() reload - only these actually change
+      // when a cycle completes. (Budgets are BudgetTracker's own state, kept
+      // in sync there via its activeCycle-dependent fetch effect.)
+      const [cyclesData, customersList, purchasesList, paymentsList, archivesList] = await Promise.all([
+        api.getBillingCycles(),
+        api.getCustomers(),
+        api.getPurchases(),
+        api.getPayments(),
+        api.getArchives()
+      ]);
+      setActiveCycle(cyclesData.activeCycle);
+      setAvailableCycles(cyclesData.cycles);
+      setCustomers(customersList);
+      setPurchases(purchasesList);
+      setPayments(paymentsList);
+      setArchives(archivesList);
     }
     return res;
   };
@@ -374,7 +374,19 @@ export default function App() {
   const handleRestoreArchive = async (id: string) => {
     const res = await api.restoreArchive(id);
     if (res.success) {
-      await loadAllData();
+      const [cyclesData, customersList, purchasesList, paymentsList, archivesList] = await Promise.all([
+        api.getBillingCycles(),
+        api.getCustomers(),
+        api.getPurchases(),
+        api.getPayments(),
+        api.getArchives()
+      ]);
+      setActiveCycle(cyclesData.activeCycle);
+      setAvailableCycles(cyclesData.cycles);
+      setCustomers(customersList);
+      setPurchases(purchasesList);
+      setPayments(paymentsList);
+      setArchives(archivesList);
     }
     return res;
   };
@@ -705,6 +717,11 @@ export default function App() {
 
       {/* Main Content canvas view container */}
       <main className="flex-1 p-4 md:p-8 overflow-x-hidden min-h-0 print:p-0">
+        <Suspense fallback={
+          <div className="flex h-64 flex-col items-center justify-center gap-3">
+            <div className="w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full animate-spin" />
+          </div>
+        }>
         <AnimatePresence mode="wait">
           <motion.div
             key={currentTab}
@@ -768,7 +785,6 @@ export default function App() {
                 customers={customers}
                 purchases={purchases}
                 loans={loans}
-                onRefreshLogs={refreshLogs}
               />
             )}
 
@@ -804,6 +820,7 @@ export default function App() {
             )}
           </motion.div>
         </AnimatePresence>
+        </Suspense>
       </main>
     </div>
   );

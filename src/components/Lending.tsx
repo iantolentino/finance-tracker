@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   DollarSign,
   Search,
@@ -29,6 +29,9 @@ interface LendingProps {
   onAddLoanPayment: (loanId: string, pay: { paymentDate: string; amountPaid: number; paymentMethod: string; notes?: string }) => Promise<any>;
   onEditLoanPayment: (loanId: string, paymentId: string, pay: { paymentDate?: string; amountPaid?: number; paymentMethod?: string; notes?: string }) => Promise<any>;
   onDeleteLoanPayment: (loanId: string, paymentId: string) => Promise<any>;
+  // Set when arriving here via global search - pre-selects the loan once.
+  initialSelectedLoanId?: string;
+  onConsumeInitialSelection?: () => void;
 }
 
 export default function Lending({
@@ -39,13 +42,20 @@ export default function Lending({
   onDeleteLoan,
   onAddLoanPayment,
   onEditLoanPayment,
-  onDeleteLoanPayment
+  onDeleteLoanPayment,
+  initialSelectedLoanId,
+  onConsumeInitialSelection
 }: LendingProps) {
-  
+
   // States
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("All");
-  const [selectedLoanId, setSelectedLoanId] = useState<string | null>(null);
+  const [selectedLoanId, setSelectedLoanId] = useState<string | null>(initialSelectedLoanId ?? null);
+
+  useEffect(() => {
+    if (initialSelectedLoanId) onConsumeInitialSelection?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Modals state
   const [loanModal, setLoanModal] = useState<{ open: boolean; editId?: string; borrowerName: string; contactNumber: string; address: string; principalAmount: number; loanDate: string; dueDate: string; paymentSchedule: string; interestType: "Fixed Amount" | "Percentage"; interestValue: number; notes: string }>({

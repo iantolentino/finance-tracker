@@ -20,7 +20,8 @@ import {
   Sun,
   Moon,
   Wallet,
-  Plus
+  Plus,
+  Search
 } from "lucide-react";
 
 import { api, getAuthToken, setAuthToken, getDisplayName, setDisplayName } from "./api";
@@ -35,6 +36,7 @@ const Archives = React.lazy(() => import("./components/Archives"));
 const Reports = React.lazy(() => import("./components/Reports"));
 const Settings = React.lazy(() => import("./components/Settings"));
 const QuickLogModal = React.lazy(() => import("./components/QuickLogModal"));
+const GlobalSearchModal = React.lazy(() => import("./components/GlobalSearchModal"));
 
 export default function App() {
   // Authentication states
@@ -51,6 +53,8 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [quickLogOpen, setQuickLogOpen] = useState(false);
   const [quickLogPreset, setQuickLogPreset] = useState<{ customerId?: string; loanId?: string } | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchNavTarget, setSearchNavTarget] = useState<{ type: "customer" | "loan"; id: string } | null>(null);
 
   // Database datasets state
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -373,6 +377,17 @@ export default function App() {
     setQuickLogOpen(true);
   };
 
+  // Global search result -> switch tab and pre-select that record there.
+  const handleSearchSelectCustomer = (customerId: string) => {
+    setSearchNavTarget({ type: "customer", id: customerId });
+    setCurrentTab("spaylater");
+  };
+
+  const handleSearchSelectLoan = (loanId: string) => {
+    setSearchNavTarget({ type: "loan", id: loanId });
+    setCurrentTab("lending");
+  };
+
   // ==========================================
   // SETTINGS & REFRESHERS
   // ==========================================
@@ -571,6 +586,13 @@ export default function App() {
         <span className="text-xs font-bold uppercase tracking-wider">{settings.personalBusinessName}</span>
         <div className="flex items-center gap-2">
           <button
+            onClick={() => setSearchOpen(true)}
+            className="p-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+            title="Search"
+          >
+            <Search className="w-5 h-5" />
+          </button>
+          <button
             onClick={async () => {
               const nextTheme = settings.theme === "dark" ? "light" : "dark";
               await handleUpdateSettings({ theme: nextTheme });
@@ -600,6 +622,17 @@ export default function App() {
             <h2 className="text-xs font-black truncate">{settings.personalBusinessName}</h2>
             <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">{displayName || "Workspace"}</span>
           </div>
+        </div>
+
+        {/* Search */}
+        <div className="p-4 pb-0">
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="w-full flex items-center gap-2.5 px-3.5 py-2 rounded-lg text-xs font-medium text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-600 dark:hover:text-slate-300 transition"
+          >
+            <Search className="w-3.5 h-3.5" />
+            Search customer or borrower...
+          </button>
         </div>
 
         {/* Navigation links */}
@@ -806,6 +839,8 @@ export default function App() {
                 onEditPayment={handleEditPayment}
                 onDeletePayment={handleDeletePayment}
                 onCompleteBillingCycle={handleCompleteBillingCycle}
+                initialSelectedCustomerId={searchNavTarget?.type === "customer" ? searchNavTarget.id : undefined}
+                onConsumeInitialSelection={() => setSearchNavTarget(null)}
               />
             )}
 
@@ -819,6 +854,8 @@ export default function App() {
                 onAddLoanPayment={handleAddLoanPayment}
                 onEditLoanPayment={handleEditLoanPayment}
                 onDeleteLoanPayment={handleDeleteLoanPayment}
+                initialSelectedLoanId={searchNavTarget?.type === "loan" ? searchNavTarget.id : undefined}
+                onConsumeInitialSelection={() => setSearchNavTarget(null)}
               />
             )}
 
@@ -956,6 +993,18 @@ export default function App() {
             onLogBudgetExpense={handleQuickLogBudgetExpense}
             initialCustomerId={quickLogPreset?.customerId}
             initialLoanId={quickLogPreset?.loanId}
+          />
+        </Suspense>
+      )}
+
+      {searchOpen && (
+        <Suspense fallback={null}>
+          <GlobalSearchModal
+            onClose={() => setSearchOpen(false)}
+            customers={customers}
+            loans={loans}
+            onSelectCustomer={handleSearchSelectCustomer}
+            onSelectLoan={handleSearchSelectLoan}
           />
         </Suspense>
       )}

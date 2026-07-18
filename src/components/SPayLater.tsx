@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Users,
   Search,
@@ -37,6 +37,9 @@ interface SPayLaterProps {
   onEditPayment: (id: string, py: Partial<Payment>) => Promise<any>;
   onDeletePayment: (id: string) => Promise<any>;
   onCompleteBillingCycle: () => Promise<any>;
+  // Set when arriving here via global search - pre-selects the customer once.
+  initialSelectedCustomerId?: string;
+  onConsumeInitialSelection?: () => void;
 }
 
 export default function SPayLater({
@@ -54,13 +57,20 @@ export default function SPayLater({
   onAddPayment,
   onEditPayment,
   onDeletePayment,
-  onCompleteBillingCycle
+  onCompleteBillingCycle,
+  initialSelectedCustomerId,
+  onConsumeInitialSelection
 }: SPayLaterProps) {
-  
+
   // Search & filter state
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("All");
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(initialSelectedCustomerId ?? null);
+
+  useEffect(() => {
+    if (initialSelectedCustomerId) onConsumeInitialSelection?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Modals state
   const [customerModal, setCustomerModal] = useState<{ open: boolean; editId?: string; fullName: string; contactNumber: string; messengerLink: string; notes: string; carriedOverBalance: number }>({

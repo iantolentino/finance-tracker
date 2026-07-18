@@ -321,10 +321,38 @@ export default function BudgetTracker({
     [activeBudget]
   );
 
-  const unallocatedIncome = Math.max(0, totalIncome - totalAllocated);
   const remainingCash = Math.max(0, totalIncome - totalSpent);
+  // Raw "remaining cash" ignores money already committed elsewhere (SPayLater
+  // dues for this cycle you haven't logged as a budget expense yet) - this is
+  // the number that actually answers "can I afford this right now".
+  const safeToSpend = Math.max(0, remainingCash - totalSPayLaterDue);
   const allocationProgress = totalIncome > 0 ? (totalAllocated / totalIncome) * 100 : 0;
   const spendingProgress = totalAllocated > 0 ? (totalSpent / totalAllocated) * 100 : 0;
+
+  // How far through the active cycle we are, only meaningful for the
+  // currently-live month - a past or future cycle has no "pace" to compare against.
+  const cycleProgress = useMemo(() => {
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const parts = activeCycle.split(" ");
+    const monthIndex = monthNames.indexOf(parts[0]);
+    const year = parseInt(parts[1], 10);
+    if (monthIndex === -1 || Number.isNaN(year)) return null;
+
+    const now = new Date();
+    if (now.getFullYear() !== year || now.getMonth() !== monthIndex) return null;
+
+    const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+    return { percentElapsed: (now.getDate() / daysInMonth) * 100 };
+  }, [activeCycle]);
+
+  // "On track" / "Spending faster than usual" label for a given spent%,
+  // relative to how far through the cycle we are.
+  const pacingLabel = (spentPercent: number): { text: string; tone: "ok" | "warn" } | null => {
+    if (!cycleProgress) return null;
+    const aheadBy = spentPercent - cycleProgress.percentElapsed;
+    if (aheadBy > 15) return { text: "Spending faster than usual", tone: "warn" };
+    return { text: "On track", tone: "ok" };
+  };
 
   // Render loading state
   if (loading) {
@@ -445,24 +473,29 @@ export default function BudgetTracker({
               </span>
               <span className="text-slate-400">spent of budgeted target</span>
             </div>
+            {spendingProgress <= 100 && pacingLabel(spendingProgress) && (
+              <span className={`inline-block mt-1 text-[9px] font-bold uppercase tracking-wide ${pacingLabel(spendingProgress)!.tone === "warn" ? "text-amber-600" : "text-slate-400"}`}>
+                {pacingLabel(spendingProgress)!.text}
+              </span>
+            )}
           </div>
           <div className="absolute bottom-0 inset-x-0 h-1 bg-rose-500" />
         </div>
 
-        {/* Free Capital / Remaining Cash */}
+        {/* Safe to Spend - nets out committed SPayLater dues, not just raw remaining cash */}
         <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800/80 shadow-sm space-y-3 relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Remaining Safe Capital</span>
+            <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Safe to Spend</span>
             <div className="p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-xl">
               <Sparkles className="w-4 h-4" />
             </div>
           </div>
           <div>
             <h3 className="text-xl font-black text-slate-900 dark:text-white">
-              {settings.currency} {remainingCash.toLocaleString()}
+              {settings.currency} {safeToSpend.toLocaleString()}
             </h3>
             <p className="text-[10px] text-slate-400 mt-1">
-              Unallocated Income: {settings.currency} {unallocatedIncome.toLocaleString()}
+              {settings.currency} {remainingCash.toLocaleString()} remaining − {settings.currency} {totalSPayLaterDue.toLocaleString()} SPayLater dues this cycle
             </p>
           </div>
           <div className="absolute bottom-0 inset-x-0 h-1 bg-amber-500" />
@@ -510,6 +543,7 @@ export default function BudgetTracker({
               {activeBudget.allocations.map((alloc) => {
                 const percent = alloc.allocatedAmount > 0 ? (alloc.spentAmount / alloc.allocatedAmount) * 100 : 0;
                 const isOverBudget = alloc.spentAmount > alloc.allocatedAmount;
+                const pacing = !isOverBudget ? pacingLabel(percent) : null;
 
                 return (
                   <div
@@ -567,6 +601,11 @@ export default function BudgetTracker({
                           style={{ width: `${Math.min(100, percent)}%` }}
                         />
                       </div>
+                      {pacing && (
+                        <span className={`inline-block text-[9px] font-bold uppercase tracking-wide ${pacing.tone === "warn" ? "text-amber-600" : "text-slate-400"}`}>
+                          {pacing.text}
+                        </span>
+                      )}
                     </div>
 
                     {/* Quick Add Expense inside this specific Category */}
@@ -929,6 +968,21 @@ export default function BudgetTracker({
                     placeholder="PHP"
                     className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 dark:text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
                   />
+                  {expenseAllocId && expenseAmount && Number(expenseAmount) > 0 && (() => {
+                    const alloc = activeBudget.allocations.find(a => a.id === expenseAllocId);
+                    if (!alloc) return null;
+                    const remaining = alloc.allocatedAmount - alloc.spentAmount;
+                    const afterThis = remaining - Number(expenseAmount);
+                    const overBudget = afterThis < 0;
+                    const nearLimit = !overBudget && afterThis < alloc.allocatedAmount * 0.15;
+                    return (
+                      <p className={`mt-1 text-[10px] font-semibold ${overBudget ? "text-red-600" : nearLimit ? "text-amber-600" : "text-slate-400"}`}>
+                        {overBudget
+                          ? `Over budget by ${settings.currency} ${Math.abs(afterThis).toLocaleString()} for "${alloc.category}"`
+                          : `${settings.currency} ${afterThis.toLocaleString()} left in "${alloc.category}" after this`}
+                      </p>
+                    );
+                  })()}
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">

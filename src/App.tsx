@@ -50,6 +50,7 @@ export default function App() {
   const [currentTab, setCurrentTab] = useState<string>("dashboard");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [quickLogOpen, setQuickLogOpen] = useState(false);
+  const [quickLogPreset, setQuickLogPreset] = useState<{ customerId?: string; loanId?: string } | null>(null);
 
   // Database datasets state
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -363,6 +364,13 @@ export default function App() {
       date: new Date().toISOString().split("T")[0],
       notes: "Logged via Quick Log"
     });
+  };
+
+  // Opens Quick Log pre-filled for a specific customer/loan - used by the
+  // Dashboard's Needs Attention widget so acting on an overdue record is one tap.
+  const openQuickLogFor = (preset: { customerId?: string; loanId?: string }) => {
+    setQuickLogPreset(preset);
+    setQuickLogOpen(true);
   };
 
   // ==========================================
@@ -777,6 +785,7 @@ export default function App() {
                 settings={settings}
                 activeCycle={activeCycle}
                 onNavigate={setCurrentTab}
+                onQuickLog={openQuickLogFor}
               />
             )}
 
@@ -937,7 +946,7 @@ export default function App() {
       {quickLogOpen && (
         <Suspense fallback={null}>
           <QuickLogModal
-            onClose={() => setQuickLogOpen(false)}
+            onClose={() => { setQuickLogOpen(false); setQuickLogPreset(null); }}
             customers={customers}
             loans={loans}
             activeCycle={activeCycle}
@@ -945,6 +954,8 @@ export default function App() {
             onLogCustomerPayment={handleQuickLogCustomerPayment}
             onLogLoanPayment={handleQuickLogLoanPayment}
             onLogBudgetExpense={handleQuickLogBudgetExpense}
+            initialCustomerId={quickLogPreset?.customerId}
+            initialLoanId={quickLogPreset?.loanId}
           />
         </Suspense>
       )}

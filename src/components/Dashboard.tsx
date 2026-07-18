@@ -37,6 +37,7 @@ interface DashboardProps {
   settings: SystemSettings;
   activeCycle: string;
   onNavigate: (tab: string) => void;
+  onQuickLog: (preset: { customerId?: string; loanId?: string }) => void;
 }
 
 export default function Dashboard({
@@ -47,7 +48,8 @@ export default function Dashboard({
   logs,
   settings,
   activeCycle,
-  onNavigate
+  onNavigate,
+  onQuickLog
 }: DashboardProps) {
   
   // Format currency helper
@@ -157,6 +159,86 @@ export default function Dashboard({
     };
   }, [purchases, loans, activeCycle]);
 
+  // "Needs Attention" - what to actually act on right now, sorted by
+  // urgency, instead of having to hunt through separate tabs to notice it.
+  interface AttentionItem {
+    key: string;
+    kind: "customer" | "loan";
+    id: string;
+    title: string;
+    detail: string;
+    urgencyRank: number; // 0 = most urgent
+    amount: number;
+  }
+
+  const needsAttention = useMemo(() => {
+    const items: AttentionItem[] = [];
+    const now = Date.now();
+    const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+
+    const activeCustomers = customers.filter(c => c.billingCycle === activeCycle);
+    activeCustomers.forEach(c => {
+      const custPurchases = purchases.filter(p => p.customerId === c.id && p.billingCycle === activeCycle);
+      const custPayments = payments.filter(p => p.customerId === c.id && p.billingCycle === activeCycle);
+      const totalDue = custPurchases.reduce((sum, p) => sum + p.totalAmount, 0) + (c.carriedOverBalance || 0);
+      const totalPaid = custPayments.reduce((sum, p) => sum + p.amountPaid, 0);
+      const remaining = totalDue - totalPaid;
+      if (remaining <= 0) return;
+
+      const overduePurchase = custPurchases.find(p => p.dueDate && new Date(p.dueDate).getTime() < now);
+      if (overduePurchase) {
+        const daysOverdue = Math.max(1, Math.ceil((now - new Date(overduePurchase.dueDate).getTime()) / (24 * 60 * 60 * 1000)));
+        items.push({
+          key: `cust-overdue-${c.id}`, kind: "customer", id: c.id, title: c.fullName,
+          detail: `${daysOverdue} day${daysOverdue === 1 ? "" : "s"} overdue`,
+          urgencyRank: 0, amount: remaining
+        });
+        return;
+      }
+
+      const dueSoonPurchase = custPurchases.find(p => {
+        if (!p.dueDate) return false;
+        const dueTime = new Date(p.dueDate).getTime();
+        return dueTime >= now && dueTime - now <= threeDaysMs;
+      });
+      if (dueSoonPurchase) {
+        const daysLeft = Math.max(0, Math.ceil((new Date(dueSoonPurchase.dueDate).getTime() - now) / (24 * 60 * 60 * 1000)));
+        items.push({
+          key: `cust-soon-${c.id}`, kind: "customer", id: c.id, title: c.fullName,
+          detail: daysLeft === 0 ? "Due today" : `Due in ${daysLeft} day${daysLeft === 1 ? "" : "s"}`,
+          urgencyRank: 1, amount: remaining
+        });
+      }
+    });
+
+    loans.forEach(loan => {
+      if (loan.status === "Completed") return;
+      const totalInterest = loan.interestType === "Percentage" ? (loan.principalAmount * (loan.interestValue / 100)) : loan.interestValue;
+      const totalPaid = loan.payments.reduce((sum, p) => sum + p.amountPaid, 0);
+      const remaining = (loan.principalAmount + totalInterest) - totalPaid;
+      if (remaining <= 0 || !loan.dueDate) return;
+
+      const dueTime = new Date(loan.dueDate).getTime();
+      if (dueTime < now) {
+        const daysOverdue = Math.max(1, Math.ceil((now - dueTime) / (24 * 60 * 60 * 1000)));
+        items.push({
+          key: `loan-overdue-${loan.id}`, kind: "loan", id: loan.id, title: loan.borrowerName,
+          detail: `${daysOverdue} day${daysOverdue === 1 ? "" : "s"} overdue`,
+          urgencyRank: 0, amount: remaining
+        });
+      } else if (dueTime - now <= threeDaysMs) {
+        const daysLeft = Math.max(0, Math.ceil((dueTime - now) / (24 * 60 * 60 * 1000)));
+        items.push({
+          key: `loan-soon-${loan.id}`, kind: "loan", id: loan.id, title: loan.borrowerName,
+          detail: daysLeft === 0 ? "Due today" : `Due in ${daysLeft} day${daysLeft === 1 ? "" : "s"}`,
+          urgencyRank: 1, amount: remaining
+        });
+      }
+    });
+
+    return items.sort((a, b) => a.urgencyRank - b.urgencyRank || b.amount - a.amount);
+  }, [customers, purchases, payments, loans, activeCycle]);
+
   // Customer outstanding bar chart data
   const customerOutstandingData = useMemo(() => {
     const activeCustomers = customers.filter(c => c.billingCycle === activeCycle);
@@ -246,6 +328,37 @@ export default function Dashboard({
           </button>
         </div>
       </div>
+
+      {/* Needs Attention - what to actually act on right now */}
+      {needsAttention.length > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
+          <div className="flex items-center gap-2 px-5 py-3 border-b border-slate-100 bg-red-50/40">
+            <AlertTriangle className="w-4 h-4 text-red-500" />
+            <h2 className="text-sm font-bold text-slate-900">Needs Attention</h2>
+            <span className="text-[10px] font-semibold text-red-600 bg-red-100 px-1.5 py-0.5 rounded-full ml-auto">
+              {needsAttention.length}
+            </span>
+          </div>
+          <div className="divide-y divide-slate-100">
+            {needsAttention.slice(0, 6).map(item => (
+              <div key={item.key} className="flex items-center justify-between gap-3 px-5 py-2.5">
+                <div className="min-w-0">
+                  <span className="block text-xs font-semibold text-slate-800 truncate">{item.title}</span>
+                  <span className={`block text-[10px] font-medium ${item.urgencyRank === 0 ? "text-red-500" : "text-amber-600"}`}>
+                    {item.detail} · {formatCurrency(item.amount)}
+                  </span>
+                </div>
+                <button
+                  onClick={() => onQuickLog(item.kind === "customer" ? { customerId: item.id } : { loanId: item.id })}
+                  className="shrink-0 px-3 py-1.5 text-[10px] font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition"
+                >
+                  Record Payment
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Grid of Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -13,9 +13,13 @@ interface QuickLogModalProps {
   onLogCustomerPayment: (customerId: string, amount: number) => Promise<any>;
   onLogLoanPayment: (loanId: string, amount: number) => Promise<any>;
   onLogBudgetExpense: (allocationId: string, amount: number, itemName: string) => Promise<any>;
+  // Opens the modal with a destination already picked (e.g. from the
+  // Dashboard's Needs Attention widget) so the user only has to type an amount.
+  initialCustomerId?: string;
+  initialLoanId?: string;
 }
 
-type Destination =
+export type Destination =
   | { kind: "customer"; id: string; label: string; sublabel: string }
   | { kind: "loan"; id: string; label: string; sublabel: string }
   | { kind: "budget"; id: string; label: string; sublabel: string };
@@ -30,11 +34,23 @@ export default function QuickLogModal({
   settings,
   onLogCustomerPayment,
   onLogLoanPayment,
-  onLogBudgetExpense
+  onLogBudgetExpense,
+  initialCustomerId,
+  initialLoanId
 }: QuickLogModalProps) {
   const [amount, setAmount] = useState("");
   const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState<Destination | null>(null);
+  const [selected, setSelected] = useState<Destination | null>(() => {
+    if (initialCustomerId) {
+      const c = customers.find(c => c.id === initialCustomerId);
+      if (c) return { kind: "customer", id: c.id, label: c.fullName, sublabel: `SPayLater · ${c.status}` };
+    }
+    if (initialLoanId) {
+      const l = loans.find(l => l.id === initialLoanId);
+      if (l) return { kind: "loan", id: l.id, label: l.borrowerName, sublabel: `Loan · ${l.status}` };
+    }
+    return null;
+  });
   const [budgetCategories, setBudgetCategories] = useState<{ id: string; category: string; remaining: number }[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");

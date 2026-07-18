@@ -399,6 +399,21 @@ export default function App() {
     return res;
   };
 
+  // Optimistic: flips instantly instead of waiting on a network round trip,
+  // and reverts with an actual error message if the save fails (the old
+  // per-button onClick handlers had no error handling at all - a failed
+  // request on a flaky mobile connection just silently did nothing).
+  const handleToggleTheme = async () => {
+    const nextTheme = settings.theme === "dark" ? "light" : "dark";
+    setSettings(prev => ({ ...prev, theme: nextTheme }));
+    try {
+      await handleUpdateSettings({ theme: nextTheme });
+    } catch (err: any) {
+      setSettings(prev => ({ ...prev, theme: prev.theme === "dark" ? "light" : "dark" }));
+      alert(err.message || "Failed to save theme preference - check your connection and try again.");
+    }
+  };
+
   const handleChangePassword = async (oldPass: string, newPass: string) => {
     const res = await api.changePassword({ oldPassword: oldPass, newPassword: newPass });
     if (res.success) {
@@ -593,10 +608,7 @@ export default function App() {
             <Search className="w-5 h-5" />
           </button>
           <button
-            onClick={async () => {
-              const nextTheme = settings.theme === "dark" ? "light" : "dark";
-              await handleUpdateSettings({ theme: nextTheme });
-            }}
+            onClick={handleToggleTheme}
             className="p-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
             title={settings.theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
           >
@@ -661,10 +673,7 @@ export default function App() {
         {/* Bottom details / logout */}
         <div className="p-4 border-t border-slate-200 dark:border-slate-800 space-y-2">
           <button
-            onClick={async () => {
-              const nextTheme = settings.theme === "dark" ? "light" : "dark";
-              await handleUpdateSettings({ theme: nextTheme });
-            }}
+            onClick={handleToggleTheme}
             className="w-full flex items-center justify-between px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white transition"
           >
             <div className="flex items-center gap-3">
@@ -701,7 +710,7 @@ export default function App() {
             animate={{ x: 0 }}
             exit={{ x: -260 }}
             transition={{ type: "tween", duration: 0.2 }}
-            className="md:hidden fixed inset-y-0 left-0 w-[260px] bg-white dark:bg-slate-900 text-slate-900 dark:text-white shrink-0 z-40 flex flex-col border-r border-slate-200 dark:border-slate-800 print:hidden h-full shadow-2xl"
+            className="md:hidden fixed inset-y-0 left-0 w-[260px] bg-white dark:bg-slate-900 text-slate-900 dark:text-white shrink-0 z-50 flex flex-col border-r border-slate-200 dark:border-slate-800 print:hidden h-full shadow-2xl"
           >
             {/* Brand details with Mobile Close Button */}
             <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
@@ -750,10 +759,7 @@ export default function App() {
             {/* Bottom details / logout */}
             <div className="p-4 border-t border-slate-200 dark:border-slate-800 space-y-2">
               <button
-                onClick={async () => {
-                  const nextTheme = settings.theme === "dark" ? "light" : "dark";
-                  await handleUpdateSettings({ theme: nextTheme });
-                }}
+                onClick={handleToggleTheme}
                 className="w-full flex items-center justify-between px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white transition"
               >
                 <div className="flex items-center gap-3">
@@ -788,7 +794,7 @@ export default function App() {
       {mobileMenuOpen && (
         <div
           onClick={() => setMobileMenuOpen(false)}
-          className="fixed inset-0 bg-black/40 z-30 md:hidden print:hidden"
+          className="fixed inset-0 bg-black/40 z-[45] md:hidden print:hidden"
         />
       )}
 

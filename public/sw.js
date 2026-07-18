@@ -1,7 +1,7 @@
 // Minimal app-shell cache for fast repeat loads and offline fallback.
 // Deliberately does NOT cache /api/* - financial data must always come
 // from the network, never a stale cache.
-const CACHE_NAME = "pfms-shell-v1";
+const CACHE_NAME = "pfms-shell-v2";
 
 self.addEventListener("install", () => {
   self.skipWaiting();

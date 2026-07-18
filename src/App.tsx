@@ -688,9 +688,9 @@ export default function App() {
           <div className="bg-slate-100 dark:bg-slate-800/40 p-3 rounded-lg border border-slate-200 dark:border-slate-800/60 flex flex-col gap-1 text-xs text-slate-700 dark:text-slate-300">
             <div className="flex items-center gap-2">
               <User className="w-3.5 h-3.5 text-brand-500 dark:text-brand-400 shrink-0" />
-              <span className="truncate font-bold">Ian Tolentino</span>
+              <span className="truncate font-bold">{displayName || "PFMS User"}</span>
             </div>
-            <span className="text-[10px] text-slate-400 font-medium ml-5">PFMS System Manager</span>
+            <span className="text-[10px] text-slate-400 font-medium ml-5">PFMS Workspace</span>
           </div>
           <button
             onClick={handleLogout}
@@ -776,7 +776,7 @@ export default function App() {
                   <User className="w-3.5 h-3.5 text-brand-500 dark:text-brand-400 shrink-0" />
                   <span className="truncate font-bold">{displayName || "PFMS User"}</span>
                 </div>
-                <span className="text-[10px] text-slate-400 font-medium ml-5">PFMS System Manager</span>
+                <span className="text-[10px] text-slate-400 font-medium ml-5">PFMS Workspace</span>
               </div>
               <button
                 onClick={handleLogout}

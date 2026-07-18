@@ -869,8 +869,7 @@ export default function Lending({
               <div className="grid grid-cols-2 gap-4 text-xs">
                 <div className="space-y-1 p-3 bg-slate-50 rounded-xl border border-slate-100 print:bg-white print:border-none print:p-0">
                   <span className="text-[9px] uppercase font-bold text-slate-400 block">Lender:</span>
-                  <h3 className="font-bold text-slate-900">Ian Tolentino</h3>
-                  <p className="text-slate-500">Contact: System Administrator</p>
+                  <h3 className="font-bold text-slate-900">{settings.personalBusinessName}</h3>
                 </div>
                 <div className="space-y-1 p-3 bg-slate-50 rounded-xl border border-slate-100 print:bg-white print:border-none print:p-0">
                   <span className="text-[9px] uppercase font-bold text-slate-400 block">Borrower / Payee:</span>
@@ -960,7 +959,7 @@ export default function Lending({
               {/* Signatures */}
               <div className="grid grid-cols-2 gap-12 pt-12 text-center text-[10px] text-slate-400">
                 <div className="border-t border-dashed border-slate-200 pt-2">
-                  Ian Tolentino <br />
+                  {settings.personalBusinessName} <br />
                   <span className="font-medium text-slate-300">Lender Signature / Date</span>
                 </div>
                 <div className="border-t border-dashed border-slate-200 pt-2">

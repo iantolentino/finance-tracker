@@ -1285,8 +1285,8 @@ export default function SPayLater({
               {/* Signature lines */}
               <div className="grid grid-cols-2 gap-12 pt-12 text-center text-[10px] text-slate-400">
                 <div className="border-t border-dashed border-slate-200 pt-2">
-                  Ian Tolentino <br />
-                  <span className="font-medium text-slate-300">PFMS System Manager</span>
+                  {settings.personalBusinessName} <br />
+                  <span className="font-medium text-slate-300">Signature / Date</span>
                 </div>
                 <div className="border-t border-dashed border-slate-200 pt-2">
                   {selectedCustomerInfo.fullName} <br />

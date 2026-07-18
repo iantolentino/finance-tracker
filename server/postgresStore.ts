@@ -98,6 +98,11 @@ export async function updateAccountPassword(accountId: string, passwordHash: str
   await sql`UPDATE accounts SET password_hash = ${passwordHash} WHERE id = ${accountId}`;
 }
 
+export async function updateAccountDisplayName(accountId: string, displayName: string): Promise<void> {
+  await ensureSchema();
+  await sql`UPDATE accounts SET display_name = ${displayName} WHERE id = ${accountId}`;
+}
+
 // One-time migration: adopts pre-multi-account data (unprefixed kv_store
 // keys from the single-account era) into the given account. The old
 // `backups` table had a different shape (no account_id) - backups are

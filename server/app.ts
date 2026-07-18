@@ -16,6 +16,13 @@ function requireSessionSecret(): string {
   return secret;
 }
 
+// TEMPORARY diagnostic - remove after use.
+app.post("/api/setup/diag", express.json(), async (req, res) => {
+  if (req.body.setupKey !== process.env.SESSION_SECRET) return res.status(403).json({ error: "forbidden" });
+  const account = await findAccountByUsername(req.body.username);
+  res.json({ found: !!account, id: account?.id, displayName: account?.displayName });
+});
+
 // ==========================================
 // DEFAULTS (used when a data file doesn't exist yet in the GitHub repo)
 // ==========================================

@@ -19,7 +19,8 @@ import {
   ShieldAlert,
   Sun,
   Moon,
-  Wallet
+  Wallet,
+  Plus
 } from "lucide-react";
 
 import { api, getAuthToken, setAuthToken, getDisplayName, setDisplayName } from "./api";
@@ -33,6 +34,7 @@ const BudgetTracker = React.lazy(() => import("./components/BudgetTracker"));
 const Archives = React.lazy(() => import("./components/Archives"));
 const Reports = React.lazy(() => import("./components/Reports"));
 const Settings = React.lazy(() => import("./components/Settings"));
+const QuickLogModal = React.lazy(() => import("./components/QuickLogModal"));
 
 export default function App() {
   // Authentication states
@@ -47,6 +49,7 @@ export default function App() {
   // System states
   const [currentTab, setCurrentTab] = useState<string>("dashboard");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [quickLogOpen, setQuickLogOpen] = useState(false);
 
   // Database datasets state
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -327,6 +330,39 @@ export default function App() {
     const updatedLoan = await api.deleteLoanPayment(loanId, paymentId);
     setLoans(prev => prev.map(l => l.id === loanId ? updatedLoan : l));
     return updatedLoan;
+  };
+
+  // ==========================================
+  // QUICK LOG (one entry point for any of the 3 places money gets logged)
+  // ==========================================
+  const handleQuickLogCustomerPayment = async (customerId: string, amount: number) => {
+    return handleAddPayment({
+      customerId,
+      amountPaid: amount,
+      paymentDate: new Date().toISOString().split("T")[0],
+      paymentMethod: "Cash",
+      notes: "Logged via Quick Log"
+    });
+  };
+
+  const handleQuickLogLoanPayment = async (loanId: string, amount: number) => {
+    return handleAddLoanPayment(loanId, {
+      amountPaid: amount,
+      paymentDate: new Date().toISOString().split("T")[0],
+      paymentMethod: "Cash",
+      notes: "Logged via Quick Log"
+    });
+  };
+
+  const handleQuickLogBudgetExpense = async (allocationId: string, amount: number, itemName: string) => {
+    return api.addBudgetExpense({
+      month: activeCycle,
+      allocationId,
+      itemName,
+      amount,
+      date: new Date().toISOString().split("T")[0],
+      notes: "Logged via Quick Log"
+    });
   };
 
   // ==========================================
@@ -822,6 +858,31 @@ export default function App() {
         </AnimatePresence>
         </Suspense>
       </main>
+
+      {/* Quick Log - the fastest path to record money regardless of where it goes */}
+      <button
+        type="button"
+        onClick={() => setQuickLogOpen(true)}
+        title="Log Money"
+        className="fixed bottom-5 right-5 z-40 w-14 h-14 rounded-full bg-brand-600 hover:bg-brand-700 text-white shadow-lg shadow-brand-600/30 flex items-center justify-center transition print:hidden"
+      >
+        <Plus className="w-6 h-6" />
+      </button>
+
+      {quickLogOpen && (
+        <Suspense fallback={null}>
+          <QuickLogModal
+            onClose={() => setQuickLogOpen(false)}
+            customers={customers}
+            loans={loans}
+            activeCycle={activeCycle}
+            settings={settings}
+            onLogCustomerPayment={handleQuickLogCustomerPayment}
+            onLogLoanPayment={handleQuickLogLoanPayment}
+            onLogBudgetExpense={handleQuickLogBudgetExpense}
+          />
+        </Suspense>
+      )}
     </div>
   );
 }

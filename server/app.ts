@@ -1,9 +1,21 @@
 import "dotenv/config";
 import express from "express";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import seedData from "../spaylater_import.json" with { type: "json" };
-import { readDb, writeDb, writeDbBatch, listBackups, readBackup, writeBackup, deleteBackup } from "./postgresStore.js";
+import {
+  readDb, writeDb, writeDbBatch, listBackups, readBackup, writeBackup, deleteBackup,
+  runWithAccount, findAccountByUsername, findAccountById, createAccount, updateAccountPassword,
+  migrateLegacyDataToAccount
+} from "./postgresStore.js";
 
 export const app = express();
+
+function requireSessionSecret(): string {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) throw new Error("Missing required environment variable: SESSION_SECRET");
+  return secret;
+}
 
 // ==========================================
 // DEFAULTS (used when a data file doesn't exist yet in the GitHub repo)
@@ -25,7 +37,6 @@ function defaultBillingCycles() {
 }
 
 const DEFAULT_SETTINGS = {
-  masterPassword: "admin",
   currency: "PHP",
   theme: "light",
   personalBusinessName: "Personal Finance Management System",
@@ -146,8 +157,11 @@ const checkAndTriggerAutoBackup = async () => {
 // Middleware
 app.use(express.json());
 
-// Token verification middleware
-const verifyToken = h(async (req, res, next) => {
+// Session token verification middleware. Decodes the JWT, then runs the rest
+// of the request inside an AsyncLocalStorage account context so every
+// readDb/writeDb call below is implicitly scoped to this account - route
+// handlers never need to pass an accountId around explicitly.
+const verifyToken: express.RequestHandler = (req, res, next) => {
   let token: string | undefined;
 
   const authHeader = req.headers.authorization;
@@ -158,16 +172,52 @@ const verifyToken = h(async (req, res, next) => {
   }
 
   if (!token) {
-    return res.status(401).json({ error: "No authorization token provided" });
+    res.status(401).json({ error: "No authorization token provided" });
+    return;
   }
 
-  const settings = await readDb("settings.json", DEFAULT_SETTINGS);
-  if (token === settings.masterPassword) {
-    next();
-  } else {
-    res.status(403).json({ error: "Invalid master password token" });
+  let payload: { accountId: string; displayName: string };
+  try {
+    payload = jwt.verify(token, requireSessionSecret()) as any;
+  } catch {
+    res.status(403).json({ error: "Invalid or expired session token" });
+    return;
   }
-});
+
+  runWithAccount(payload.accountId, async () => {
+    (req as any).accountId = payload.accountId;
+    (req as any).displayName = payload.displayName;
+    next();
+  }).catch(next);
+};
+
+// ==========================================
+// TEMPORARY ONE-TIME MIGRATION - remove this route after running it once to
+// move from the single-account era to multi-account. Gated behind
+// SESSION_SECRET so it can't be triggered by anyone else.
+// ==========================================
+app.post("/api/setup/migrate-accounts", h(async (req, res) => {
+  const { setupKey, accounts } = req.body;
+  if (!process.env.SESSION_SECRET || setupKey !== process.env.SESSION_SECRET) {
+    return res.status(403).json({ error: "forbidden" });
+  }
+  if (!Array.isArray(accounts) || accounts.length === 0) {
+    return res.status(400).json({ error: "accounts array required" });
+  }
+
+  const created = [];
+  for (const acc of accounts) {
+    const id = "acct-" + acc.username;
+    const hash = await bcrypt.hash(acc.password, 10);
+    await createAccount(id, acc.username, hash, acc.displayName);
+    if (acc.adoptLegacyData) {
+      await migrateLegacyDataToAccount(id);
+    }
+    created.push({ id, username: acc.username });
+  }
+
+  res.json({ success: true, created });
+}));
 
 // ==========================================
 // API ENDPOINTS
@@ -175,62 +225,69 @@ const verifyToken = h(async (req, res, next) => {
 
 // 1. AUTHENTICATION API
 app.post("/api/auth/login", h(async (req, res) => {
-  const { password } = req.body;
-  const settings = await readDb("settings.json", DEFAULT_SETTINGS);
+  const { username, password } = req.body;
+  const account = username ? await findAccountByUsername(username) : null;
+  const valid = account && password && await bcrypt.compare(password, account.passwordHash);
 
-  if (password === settings.masterPassword) {
-    await addLog("User Login", "Admin successfully logged into the system.");
+  if (!valid || !account) {
+    if (account) {
+      await runWithAccount(account.id, () => addLog("Failed Login", "An unauthorized login attempt was blocked."));
+    }
+    return res.status(401).json({ error: "Invalid username or password" });
+  }
+
+  const token = jwt.sign({ accountId: account.id, displayName: account.displayName }, requireSessionSecret(), { expiresIn: "90d" });
+
+  await runWithAccount(account.id, async () => {
+    await addLog("User Login", `${account.displayName} logged into the system.`);
     // Awaited (not fire-and-forget): on serverless, work left running after the
     // response is sent isn't guaranteed to finish. Never fail the login on backup issues.
     await checkAndTriggerAutoBackup().catch(err => console.error("Auto-backup check failed:", err));
-    res.json({ success: true, token: settings.masterPassword });
-  } else {
-    await addLog("Failed Login", "An unauthorized login attempt was blocked.");
-    res.status(401).json({ error: "Invalid master password" });
-  }
+  });
+
+  res.json({ success: true, token, displayName: account.displayName });
 }));
 
 app.post("/api/auth/verify", h(async (req, res) => {
   const { token } = req.body;
-  const settings = await readDb("settings.json", DEFAULT_SETTINGS);
-  res.json({ valid: token === settings.masterPassword });
+  try {
+    jwt.verify(token, requireSessionSecret());
+    res.json({ valid: true });
+  } catch {
+    res.json({ valid: false });
+  }
 }));
 
 app.post("/api/auth/change-password", verifyToken, h(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
-  const settings = await readDb("settings.json", DEFAULT_SETTINGS);
+  const accountId = (req as any).accountId as string;
+  const account = await findAccountById(accountId);
 
-  if (oldPassword !== settings.masterPassword) {
+  if (!account || !(await bcrypt.compare(oldPassword, account.passwordHash))) {
     return res.status(400).json({ error: "Incorrect current password" });
   }
 
-  settings.masterPassword = newPassword;
-  await writeDb("settings.json", settings);
-  await addLog("Password Changed", "Master password was successfully updated.");
-  res.json({ success: true, token: newPassword });
+  const newHash = await bcrypt.hash(newPassword, 10);
+  await updateAccountPassword(accountId, newHash);
+  await addLog("Password Changed", "Password was successfully updated.");
+
+  const token = jwt.sign({ accountId, displayName: account.displayName }, requireSessionSecret(), { expiresIn: "90d" });
+  res.json({ success: true, token });
 }));
 
 // 2. SETTINGS API
 app.get("/api/settings", verifyToken, h(async (req, res) => {
-  const settings = { ...(await readDb("settings.json", DEFAULT_SETTINGS)) };
-  delete settings.masterPassword;
-  res.json(settings);
+  res.json(await readDb("settings.json", DEFAULT_SETTINGS));
 }));
 
 app.put("/api/settings", verifyToken, h(async (req, res) => {
   const updatedSettings = req.body;
   const currentSettings = await readDb("settings.json", DEFAULT_SETTINGS);
-
-  const finalSettings = {
-    ...currentSettings,
-    ...updatedSettings,
-    masterPassword: currentSettings.masterPassword
-  };
+  const finalSettings = { ...currentSettings, ...updatedSettings };
 
   await writeDb("settings.json", finalSettings);
   await addLog("Settings Updated", "System configurations have been updated.");
-  const { masterPassword, ...safeSettings } = finalSettings;
-  res.json({ success: true, settings: safeSettings });
+  res.json({ success: true, settings: finalSettings });
 }));
 
 // 3. BILLING CYCLES API

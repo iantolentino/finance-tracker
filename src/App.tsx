@@ -22,7 +22,7 @@ import {
   Wallet
 } from "lucide-react";
 
-import { api, getAuthToken, setAuthToken } from "./api";
+import { api, getAuthToken, setAuthToken, getDisplayName, setDisplayName } from "./api";
 import { Customer, Purchase, Payment, Loan, SystemSettings, ActivityLog, BackupRecord } from "./types";
 
 // Components
@@ -38,9 +38,11 @@ export default function App() {
   // Authentication states
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isVerifyingAuth, setIsVerifyingAuth] = useState<boolean>(true);
+  const [loginUsername, setLoginUsername] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [showLoginPass, setShowLoginPass] = useState(false);
   const [loginError, setLoginError] = useState("");
+  const [displayName, setDisplayNameState] = useState("");
 
   // System states
   const [currentTab, setCurrentTab] = useState<string>("dashboard");
@@ -86,12 +88,15 @@ export default function App() {
         const verifyRes = await api.verify(token);
         if (verifyRes.valid) {
           setIsAuthenticated(true);
+          setDisplayNameState(getDisplayName() || "");
           await loadAllData();
         } else {
           setAuthToken(null);
+          setDisplayName(null);
         }
       } catch (err) {
         setAuthToken(null);
+        setDisplayName(null);
       } finally {
         setIsVerifyingAuth(false);
       }
@@ -102,6 +107,7 @@ export default function App() {
     // Listen for auth expiration events from API layer
     const handleAuthExpired = () => {
       setIsAuthenticated(false);
+      setDisplayNameState("");
       setCustomers([]);
       setPurchases([]);
       setPayments([]);
@@ -162,15 +168,18 @@ export default function App() {
     e.preventDefault();
     setLoginError("");
     try {
-      const loginRes = await api.login(loginPassword);
+      const loginRes = await api.login(loginUsername, loginPassword);
       if (loginRes.success) {
         setAuthToken(loginRes.token);
+        setDisplayName(loginRes.displayName);
+        setDisplayNameState(loginRes.displayName);
         setIsAuthenticated(true);
         await loadAllData();
+        setLoginUsername("");
         setLoginPassword("");
       }
     } catch (err: any) {
-      setLoginError(err.message || "Invalid master password!");
+      setLoginError(err.message || "Invalid username or password!");
     }
   };
 
@@ -178,7 +187,9 @@ export default function App() {
   const handleLogout = () => {
     if (confirm("Are you sure you want to log out of the system?")) {
       setAuthToken(null);
+      setDisplayName(null);
       setIsAuthenticated(false);
+      setDisplayNameState("");
       setCurrentTab("dashboard");
     }
   };
@@ -415,7 +426,27 @@ export default function App() {
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Master Password Access Key
+                  Username
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-3 text-slate-400">
+                    <User className="w-4 h-4" />
+                  </span>
+                  <input
+                    type="text"
+                    required
+                    autoComplete="username"
+                    value={loginUsername}
+                    onChange={(e) => setLoginUsername(e.target.value)}
+                    placeholder="Enter Username..."
+                    className="w-full pl-9 pr-4 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Password
                 </label>
                 <div className="relative">
                   <span className="absolute left-3 top-3 text-slate-400">
@@ -424,9 +455,10 @@ export default function App() {
                   <input
                     type={showLoginPass ? "text" : "password"}
                     required
+                    autoComplete="current-password"
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
-                    placeholder="Enter Master Password..."
+                    placeholder="Enter Password..."
                     className="w-full pl-9 pr-10 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
                   />
                   <button
@@ -510,7 +542,7 @@ export default function App() {
           </div>
           <div className="min-w-0">
             <h2 className="text-xs font-black truncate">{settings.personalBusinessName}</h2>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">Admin Workspace</span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">{displayName || "Workspace"}</span>
           </div>
         </div>
 
@@ -590,7 +622,7 @@ export default function App() {
                 </div>
                 <div className="min-w-0">
                   <h2 className="text-xs font-black truncate">{settings.personalBusinessName}</h2>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">Admin Workspace</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">{displayName || "Workspace"}</span>
                 </div>
               </div>
               <button

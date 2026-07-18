@@ -111,7 +111,7 @@ export default function Settings({
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      alert("Master password successfully updated!");
+      alert("Password successfully updated!");
     } catch (err: any) {
       alert(err.message || "Incorrect current password");
     } finally {
@@ -359,7 +359,7 @@ export default function Settings({
             </h3>
             <form onSubmit={handlePasswordChange} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Current Master Password</label>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Current Password</label>
                 <div className="relative">
                   <input
                     type={showPass ? "text" : "password"}
@@ -381,7 +381,7 @@ export default function Settings({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">New Master Password</label>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">New Password</label>
                   <input
                     type="password"
                     required
@@ -410,7 +410,7 @@ export default function Settings({
                   disabled={isChangingPass}
                   className="px-5 py-2.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-sm transition disabled:opacity-50"
                 >
-                  {isChangingPass ? "Updating Password..." : "Update Master Password"}
+                  {isChangingPass ? "Updating Password..." : "Update Password"}
                 </button>
               </div>
             </form>

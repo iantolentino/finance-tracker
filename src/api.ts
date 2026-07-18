@@ -24,6 +24,18 @@ export const setAuthToken = (token: string | null) => {
   }
 };
 
+export const getDisplayName = (): string | null => {
+  return localStorage.getItem("pfms_display_name");
+};
+
+export const setDisplayName = (name: string | null) => {
+  if (name) {
+    localStorage.setItem("pfms_display_name", name);
+  } else {
+    localStorage.removeItem("pfms_display_name");
+  }
+};
+
 const getHeaders = (): HeadersInit => {
   const token = getAuthToken();
   return {
@@ -50,11 +62,11 @@ async function handleResponse<T>(response: Response): Promise<T> {
 
 export const api = {
   // Authentication
-  async login(password: string): Promise<{ success: boolean; token: string }> {
+  async login(username: string, password: string): Promise<{ success: boolean; token: string; displayName: string }> {
     const res = await fetch(`${API_BASE}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password })
+      body: JSON.stringify({ username, password })
     });
     return handleResponse(res);
   },

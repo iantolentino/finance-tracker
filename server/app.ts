@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import seedData from "../spaylater_import.json" with { type: "json" };
 import {
   readDb, writeDb, writeDbBatch, listBackups, readBackup, writeBackup, deleteBackup,
-  runWithAccount, findAccountByUsername, findAccountById, updateAccountPassword, updateAccountDisplayName
+  runWithAccount, findAccountByUsername, findAccountById, updateAccountPassword
 } from "./postgresStore.js";
 
 export const app = express();
@@ -15,15 +15,6 @@ function requireSessionSecret(): string {
   if (!secret) throw new Error("Missing required environment variable: SESSION_SECRET");
   return secret;
 }
-
-// TEMPORARY - remove after use.
-app.post("/api/setup/rename-account", express.json(), async (req, res) => {
-  if (req.body.setupKey !== process.env.SESSION_SECRET) return res.status(403).json({ error: "forbidden" });
-  const account = await findAccountByUsername(req.body.username);
-  if (!account) return res.status(404).json({ error: "not found" });
-  await updateAccountDisplayName(account.id, req.body.displayName);
-  res.json({ success: true });
-});
 
 // ==========================================
 // DEFAULTS (used when a data file doesn't exist yet in the GitHub repo)

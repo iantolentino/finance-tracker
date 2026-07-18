@@ -5,8 +5,7 @@ import jwt from "jsonwebtoken";
 import seedData from "../spaylater_import.json" with { type: "json" };
 import {
   readDb, writeDb, writeDbBatch, listBackups, readBackup, writeBackup, deleteBackup,
-  runWithAccount, findAccountByUsername, findAccountById, createAccount, updateAccountPassword,
-  migrateLegacyDataToAccount
+  runWithAccount, findAccountByUsername, findAccountById, updateAccountPassword
 } from "./postgresStore.js";
 
 export const app = express();
@@ -190,34 +189,6 @@ const verifyToken: express.RequestHandler = (req, res, next) => {
     next();
   }).catch(next);
 };
-
-// ==========================================
-// TEMPORARY ONE-TIME MIGRATION - remove this route after running it once to
-// move from the single-account era to multi-account. Gated behind
-// SESSION_SECRET so it can't be triggered by anyone else.
-// ==========================================
-app.post("/api/setup/migrate-accounts", h(async (req, res) => {
-  const { setupKey, accounts } = req.body;
-  if (!process.env.SESSION_SECRET || setupKey !== process.env.SESSION_SECRET) {
-    return res.status(403).json({ error: "forbidden" });
-  }
-  if (!Array.isArray(accounts) || accounts.length === 0) {
-    return res.status(400).json({ error: "accounts array required" });
-  }
-
-  const created = [];
-  for (const acc of accounts) {
-    const id = "acct-" + acc.username;
-    const hash = await bcrypt.hash(acc.password, 10);
-    await createAccount(id, acc.username, hash, acc.displayName);
-    if (acc.adoptLegacyData) {
-      await migrateLegacyDataToAccount(id);
-    }
-    created.push({ id, username: acc.username });
-  }
-
-  res.json({ success: true, created });
-}));
 
 // ==========================================
 // API ENDPOINTS

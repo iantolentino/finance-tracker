@@ -271,11 +271,12 @@ app.post("/api/billing-cycles/complete", verifyToken, h(async (req, res) => {
   const billingCycleData = await readDb("billing_cycles.json", defaultBillingCycles());
   const activeCycle = billingCycleData.activeCycle;
 
-  const [customers, purchases, payments, archives] = await Promise.all([
+  const [customers, purchases, payments, archives, budgets] = await Promise.all([
     readDb("customers.json", []),
     readDb("purchases.json", []),
     readDb("payments.json", []),
-    readDb("archives.json", [])
+    readDb("archives.json", []),
+    readDb("budgets.json", [])
   ]);
 
   const newArchive = {
@@ -330,11 +331,39 @@ app.post("/api/billing-cycles/complete", verifyToken, h(async (req, res) => {
     billingCycleData.cycles.push(nextCycle);
   }
 
+  // Carry the budget layout (income + allocation categories, not expenses)
+  // forward automatically, same as customer balances already do - otherwise
+  // the Budget tab silently shows a blank month with no warning.
+  const sourceBudget = budgets.find((b: any) => b.month === activeCycle);
+  const targetBudgetExists = budgets.some((b: any) => b.month === nextCycle);
+  let updatedBudgets = budgets;
+  if (sourceBudget && !targetBudgetExists) {
+    const copiedAllocations = sourceBudget.allocations.map((a: any) => ({
+      id: "alloc-" + Date.now() + "-" + Math.random().toString(36).substring(2, 6),
+      category: a.category,
+      allocatedAmount: a.allocatedAmount,
+      spentAmount: 0
+    }));
+    updatedBudgets = [
+      ...budgets,
+      {
+        id: "budget-" + Date.now(),
+        month: nextCycle,
+        salary: sourceBudget.salary,
+        additionalIncome: sourceBudget.additionalIncome,
+        allocations: copiedAllocations,
+        expenses: [],
+        createdAt: new Date().toISOString()
+      }
+    ];
+  }
+
   await writeDbBatch([
     ["customers.json", activeCustomers],
     ["purchases.json", remainingPurchases],
     ["payments.json", remainingPayments],
-    ["billing_cycles.json", billingCycleData]
+    ["billing_cycles.json", billingCycleData],
+    ["budgets.json", updatedBudgets]
   ]);
 
   await addLog("Billing Cycle Completed", `Archived cycle ${activeCycle}. Shifted active workspace to ${nextCycle}.`);

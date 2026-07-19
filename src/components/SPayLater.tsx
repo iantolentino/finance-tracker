@@ -1193,7 +1193,6 @@ export default function SPayLater({
                     <tr className="border-b border-slate-200 text-slate-400 font-medium bg-slate-50/50 print:bg-transparent">
                       <th className="py-2 px-1">Item Detail</th>
                       <th className="py-2 text-right">Qty</th>
-                      <th className="py-2 text-right">Original Cost</th>
                       <th className="py-2 text-right px-1">Total Due</th>
                     </tr>
                   </thead>
@@ -1205,7 +1204,6 @@ export default function SPayLater({
                           Carried over balance from previous cycles
                         </td>
                         <td className="py-2.5 text-right">—</td>
-                        <td className="py-2.5 text-right">—</td>
                         <td className="py-2.5 text-right font-bold px-1 text-slate-800">
                           {formatCurrency(selectedCustomerInfo.carriedOverBalance)}
                         </td>
@@ -1213,7 +1211,7 @@ export default function SPayLater({
                     )}
                     {selectedCustomerInfo.purchases.length === 0 && selectedCustomerInfo.carriedOverBalance === 0 ? (
                       <tr>
-                        <td colSpan={4} className="py-4 text-center text-slate-400">No active billing items.</td>
+                        <td colSpan={3} className="py-4 text-center text-slate-400">No active billing items.</td>
                       </tr>
                     ) : (
                       selectedCustomerInfo.purchases.map((p) => (
@@ -1223,7 +1221,6 @@ export default function SPayLater({
                             {p.description && <span className="text-[10px] text-slate-400 block">{p.description}</span>}
                           </td>
                           <td className="py-2.5 text-right text-slate-600">{p.quantity}</td>
-                          <td className="py-2.5 text-right text-slate-600">{formatCurrency(p.originalCost)}</td>
                           <td className="py-2.5 text-right font-semibold text-slate-900 px-1">{formatCurrency(p.totalAmount)}</td>
                         </tr>
                       ))

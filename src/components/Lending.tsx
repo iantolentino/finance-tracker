@@ -19,7 +19,7 @@ import {
   Calculator,
   Download
 } from "lucide-react";
-import html2canvas from "html2canvas-pro";
+import { toBlob as domToBlob } from "html-to-image";
 import { Loan, LoanPayment, SystemSettings } from "../types";
 
 interface LendingProps {
@@ -140,45 +140,34 @@ export default function Lending({
     return computedLoans.find(l => l.id === selectedLoanId) || null;
   }, [selectedLoanId, computedLoans]);
 
-  // Save the loan statement as a PNG image (for sending via Messenger/Viber etc.)
+  // Save the loan statement as a PNG image (for sending via Messenger/Viber
+  // etc.). Uses html-to-image instead of html2canvas: html2canvas rebuilds
+  // the DOM from scratch by hand-parsing CSS and redrawing shapes/text onto
+  // a canvas, which is what caused the font-timing/oklch-color/iOS-blank-
+  // canvas issues. html-to-image serializes the live node (styles, fonts,
+  // whichever theme is actually on screen, included) into an SVG
+  // <foreignObject> and lets the browser's own renderer draw that - much
+  // closer to an actual screenshot, and it doesn't matter whether the page
+  // is in light or dark mode when it's taken.
   const receiptRef = useRef<HTMLDivElement>(null);
   const [isSavingImage, setIsSavingImage] = useState(false);
   const handleSaveAsImage = async () => {
     if (!receiptRef.current) return;
     setIsSavingImage(true);
-
-    // iOS Safari has a documented history of returning a blank/white canvas
-    // from html2canvas - not an error, just nothing drawn - when: (a) it
-    // captures before web fonts finish loading, or (b) the target styles
-    // depend on a class toggled only on a cloned/offscreen document (the
-    // onclone approach) rather than the live DOM Safari already painted.
-    // Toggling .dark off the *live* <html> (same code path as the real
-    // theme switch, which already works correctly on iOS) and waiting a
-    // real paint frame before capturing avoids both.
-    const wasDark = document.documentElement.classList.contains("dark");
-    if (wasDark) document.documentElement.classList.remove("dark");
-
     try {
-      await document.fonts.ready;
-      await new Promise(requestAnimationFrame);
-
       const node = receiptRef.current;
       const isMobile = /iPad|iPhone|iPod|Android/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-      const canvas = await html2canvas(node, {
-        // iOS Safari has tight canvas memory limits - a scale-2 canvas can
-        // silently fail (renders blank) on iOS even for modest content
-        // where the same scale works fine on desktop.
-        scale: isMobile ? 1 : 2,
+      const blob = await domToBlob(node, {
         backgroundColor: "#ffffff",
-        useCORS: true,
-        imageTimeout: 0,
+        pixelRatio: isMobile ? 1 : 2,
+        width: node.scrollWidth,
         height: node.scrollHeight,
-        windowHeight: node.scrollHeight
+        skipFonts: true,
+        cacheBust: true
       });
+      if (!blob) throw new Error("Image capture produced no data");
 
       const filename = `Loan-Statement-${(selectedLoanInfo?.borrowerName || "statement").replace(/\s+/g, "-")}-${new Date().toISOString().split("T")[0]}.png`;
-      const blob: Blob | null = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
-      if (!blob) throw new Error("Canvas produced no image data");
       const file = new File([blob], filename, { type: "image/png" });
 
       // Desktop browsers (Windows Edge/Chrome included) also implement
@@ -203,7 +192,6 @@ export default function Lending({
       console.error("Save as Image failed:", err);
       alert("Failed to generate image. Please try Print instead.");
     } finally {
-      if (wasDark) document.documentElement.classList.add("dark");
       setIsSavingImage(false);
     }
   };

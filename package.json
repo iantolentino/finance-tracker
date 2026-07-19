@@ -18,7 +18,7 @@
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
-    "html2canvas-pro": "^2.2.4",
+    "html-to-image": "^1.11.13",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",

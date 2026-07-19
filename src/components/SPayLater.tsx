@@ -366,6 +366,17 @@ export default function SPayLater({
       const filename = `SOA-${(selectedCustomerInfo?.fullName || "statement").replace(/\s+/g, "-")}-${new Date().toISOString().split("T")[0]}.png`;
       const blob: Blob | null = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
       if (!blob) throw new Error("Canvas produced no image data");
+
+      // The blank-on-iOS failure doesn't throw - it "succeeds" with an
+      // empty image - so a normal try/catch gives no signal. Surface the
+      // actual numbers when the output looks suspiciously empty, instead of
+      // silently handing over a blank file.
+      console.log("Save as Image diagnostics:", { canvasWidth: canvas.width, canvasHeight: canvas.height, blobSize: blob.size, nodeScrollHeight: node.scrollHeight, isMobile });
+      if (canvas.width === 0 || canvas.height === 0 || blob.size < 2000) {
+        alert(`Image came out empty (canvas ${canvas.width}x${canvas.height}, ${blob.size} bytes). Please screenshot this message and send it - it'll help pin down the exact cause.`);
+        return;
+      }
+
       const file = new File([blob], filename, { type: "image/png" });
 
       // Desktop browsers (Windows Edge/Chrome included) also implement

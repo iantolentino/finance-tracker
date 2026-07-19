@@ -1197,10 +1197,7 @@ export default function SPayLater({
             {/* Print Friendly Canvas Sheet - Scrollable area inside the modal */}
             <div ref={invoiceRef} className="p-6 md:p-8 space-y-6 text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900 overflow-y-auto flex-1 print:p-0 print:overflow-visible">
               {/* Print header */}
-              <div className="flex justify-between items-start border-b border-slate-100 pb-4">
-                <div>
-                  <span className="text-[10px] text-slate-400 font-medium block mt-0.5">SPayLater Billing & Receivable Statement</span>
-                </div>
+              <div className="flex justify-end items-start border-b border-slate-100 pb-4">
                 <div className="text-right">
                   <span className="text-xs font-bold text-slate-900 uppercase block">Statement of Account</span>
                   <span className="text-[10px] text-slate-500 block mt-0.5">Billing Cycle: {activeCycle}</span>

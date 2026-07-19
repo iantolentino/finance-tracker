@@ -163,11 +163,14 @@ export default function Lending({
       await new Promise(requestAnimationFrame);
 
       const node = receiptRef.current;
-      const isMobile = /iPad|iPhone|iPod|Android/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      const isMobile = isIOS || /Android/.test(navigator.userAgent);
       const canvas = await html2canvas(node, {
-        // iOS Safari has a tighter canvas memory ceiling than desktop - a
-        // scale-2 canvas is a known trigger for silent blank output there.
-        scale: isMobile ? 1 : 2,
+        // iOS Safari specifically has a tighter canvas memory ceiling than
+        // desktop or Android Chrome - only cap resolution there, not on
+        // Android (which doesn't have this limit and was getting an
+        // unnecessarily blurry capture from being lumped in as "mobile").
+        scale: isIOS ? 1 : 2,
         backgroundColor: "#ffffff",
         useCORS: true,
         imageTimeout: 0,

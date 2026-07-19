@@ -1192,13 +1192,13 @@ export default function SPayLater({
 
       {/* 5. Invoices & Statements Generator Modal Overlay */}
       {invoiceModalOpen && selectedCustomerInfo && (
-        <div 
+        <div
           onClick={() => setInvoiceModalOpen(false)}
-          className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex justify-center items-center p-4 print:bg-white print:p-0 print:absolute print:inset-0"
+          className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex justify-center items-center p-4 print:block print:bg-white print:p-0 print:absolute print:inset-0"
         >
-          <div 
+          <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white dark:bg-slate-900 rounded-xl w-full max-w-2xl flex flex-col max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in-50 zoom-in-95 print:shadow-none print:rounded-none print:w-full print:max-h-none"
+            className="bg-white dark:bg-slate-900 rounded-xl w-full max-w-2xl flex flex-col max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in-50 zoom-in-95 print:block print:shadow-none print:rounded-none print:w-full print:max-h-none print:overflow-visible"
           >
             {/* Header: Hide when printing - actions (Print/Save as Image/Close) live in the footer below, not duplicated here */}
             <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center print:hidden shrink-0 bg-white dark:bg-slate-900">
@@ -1221,7 +1221,7 @@ export default function SPayLater({
 
               {/* Customer & Billing information */}
               <div className="text-xs">
-                <div className="space-y-1 p-3 bg-slate-50 rounded-xl border border-slate-100 print:bg-white print:border-none print:p-0">
+                <div className="space-y-1 p-3 bg-slate-50 rounded-xl border border-slate-100 print:bg-white print:border-none print:p-0 print:break-inside-avoid">
                   <span className="text-[9px] uppercase font-bold text-slate-400 block">Billed To:</span>
                   <h3 className="font-bold text-slate-900">{selectedCustomerInfo.fullName}</h3>
                   {selectedCustomerInfo.contactNumber && <p className="text-slate-500">Phone: {selectedCustomerInfo.contactNumber}</p>}
@@ -1243,7 +1243,7 @@ export default function SPayLater({
                   <tbody className="divide-y divide-slate-100">
                     {/* Carried over balance line if any */}
                     {selectedCustomerInfo.carriedOverBalance > 0 && (
-                      <tr>
+                      <tr className="print:break-inside-avoid">
                         <td className="py-2.5 px-1 font-semibold text-slate-700">
                           Carried over balance from previous cycles
                         </td>
@@ -1259,7 +1259,7 @@ export default function SPayLater({
                       </tr>
                     ) : (
                       selectedCustomerInfo.purchases.map((p) => (
-                        <tr key={p.id}>
+                        <tr key={p.id} className="print:break-inside-avoid">
                           <td className="py-2.5 px-1">
                             <span className="font-bold text-slate-900">{p.itemName}</span>
                             {p.description && <span className="text-[10px] text-slate-400 block">{p.description}</span>}
@@ -1292,7 +1292,7 @@ export default function SPayLater({
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {selectedCustomerInfo.payments.map((py) => (
-                        <tr key={py.id}>
+                        <tr key={py.id} className="print:break-inside-avoid">
                           <td className="py-2 px-1 text-slate-600">{py.paymentDate}</td>
                           <td className="py-2 text-slate-700">{py.paymentMethod}</td>
                           <td className="py-2 text-slate-400">{py.notes || "—"}</td>
@@ -1306,7 +1306,7 @@ export default function SPayLater({
               </div>
 
               {/* Total calculations footer sheet */}
-              <div className="border-t border-slate-200 pt-4 flex flex-col items-end text-xs space-y-1.5">
+              <div className="border-t border-slate-200 pt-4 flex flex-col items-end text-xs space-y-1.5 print:break-inside-avoid">
                 <div className="flex justify-between w-64 text-slate-500">
                   <span>Gross Receivables Due:</span>
                   <span className="font-semibold text-slate-800">{formatCurrency(selectedCustomerInfo.totalPurchases)}</span>
@@ -1323,7 +1323,7 @@ export default function SPayLater({
               </div>
 
               {/* Signature lines */}
-              <div className="grid grid-cols-2 gap-12 pt-12 text-center text-[10px] text-slate-400">
+              <div className="grid grid-cols-2 gap-12 pt-12 text-center text-[10px] text-slate-400 print:break-inside-avoid">
                 <div className="border-t border-dashed border-slate-200 pt-2">
                   {displayName} <br />
                   <span className="font-medium text-slate-300">Signature / Date</span>

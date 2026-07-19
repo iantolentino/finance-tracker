@@ -894,8 +894,8 @@ export default function Lending({
 
       {/* 3. Receipt & Agreement Statement Overlay */}
       {receiptModalOpen && selectedLoanInfo && (
-        <div className="fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 overflow-y-auto print:bg-white print:p-0 print:absolute print:inset-0">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in print:shadow-none print:rounded-none print:w-full">
+        <div className="fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 overflow-y-auto print:block print:bg-white print:p-0 print:absolute print:inset-0">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in print:block print:shadow-none print:rounded-none print:w-full print:overflow-visible">
             {/* Header control bar */}
             <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between print:hidden">
               <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2 text-sm">
@@ -945,11 +945,11 @@ export default function Lending({
 
               {/* Parties info */}
               <div className="grid grid-cols-2 gap-4 text-xs">
-                <div className="space-y-1 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 print:bg-white print:border-none print:p-0">
+                <div className="space-y-1 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 print:bg-white print:border-none print:p-0 print:break-inside-avoid">
                   <span className="text-[9px] uppercase font-bold text-slate-400 dark:text-slate-500 block">Lender:</span>
                   <h3 className="font-bold text-slate-900 dark:text-white">{displayName}</h3>
                 </div>
-                <div className="space-y-1 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 print:bg-white print:border-none print:p-0">
+                <div className="space-y-1 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 print:bg-white print:border-none print:p-0 print:break-inside-avoid">
                   <span className="text-[9px] uppercase font-bold text-slate-400 dark:text-slate-500 block">Borrower / Payee:</span>
                   <h3 className="font-bold text-slate-900 dark:text-white">{selectedLoanInfo.borrowerName}</h3>
                   {selectedLoanInfo.contactNumber && <p className="text-slate-500 dark:text-slate-400">Phone: {selectedLoanInfo.contactNumber}</p>}
@@ -971,7 +971,7 @@ export default function Lending({
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
+                    <tr className="print:break-inside-avoid">
                       <td className="py-3 px-1 text-slate-900 dark:text-white font-bold">{formatCurrency(selectedLoanInfo.principalAmount)}</td>
                       <td className="py-3 text-slate-600 dark:text-slate-400">
                         {selectedLoanInfo.interestType === "Percentage" 
@@ -1004,7 +1004,7 @@ export default function Lending({
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                       {selectedLoanInfo.payments.map((py) => (
-                        <tr key={py.id}>
+                        <tr key={py.id} className="print:break-inside-avoid">
                           <td className="py-2 px-1 text-slate-600 dark:text-slate-400">{py.paymentDate}</td>
                           <td className="py-2 text-slate-700 dark:text-slate-300">{py.paymentMethod}</td>
                           <td className="py-2 text-slate-400 dark:text-slate-500">{py.notes || "—"}</td>
@@ -1018,7 +1018,7 @@ export default function Lending({
               </div>
 
               {/* Layout Totals */}
-              <div className="border-t border-slate-200 dark:border-slate-700 pt-4 flex flex-col items-end text-xs space-y-1.5">
+              <div className="border-t border-slate-200 dark:border-slate-700 pt-4 flex flex-col items-end text-xs space-y-1.5 print:break-inside-avoid">
                 <div className="flex justify-between w-64 text-slate-500 dark:text-slate-400">
                   <span>Gross Principal + Interest Due:</span>
                   <span className="font-semibold text-slate-800 dark:text-slate-200">{formatCurrency(selectedLoanInfo.totalDue)}</span>
@@ -1035,7 +1035,7 @@ export default function Lending({
               </div>
 
               {/* Signatures */}
-              <div className="grid grid-cols-2 gap-12 pt-12 text-center text-[10px] text-slate-400 dark:text-slate-500">
+              <div className="grid grid-cols-2 gap-12 pt-12 text-center text-[10px] text-slate-400 dark:text-slate-500 print:break-inside-avoid">
                 <div className="border-t border-dashed border-slate-200 dark:border-slate-700 pt-2">
                   {displayName} <br />
                   <span className="font-medium text-slate-300 dark:text-slate-600">Lender Signature / Date</span>

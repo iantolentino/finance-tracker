@@ -305,10 +305,10 @@ export default function Dashboard({
         <p className="text-sm text-slate-500 dark:text-slate-400">
           Active Billing Cycle: <strong className="text-brand-600 font-medium">{activeCycle}</strong> • Keep track of everyone who owes you money.
         </p>
-        <div className="flex gap-3 mt-3 md:mt-0">
+        <div className="flex justify-center mt-3 md:mt-0">
           <button
             onClick={() => onNavigate("lending")}
-            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            className="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-sm transition"
           >
             <DollarSign className="w-4 h-4 mr-2" />
             Grant Cash Loan

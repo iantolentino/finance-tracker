@@ -391,7 +391,7 @@ export default function BudgetTracker({
             Active Budget Cycle
           </div>
           <h2 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-            Salary & Monthly Budgeting Tracker
+            Monthly Budgeting
             <span className="text-brand-600 dark:text-brand-400 font-medium">({budgetMonth})</span>
           </h2>
           <p className="text-xs text-slate-400 dark:text-slate-500 max-w-xl">

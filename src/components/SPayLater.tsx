@@ -327,14 +327,13 @@ export default function SPayLater({
   return (
     <div className="space-y-6">
       {/* Header with cycle details and complete cycle button */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white p-5 rounded-2xl border border-slate-100 shadow-sm gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm gap-4">
         <div>
-          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Module 01</span>
-          <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <CreditCard className="w-5 h-5 text-brand-500" />
             SPayLater Tracker
           </h2>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Current Billing Cycle: <strong className="text-brand-600 font-semibold">{activeCycle}</strong>
           </p>
         </div>

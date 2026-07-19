@@ -239,7 +239,6 @@ export default function Lending({
       {/* Header section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm gap-4">
         <div>
-          <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider">Module 02</span>
           <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <Calculator className="w-5 h-5 text-brand-500" />
             Lending Management (Cash Loans)

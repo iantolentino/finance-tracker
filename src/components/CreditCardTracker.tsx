@@ -112,7 +112,7 @@ export default function CreditCardTracker({ entries, settings, onAddEntry, onEdi
             Credit Card Tracker
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Log charges made on your personal credit card, by person and category. Kept separate from SPayLater, Lending, and Budget data.
+            Log charges made on your personal credit card, by person and category.
           </p>
         </div>
         <button

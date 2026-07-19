@@ -753,23 +753,14 @@ export default function App() {
             transition={{ type: "tween", duration: 0.2 }}
             className="md:hidden fixed inset-y-0 left-0 w-[260px] bg-white dark:bg-slate-900 text-slate-900 dark:text-white shrink-0 z-50 flex flex-col border-r border-slate-200 dark:border-slate-800 print:hidden h-full shadow-2xl"
           >
-            {/* Brand details with Mobile Close Button */}
-            <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="p-2 bg-brand-600 rounded-xl text-white shrink-0">
-                  <Building className="w-5 h-5" />
-                </div>
-                <div className="min-w-0">
-                  <span className="text-xs font-black truncate block">{displayName || "Workspace"}</span>
-                </div>
+            {/* Brand details - closes via tapping the backdrop or the bottom nav's menu toggle, no separate close button needed */}
+            <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
+              <div className="p-2 bg-brand-600 rounded-xl text-white shrink-0">
+                <Building className="w-5 h-5" />
               </div>
-              <button
-                onClick={() => setMobileMenuOpen(false)}
-                className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg transition shrink-0"
-                aria-label="Close Sidebar"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="min-w-0">
+                <span className="text-xs font-black truncate block">{displayName || "Workspace"}</span>
+              </div>
             </div>
 
             {/* Navigation links */}

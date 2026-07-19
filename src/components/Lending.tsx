@@ -180,12 +180,14 @@ export default function Lending({
       if (!blob) throw new Error("Canvas produced no image data");
 
       // The blank-on-iOS failure doesn't throw - it "succeeds" with an
-      // empty image - so a normal try/catch gives no signal. Surface the
-      // actual numbers when the output looks suspiciously empty, instead of
-      // silently handing over a blank file.
+      // empty image - so a normal try/catch gives no signal. Only the
+      // canvas dimensions are a reliable "did this actually fail" check;
+      // file size is NOT (a sparse statement with no payments logged is
+      // legitimately a small, mostly-white PNG - a byte-size threshold here
+      // was flagging real, correct output as broken).
       console.log("Save as Image diagnostics:", { canvasWidth: canvas.width, canvasHeight: canvas.height, blobSize: blob.size, nodeScrollHeight: node.scrollHeight, isMobile });
-      if (canvas.width === 0 || canvas.height === 0 || blob.size < 2000) {
-        alert(`Image came out empty (canvas ${canvas.width}x${canvas.height}, ${blob.size} bytes). Please screenshot this message and send it - it'll help pin down the exact cause.`);
+      if (canvas.width === 0 || canvas.height === 0) {
+        alert(`Image came out empty (canvas ${canvas.width}x${canvas.height}). Please screenshot this message and send it - it'll help pin down the exact cause.`);
         return;
       }
 
@@ -905,7 +907,7 @@ export default function Lending({
 
       {/* 3. Receipt & Agreement Statement Overlay */}
       {receiptModalOpen && selectedLoanInfo && (
-        <div className="fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 overflow-y-auto print:block print:bg-white print:p-0 print:absolute print:inset-0">
+        <div className="print-area fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 overflow-y-auto print:block print:bg-white print:p-0 print:absolute print:inset-0">
           <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in print:block print:shadow-none print:rounded-none print:w-full print:overflow-visible">
             {/* Header control bar */}
             <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between print:hidden">

@@ -368,12 +368,14 @@ export default function SPayLater({
       if (!blob) throw new Error("Canvas produced no image data");
 
       // The blank-on-iOS failure doesn't throw - it "succeeds" with an
-      // empty image - so a normal try/catch gives no signal. Surface the
-      // actual numbers when the output looks suspiciously empty, instead of
-      // silently handing over a blank file.
+      // empty image - so a normal try/catch gives no signal. Only the
+      // canvas dimensions are a reliable "did this actually fail" check;
+      // file size is NOT (a sparse statement with no purchases/payments is
+      // legitimately a small, mostly-white PNG - a byte-size threshold here
+      // was flagging real, correct output as broken).
       console.log("Save as Image diagnostics:", { canvasWidth: canvas.width, canvasHeight: canvas.height, blobSize: blob.size, nodeScrollHeight: node.scrollHeight, isMobile });
-      if (canvas.width === 0 || canvas.height === 0 || blob.size < 2000) {
-        alert(`Image came out empty (canvas ${canvas.width}x${canvas.height}, ${blob.size} bytes). Please screenshot this message and send it - it'll help pin down the exact cause.`);
+      if (canvas.width === 0 || canvas.height === 0) {
+        alert(`Image came out empty (canvas ${canvas.width}x${canvas.height}). Please screenshot this message and send it - it'll help pin down the exact cause.`);
         return;
       }
 
@@ -1205,7 +1207,7 @@ export default function SPayLater({
       {invoiceModalOpen && selectedCustomerInfo && (
         <div
           onClick={() => setInvoiceModalOpen(false)}
-          className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex justify-center items-center p-4 print:block print:bg-white print:p-0 print:absolute print:inset-0"
+          className="print-area fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex justify-center items-center p-4 print:block print:bg-white print:p-0 print:absolute print:inset-0"
         >
           <div
             onClick={(e) => e.stopPropagation()}

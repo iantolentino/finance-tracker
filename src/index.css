@@ -358,4 +358,29 @@ html.dark .max-w-5xl.bg-white {
     box-shadow: none !important;
     backdrop-filter: none !important;
   }
+
+  /* Print ONLY the statement/invoice being printed, nothing else - the
+     sidebar, backdrop, modal chrome (shadow/rounding/backdrop-blur), and
+     whatever tab is open behind the modal. Relying on print:hidden spread
+     across dozens of individual elements is fragile; this is the standard,
+     bulletproof "print this one element" technique: hide everything, then
+     re-reveal only the print target and take it out of flow so its own
+     ancestors' now-invisible-but-still-occupying-space boxes can't affect
+     its position or size on the page. */
+  body * {
+    visibility: hidden;
+  }
+  .print-area, .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
 }

@@ -336,20 +336,34 @@ export default function SPayLater({
   const handleSaveAsImage = async () => {
     if (!invoiceRef.current) return;
     setIsSavingImage(true);
+
+    // iOS Safari has a documented history of returning a blank/white canvas
+    // from html2canvas - not an error, just nothing drawn - when: (a) it
+    // captures before web fonts finish loading, or (b) the target styles
+    // depend on a class toggled only on a cloned/offscreen document (the
+    // onclone approach) rather than the live DOM Safari already painted.
+    // Toggling .dark off the *live* <html> (same code path as the real
+    // theme switch, which already works correctly on iOS) and waiting a
+    // real paint frame before capturing avoids both.
+    const wasDark = document.documentElement.classList.contains("dark");
+    if (wasDark) document.documentElement.classList.remove("dark");
+
     try {
+      await document.fonts.ready;
+      await new Promise(requestAnimationFrame);
+
       const node = invoiceRef.current;
+      const isMobile = /iPad|iPhone|iPod|Android/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
       const canvas = await html2canvas(node, {
-        scale: 2,
+        // iOS Safari has tight canvas memory limits - a scale-2 canvas can
+        // silently fail (renders blank) on iOS even for modest content
+        // where the same scale works fine on desktop.
+        scale: isMobile ? 1 : 2,
         backgroundColor: "#ffffff",
         useCORS: true,
+        imageTimeout: 0,
         height: node.scrollHeight,
-        windowHeight: node.scrollHeight,
-        // A printed statement should always look the same (black text on
-        // white) regardless of whether the app is currently in dark mode -
-        // strip the .dark class from the cloned document before it renders.
-        onclone: (clonedDoc) => {
-          clonedDoc.documentElement.classList.remove("dark");
-        }
+        windowHeight: node.scrollHeight
       });
 
       const filename = `SOA-${(selectedCustomerInfo?.fullName || "statement").replace(/\s+/g, "-")}-${new Date().toISOString().split("T")[0]}.png`;
@@ -357,10 +371,12 @@ export default function SPayLater({
       if (!blob) throw new Error("Canvas produced no image data");
       const file = new File([blob], filename, { type: "image/png" });
 
-      // iOS Safari doesn't reliably honor forced <a download> file saves -
-      // the native share sheet (Save Image / send directly to Messages etc.)
-      // is both more reliable there and closer to what "send to others" means.
-      if (typeof navigator.share === "function" && typeof navigator.canShare === "function" && navigator.canShare({ files: [file] })) {
+      // Desktop browsers (Windows Edge/Chrome included) also implement
+      // navigator.share for files - but on desktop that opens the OS share
+      // flyout instead of just saving, which isn't what "Save as Image"
+      // should do there. Only use the share sheet on actual mobile devices;
+      // desktop always gets a normal file download to Downloads.
+      if (isMobile && typeof navigator.share === "function" && typeof navigator.canShare === "function" && navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title: filename });
       } else {
         const url = URL.createObjectURL(blob);
@@ -377,6 +393,7 @@ export default function SPayLater({
       console.error("Save as Image failed:", err);
       alert("Failed to generate image. Please try Print instead.");
     } finally {
+      if (wasDark) document.documentElement.classList.add("dark");
       setIsSavingImage(false);
     }
   };

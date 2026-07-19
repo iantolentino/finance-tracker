@@ -1,6 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
+/* Without this, Tailwind v4's dark: variant defaults to the OS/browser
+   "prefers-color-scheme: dark" media query - completely independent of the
+   in-app light/dark toggle below, which works by adding/removing a literal
+   .dark class on <html>. That mismatch is why dark: elements (most of the
+   app) could look "stuck" on a phone with system dark mode on, regardless
+   of what the in-app switch was set to. This makes dark: track the class. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;

@@ -641,34 +641,34 @@ export default function BudgetTracker({
           </h3>
 
           {/* SPayLater Integration Sync widget */}
-          <div className="p-5 bg-gradient-to-br from-brand-900 to-slate-900 dark:from-brand-950 dark:to-slate-950 text-white rounded-2xl shadow-md border border-brand-500/20 relative overflow-hidden">
+          <div className="p-5 bg-brand-50 dark:bg-gradient-to-br dark:from-brand-950 dark:to-slate-950 text-slate-900 dark:text-white rounded-2xl shadow-md border border-brand-100 dark:border-brand-500/20 relative overflow-hidden">
             <div className="absolute top-0 right-0 p-8 transform translate-x-4 -translate-y-4 opacity-5 pointer-events-none">
               <TrendingUp className="w-48 h-48" />
             </div>
 
             <div className="space-y-4 relative z-10">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-brand-500/20 rounded-xl border border-brand-400/30">
-                  <TrendingUp className="w-4.5 h-4.5 text-brand-400" />
+                <div className="p-2 bg-white dark:bg-brand-500/20 rounded-xl border border-brand-200 dark:border-brand-400/30">
+                  <TrendingUp className="w-4.5 h-4.5 text-brand-600 dark:text-brand-400" />
                 </div>
                 <div>
                   <h4 className="font-bold text-xs tracking-wide">SPayLater Active Cycle Sync</h4>
-                  <p className="text-[10px] text-brand-200">Sync purchases due in active cycle</p>
+                  <p className="text-[10px] text-brand-700 dark:text-brand-200">Sync purchases due in active cycle</p>
                 </div>
               </div>
 
-              <div className="p-3 bg-white/5 rounded-xl border border-white/10 space-y-1">
-                <span className="text-[9px] uppercase font-bold text-brand-300 block">Total Due in {activeCycle}:</span>
+              <div className="p-3 bg-white dark:bg-white/5 rounded-xl border border-brand-100 dark:border-white/10 space-y-1">
+                <span className="text-[9px] uppercase font-bold text-brand-600 dark:text-brand-300 block">Total Due in {activeCycle}:</span>
                 <div className="flex items-baseline justify-between">
-                  <span className="text-lg font-black text-white">
+                  <span className="text-lg font-black text-slate-900 dark:text-white">
                     {settings.currency} {totalSPayLaterDue.toLocaleString()}
                   </span>
-                  <span className="text-[10px] text-brand-200">{activeCyclePurchases.length} Purchase items</span>
+                  <span className="text-[10px] text-slate-500 dark:text-brand-200">{activeCyclePurchases.length} Purchase items</span>
                 </div>
               </div>
 
               {activeBudget.allocations.some(a => a.category.toLowerCase().includes("spaylater")) ? (
-                <div className="p-2.5 bg-emerald-500/15 text-emerald-300 text-[10px] rounded-xl border border-emerald-500/20 flex items-center gap-2">
+                <div className="p-2.5 bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[10px] rounded-xl border border-emerald-200 dark:border-emerald-500/20 flex items-center gap-2">
                   <Check className="w-4 h-4 shrink-0" />
                   <span>SPayLater dues successfully integrated in your active budget categories!</span>
                 </div>

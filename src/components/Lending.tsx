@@ -19,7 +19,7 @@ import {
   Calculator,
   Download
 } from "lucide-react";
-import html2canvas from "html2canvas";
+import html2canvas from "html2canvas-pro";
 import { Loan, LoanPayment, SystemSettings } from "../types";
 
 interface LendingProps {
@@ -160,6 +160,7 @@ export default function Lending({
       link.href = canvas.toDataURL("image/png");
       link.click();
     } catch (err) {
+      console.error("Save as Image failed:", err);
       alert("Failed to generate image. Please try Print instead.");
     } finally {
       setIsSavingImage(false);

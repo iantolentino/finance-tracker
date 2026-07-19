@@ -20,7 +20,7 @@ import {
   TrendingUp,
   Download
 } from "lucide-react";
-import html2canvas from "html2canvas";
+import html2canvas from "html2canvas-pro";
 import { Customer, Purchase, Payment, SystemSettings } from "../types";
 
 interface SPayLaterProps {
@@ -350,6 +350,7 @@ export default function SPayLater({
       link.href = canvas.toDataURL("image/png");
       link.click();
     } catch (err) {
+      console.error("Save as Image failed:", err);
       alert("Failed to generate image. Please try Print instead.");
     } finally {
       setIsSavingImage(false);
@@ -1161,36 +1162,12 @@ export default function SPayLater({
             onClick={(e) => e.stopPropagation()}
             className="bg-white dark:bg-slate-900 rounded-xl w-full max-w-2xl flex flex-col max-h-[90vh] overflow-hidden shadow-2xl animate-in fade-in-50 zoom-in-95 print:shadow-none print:rounded-none print:w-full print:max-h-none"
           >
-            {/* Header: Hide when printing */}
-            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between print:hidden shrink-0 bg-white dark:bg-slate-900">
+            {/* Header: Hide when printing - actions (Print/Save as Image/Close) live in the footer below, not duplicated here */}
+            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center print:hidden shrink-0 bg-white dark:bg-slate-900">
               <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2 text-sm">
                 <Printer className="w-4 h-4 text-slate-500" />
                 Statement Of Account / Invoice
               </h4>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handlePrint}
-                  className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold text-white bg-slate-950 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 rounded-lg transition"
-                >
-                  <Printer className="w-3.5 h-3.5 mr-1" />
-                  Print Statement
-                </button>
-                <button
-                  onClick={handleSaveAsImage}
-                  disabled={isSavingImage}
-                  className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-50 rounded-lg transition"
-                >
-                  <Download className="w-3.5 h-3.5 mr-1" />
-                  {isSavingImage ? "Saving..." : "Save as Image"}
-                </button>
-                <button
-                  onClick={() => setInvoiceModalOpen(false)}
-                  className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
-                  aria-label="Close modal"
-                >
-                  <X className="w-4 h-4 text-slate-400" />
-                </button>
-              </div>
             </div>
 
             {/* Print Friendly Canvas Sheet - Scrollable area inside the modal */}

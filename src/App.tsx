@@ -561,9 +561,6 @@ export default function App() {
                 <Building className="w-8 h-8" />
               </div>
               <h2 className="text-xl font-bold tracking-tight text-slate-950">PFMS Workspace</h2>
-              <p className="text-xs text-slate-500">
-                Personal Finance Management System. Authentication Required.
-              </p>
             </div>
 
             <form onSubmit={handleLoginSubmit} className="space-y-4">
@@ -625,15 +622,9 @@ export default function App() {
                 type="submit"
                 className="w-full py-2.5 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow transition"
               >
-                Access System Workspace
+                Login
               </button>
             </form>
-
-            <div className="border-t border-slate-100 pt-4 text-center">
-              <span className="text-[10px] text-slate-400">
-                Authorized Use Only • Powered by Secure local JSON-Persistence
-              </span>
-            </div>
           </div>
         </motion.div>
       </div>

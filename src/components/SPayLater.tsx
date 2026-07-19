@@ -20,7 +20,7 @@ import {
   TrendingUp,
   Download
 } from "lucide-react";
-import { toBlob as domToBlob } from "html-to-image";
+import html2canvas from "html2canvas-pro";
 import { Customer, Purchase, Payment, SystemSettings } from "../types";
 
 interface SPayLaterProps {
@@ -329,33 +329,43 @@ export default function SPayLater({
   };
 
   // Save the invoice as a PNG image (for sending via Messenger/Viber etc.).
-  // Uses html-to-image instead of html2canvas: html2canvas rebuilds the DOM
-  // from scratch by hand-parsing CSS and redrawing shapes/text onto a
-  // canvas, which is what caused the font-timing/oklch-color/iOS-blank-
-  // canvas issues. html-to-image serializes the live node (styles, fonts,
-  // whichever theme is actually on screen, included) into an SVG
-  // <foreignObject> and lets the browser's own renderer draw that - much
-  // closer to an actual screenshot, and it doesn't matter whether the page
-  // is in light or dark mode when it's taken.
+  // Captures the full scrollHeight of the statement, not just what's
+  // currently visible in the modal's scrollable viewport.
   const invoiceRef = useRef<HTMLDivElement>(null);
   const [isSavingImage, setIsSavingImage] = useState(false);
   const handleSaveAsImage = async () => {
     if (!invoiceRef.current) return;
     setIsSavingImage(true);
+
+    // A printed statement should always look the same (black text on white)
+    // regardless of whether the app is currently in dark mode. Toggling
+    // .dark off the live <html> (same code path the working theme switch
+    // already uses) rather than only inside html2canvas's cloned document
+    // avoids a class-recalculation race that can otherwise leave the
+    // capture blank.
+    const wasDark = document.documentElement.classList.contains("dark");
+    if (wasDark) document.documentElement.classList.remove("dark");
+
     try {
+      await document.fonts.ready;
+      await new Promise(requestAnimationFrame);
+
       const node = invoiceRef.current;
       const isMobile = /iPad|iPhone|iPod|Android/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-      const blob = await domToBlob(node, {
+      const canvas = await html2canvas(node, {
+        // iOS Safari has a tighter canvas memory ceiling than desktop - a
+        // scale-2 canvas is a known trigger for silent blank output there.
+        scale: isMobile ? 1 : 2,
         backgroundColor: "#ffffff",
-        pixelRatio: isMobile ? 1 : 2,
-        width: node.scrollWidth,
+        useCORS: true,
+        imageTimeout: 0,
         height: node.scrollHeight,
-        skipFonts: true,
-        cacheBust: true
+        windowHeight: node.scrollHeight
       });
-      if (!blob) throw new Error("Image capture produced no data");
 
       const filename = `SOA-${(selectedCustomerInfo?.fullName || "statement").replace(/\s+/g, "-")}-${new Date().toISOString().split("T")[0]}.png`;
+      const blob: Blob | null = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+      if (!blob) throw new Error("Canvas produced no image data");
       const file = new File([blob], filename, { type: "image/png" });
 
       // Desktop browsers (Windows Edge/Chrome included) also implement
@@ -380,6 +390,7 @@ export default function SPayLater({
       console.error("Save as Image failed:", err);
       alert("Failed to generate image. Please try Print instead.");
     } finally {
+      if (wasDark) document.documentElement.classList.add("dark");
       setIsSavingImage(false);
     }
   };
@@ -1200,8 +1211,8 @@ export default function SPayLater({
             {/* Print Friendly Canvas Sheet - Scrollable area inside the modal */}
             <div ref={invoiceRef} className="p-6 md:p-8 space-y-6 text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900 overflow-y-auto flex-1 print:p-0 print:overflow-visible">
               {/* Print header */}
-              <div className="flex justify-end items-start border-b border-slate-100 pb-4">
-                <div className="text-right">
+              <div className="flex items-start border-b border-slate-100 pb-4">
+                <div>
                   <span className="text-xs font-bold text-slate-900 uppercase block">Statement of Account</span>
                   <span className="text-[10px] text-slate-500 block mt-0.5">Billing Cycle: {activeCycle}</span>
                   <span className="text-[10px] text-slate-500 block">Date Generated: {new Date().toLocaleDateString()}</span>

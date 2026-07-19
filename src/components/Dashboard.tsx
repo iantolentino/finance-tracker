@@ -371,7 +371,7 @@ export default function Dashboard({
         {/* Card 2: Total Outstanding Balance */}
         <div className="bg-white dark:bg-slate-900 rounded-xl p-3 sm:p-5 border border-slate-200/80 dark:border-slate-800/80 shadow-xs relative overflow-hidden group hover:border-orange-200 transition">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] sm:text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">Outstanding</span>
+            <span className="text-[10px] sm:text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">Total Outstanding</span>
             <div className="p-1.5 sm:p-2 bg-orange-50 dark:bg-orange-950/30 text-orange-500 rounded-lg">
               <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
@@ -380,8 +380,8 @@ export default function Dashboard({
             <h3 className="text-lg sm:text-2xl font-bold text-slate-950 dark:text-white break-words">
               {formatCurrency(totalOutstanding)}
             </h3>
-            <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1">
-              {formatCurrency(spayLaterMetrics.outstanding)} SPayLater
+            <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1 break-words">
+              {formatCurrency(spayLaterMetrics.outstanding)} SPayLater • {formatCurrency(lendingMetrics.outstanding)} Lending
             </p>
           </div>
         </div>

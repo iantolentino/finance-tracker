@@ -1018,11 +1018,13 @@ export default function App() {
         })}
 
         <button
-          onClick={() => setMobileMenuOpen(true)}
-          className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 min-h-[56px] text-slate-500 dark:text-slate-400"
+          onClick={() => setCurrentTab("reports")}
+          className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 min-h-[56px] ${
+            currentTab === "reports" ? "text-brand-600 dark:text-brand-400" : "text-slate-500 dark:text-slate-400"
+          }`}
         >
-          <Menu className="w-5 h-5" />
-          <span className="text-[9px] font-semibold">More</span>
+          <FileText className="w-5 h-5" />
+          <span className="text-[9px] font-semibold">Reports</span>
         </button>
       </nav>
       )}

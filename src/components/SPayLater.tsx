@@ -1175,9 +1175,6 @@ export default function SPayLater({
               {/* Print header */}
               <div className="flex justify-between items-start border-b border-slate-100 pb-4">
                 <div>
-                  <h1 className="text-lg font-extrabold text-brand-600 uppercase tracking-tight">
-                    {settings.personalBusinessName || "Personal Finance System"}
-                  </h1>
                   <span className="text-[10px] text-slate-400 font-medium block mt-0.5">SPayLater Billing & Receivable Statement</span>
                 </div>
                 <div className="text-right">
@@ -1188,16 +1185,11 @@ export default function SPayLater({
               </div>
 
               {/* Customer & Billing information */}
-              <div className="grid grid-cols-2 gap-4 text-xs">
+              <div className="text-xs">
                 <div className="space-y-1 p-3 bg-slate-50 rounded-xl border border-slate-100 print:bg-white print:border-none print:p-0">
                   <span className="text-[9px] uppercase font-bold text-slate-400 block">Billed To:</span>
                   <h3 className="font-bold text-slate-900">{selectedCustomerInfo.fullName}</h3>
                   {selectedCustomerInfo.contactNumber && <p className="text-slate-500">Phone: {selectedCustomerInfo.contactNumber}</p>}
-                </div>
-                <div className="text-right space-y-1 p-3 bg-slate-50 rounded-xl border border-slate-100 print:bg-white print:border-none print:p-0">
-                  <span className="text-[9px] uppercase font-bold text-slate-400 block">Payment Instructions:</span>
-                  <p className="font-medium text-slate-900">GCash / Maya / Bank</p>
-                  <p className="text-[10px] text-slate-500">Please send GCash receipts via Messenger.</p>
                 </div>
               </div>
 

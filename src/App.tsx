@@ -858,6 +858,7 @@ export default function App() {
                 purchases={purchases}
                 payments={payments}
                 settings={settings}
+                displayName={displayName}
                 activeCycle={activeCycle}
                 onAddCustomer={handleAddCustomer}
                 onEditCustomer={handleEditCustomer}
@@ -878,6 +879,7 @@ export default function App() {
               <Lending
                 loans={loans}
                 settings={settings}
+                displayName={displayName}
                 onAddLoan={handleAddLoan}
                 onEditLoan={handleEditLoan}
                 onDeleteLoan={handleDeleteLoan}

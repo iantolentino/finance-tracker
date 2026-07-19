@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import {
   Users,
   Search,
@@ -17,8 +17,10 @@ import {
   ArrowRight,
   Printer,
   ChevronRight,
-  TrendingUp
+  TrendingUp,
+  Download
 } from "lucide-react";
+import html2canvas from "html2canvas";
 import { Customer, Purchase, Payment, SystemSettings } from "../types";
 
 interface SPayLaterProps {
@@ -26,6 +28,7 @@ interface SPayLaterProps {
   purchases: Purchase[];
   payments: Payment[];
   settings: SystemSettings;
+  displayName: string;
   activeCycle: string;
   onAddCustomer: (c: Partial<Customer>) => Promise<any>;
   onEditCustomer: (id: string, c: Partial<Customer>) => Promise<any>;
@@ -47,6 +50,7 @@ export default function SPayLater({
   purchases,
   payments,
   settings,
+  displayName,
   activeCycle,
   onAddCustomer,
   onEditCustomer,
@@ -322,6 +326,34 @@ export default function SPayLater({
   // Trigger Print of Invoice
   const handlePrint = () => {
     window.print();
+  };
+
+  // Save the invoice as a PNG image (for sending via Messenger/Viber etc.)
+  // Captures the full scrollHeight of the statement, not just what's
+  // currently visible in the modal's scrollable viewport.
+  const invoiceRef = useRef<HTMLDivElement>(null);
+  const [isSavingImage, setIsSavingImage] = useState(false);
+  const handleSaveAsImage = async () => {
+    if (!invoiceRef.current) return;
+    setIsSavingImage(true);
+    try {
+      const node = invoiceRef.current;
+      const canvas = await html2canvas(node, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        useCORS: true,
+        height: node.scrollHeight,
+        windowHeight: node.scrollHeight
+      });
+      const link = document.createElement("a");
+      link.download = `SOA-${(selectedCustomerInfo?.fullName || "statement").replace(/\s+/g, "-")}-${new Date().toISOString().split("T")[0]}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch (err) {
+      alert("Failed to generate image. Please try Print instead.");
+    } finally {
+      setIsSavingImage(false);
+    }
   };
 
   return (
@@ -1144,6 +1176,14 @@ export default function SPayLater({
                   Print Statement
                 </button>
                 <button
+                  onClick={handleSaveAsImage}
+                  disabled={isSavingImage}
+                  className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-50 rounded-lg transition"
+                >
+                  <Download className="w-3.5 h-3.5 mr-1" />
+                  {isSavingImage ? "Saving..." : "Save as Image"}
+                </button>
+                <button
                   onClick={() => setInvoiceModalOpen(false)}
                   className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
                   aria-label="Close modal"
@@ -1154,7 +1194,7 @@ export default function SPayLater({
             </div>
 
             {/* Print Friendly Canvas Sheet - Scrollable area inside the modal */}
-            <div className="p-6 md:p-8 space-y-6 text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900 overflow-y-auto flex-1 print:p-0 print:overflow-visible">
+            <div ref={invoiceRef} className="p-6 md:p-8 space-y-6 text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900 overflow-y-auto flex-1 print:p-0 print:overflow-visible">
               {/* Print header */}
               <div className="flex justify-between items-start border-b border-slate-100 pb-4">
                 <div>
@@ -1281,7 +1321,7 @@ export default function SPayLater({
               {/* Signature lines */}
               <div className="grid grid-cols-2 gap-12 pt-12 text-center text-[10px] text-slate-400">
                 <div className="border-t border-dashed border-slate-200 pt-2">
-                  {settings.personalBusinessName} <br />
+                  {displayName} <br />
                   <span className="font-medium text-slate-300">Signature / Date</span>
                 </div>
                 <div className="border-t border-dashed border-slate-200 pt-2">
@@ -1299,6 +1339,15 @@ export default function SPayLater({
                 className="px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg transition shadow-xs"
               >
                 Close / Dismiss
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveAsImage}
+                disabled={isSavingImage}
+                className="inline-flex items-center justify-center px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 disabled:opacity-50 rounded-lg shadow-xs transition"
+              >
+                <Download className="w-3.5 h-3.5 mr-1.5" />
+                {isSavingImage ? "Saving..." : "Save as Image"}
               </button>
               <button
                 type="button"

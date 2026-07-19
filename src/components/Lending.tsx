@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import {
   DollarSign,
   Search,
@@ -16,13 +16,16 @@ import {
   TrendingUp,
   Printer,
   ChevronRight,
-  Calculator
+  Calculator,
+  Download
 } from "lucide-react";
+import html2canvas from "html2canvas";
 import { Loan, LoanPayment, SystemSettings } from "../types";
 
 interface LendingProps {
   loans: Loan[];
   settings: SystemSettings;
+  displayName: string;
   onAddLoan: (l: Partial<Loan>) => Promise<any>;
   onEditLoan: (id: string, l: Partial<Loan>) => Promise<any>;
   onDeleteLoan: (id: string) => Promise<any>;
@@ -37,6 +40,7 @@ interface LendingProps {
 export default function Lending({
   loans,
   settings,
+  displayName,
   onAddLoan,
   onEditLoan,
   onDeleteLoan,
@@ -135,6 +139,32 @@ export default function Lending({
     if (!selectedLoanId) return null;
     return computedLoans.find(l => l.id === selectedLoanId) || null;
   }, [selectedLoanId, computedLoans]);
+
+  // Save the loan statement as a PNG image (for sending via Messenger/Viber etc.)
+  const receiptRef = useRef<HTMLDivElement>(null);
+  const [isSavingImage, setIsSavingImage] = useState(false);
+  const handleSaveAsImage = async () => {
+    if (!receiptRef.current) return;
+    setIsSavingImage(true);
+    try {
+      const node = receiptRef.current;
+      const canvas = await html2canvas(node, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        useCORS: true,
+        height: node.scrollHeight,
+        windowHeight: node.scrollHeight
+      });
+      const link = document.createElement("a");
+      link.download = `Loan-Statement-${(selectedLoanInfo?.borrowerName || "statement").replace(/\s+/g, "-")}-${new Date().toISOString().split("T")[0]}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch (err) {
+      alert("Failed to generate image. Please try Print instead.");
+    } finally {
+      setIsSavingImage(false);
+    }
+  };
 
   // Metric summaries for the Lending Dashboard Sidebar
   const lendingTotals = useMemo(() => {
@@ -840,6 +870,14 @@ export default function Lending({
                   Print Statement
                 </button>
                 <button
+                  onClick={handleSaveAsImage}
+                  disabled={isSavingImage}
+                  className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-50 rounded-xl transition"
+                >
+                  <Download className="w-3.5 h-3.5 mr-1" />
+                  {isSavingImage ? "Saving..." : "Save as Image"}
+                </button>
+                <button
                   onClick={() => setReceiptModalOpen(false)}
                   className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
                 >
@@ -849,7 +887,7 @@ export default function Lending({
             </div>
 
             {/* Statement of Loan Sheet */}
-            <div className="p-8 space-y-6 text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900 print:p-0">
+            <div ref={receiptRef} className="p-8 space-y-6 text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900 print:p-0">
               <div className="flex justify-between items-start border-b border-slate-100 dark:border-slate-800 pb-4">
                 <div>
                   <h1 className="text-lg font-extrabold text-brand-600 uppercase tracking-tight">
@@ -868,7 +906,7 @@ export default function Lending({
               <div className="grid grid-cols-2 gap-4 text-xs">
                 <div className="space-y-1 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 print:bg-white print:border-none print:p-0">
                   <span className="text-[9px] uppercase font-bold text-slate-400 dark:text-slate-500 block">Lender:</span>
-                  <h3 className="font-bold text-slate-900 dark:text-white">{settings.personalBusinessName}</h3>
+                  <h3 className="font-bold text-slate-900 dark:text-white">{displayName}</h3>
                 </div>
                 <div className="space-y-1 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 print:bg-white print:border-none print:p-0">
                   <span className="text-[9px] uppercase font-bold text-slate-400 dark:text-slate-500 block">Borrower / Payee:</span>
@@ -958,7 +996,7 @@ export default function Lending({
               {/* Signatures */}
               <div className="grid grid-cols-2 gap-12 pt-12 text-center text-[10px] text-slate-400 dark:text-slate-500">
                 <div className="border-t border-dashed border-slate-200 dark:border-slate-700 pt-2">
-                  {settings.personalBusinessName} <br />
+                  {displayName} <br />
                   <span className="font-medium text-slate-300 dark:text-slate-600">Lender Signature / Date</span>
                 </div>
                 <div className="border-t border-dashed border-slate-200 dark:border-slate-700 pt-2">

@@ -153,13 +153,37 @@ export default function Lending({
         backgroundColor: "#ffffff",
         useCORS: true,
         height: node.scrollHeight,
-        windowHeight: node.scrollHeight
+        windowHeight: node.scrollHeight,
+        // A printed statement should always look the same (black text on
+        // white) regardless of whether the app is currently in dark mode -
+        // strip the .dark class from the cloned document before it renders.
+        onclone: (clonedDoc) => {
+          clonedDoc.documentElement.classList.remove("dark");
+        }
       });
-      const link = document.createElement("a");
-      link.download = `Loan-Statement-${(selectedLoanInfo?.borrowerName || "statement").replace(/\s+/g, "-")}-${new Date().toISOString().split("T")[0]}.png`;
-      link.href = canvas.toDataURL("image/png");
-      link.click();
-    } catch (err) {
+
+      const filename = `Loan-Statement-${(selectedLoanInfo?.borrowerName || "statement").replace(/\s+/g, "-")}-${new Date().toISOString().split("T")[0]}.png`;
+      const blob: Blob | null = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+      if (!blob) throw new Error("Canvas produced no image data");
+      const file = new File([blob], filename, { type: "image/png" });
+
+      // iOS Safari doesn't reliably honor forced <a download> file saves -
+      // the native share sheet (Save Image / send directly to Messages etc.)
+      // is both more reliable there and closer to what "send to others" means.
+      if (typeof navigator.share === "function" && typeof navigator.canShare === "function" && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: filename });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.download = filename;
+        link.href = url;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
+    } catch (err: any) {
+      if (err?.name === "AbortError") return; // user cancelled the share sheet
       console.error("Save as Image failed:", err);
       alert("Failed to generate image. Please try Print instead.");
     } finally {

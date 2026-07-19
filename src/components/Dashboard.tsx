@@ -423,64 +423,66 @@ export default function Dashboard({
         </div>
       </div>
 
-      {/* Sub-grid: Lending vs SPayLater Split cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Sub-grid: Lending vs SPayLater Split cards - kept compact since the
+          same totals also appear in the stat cards above and the pie chart
+          below; this is just the per-module breakdown. */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {/* SPayLater Panel Summary */}
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 bg-orange-500 rounded-full" />
-              <h3 className="font-semibold text-slate-800 dark:text-slate-200">SPayLater Tracker</h3>
+        <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs">
+          <div className="flex items-center justify-between pb-2 mb-2">
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 bg-orange-500 rounded-full" />
+              <h3 className="text-xs font-semibold text-slate-800 dark:text-slate-200">SPayLater Tracker</h3>
             </div>
-            <button 
+            <button
               onClick={() => onNavigate("spaylater")}
-              className="text-xs text-brand-600 hover:text-brand-800 flex items-center gap-1 font-medium"
+              className="text-[10px] text-brand-600 hover:text-brand-800 flex items-center gap-0.5 font-medium"
             >
-              Manage Module <ArrowRight className="w-3 h-3" />
+              Manage <ArrowRight className="w-3 h-3" />
             </button>
           </div>
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-2 text-center">
-            <div className="p-2 sm:p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-              <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500">Receivables</span>
-              <span className="block text-[11px] sm:text-sm font-bold text-slate-800 dark:text-slate-200 mt-1 break-words">{formatCurrency(spayLaterMetrics.receivables)}</span>
+          <div className="grid grid-cols-3 gap-1.5 text-center">
+            <div className="p-1.5 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+              <span className="block text-[8px] uppercase font-semibold text-slate-400 dark:text-slate-500">Receivables</span>
+              <span className="block text-[10px] font-bold text-slate-800 dark:text-slate-200 mt-0.5 break-words">{formatCurrency(spayLaterMetrics.receivables)}</span>
             </div>
-            <div className="p-2 sm:p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-              <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500">Total Paid</span>
-              <span className="block text-[11px] sm:text-sm font-bold text-emerald-600 mt-1 break-words">{formatCurrency(spayLaterMetrics.paid)}</span>
+            <div className="p-1.5 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+              <span className="block text-[8px] uppercase font-semibold text-slate-400 dark:text-slate-500">Paid</span>
+              <span className="block text-[10px] font-bold text-emerald-600 mt-0.5 break-words">{formatCurrency(spayLaterMetrics.paid)}</span>
             </div>
-            <div className="p-2 sm:p-3 bg-orange-50/50 dark:bg-orange-950/20 rounded-lg">
-              <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-orange-700">Remaining</span>
-              <span className="block text-[11px] sm:text-sm font-bold text-orange-600 mt-1 break-words">{formatCurrency(spayLaterMetrics.outstanding)}</span>
+            <div className="p-1.5 bg-orange-50/50 dark:bg-orange-950/20 rounded-lg">
+              <span className="block text-[8px] uppercase font-semibold text-orange-700">Remaining</span>
+              <span className="block text-[10px] font-bold text-orange-600 mt-0.5 break-words">{formatCurrency(spayLaterMetrics.outstanding)}</span>
             </div>
           </div>
         </div>
 
         {/* Lending Panel Summary */}
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 bg-brand-500 rounded-full" />
-              <h3 className="font-semibold text-slate-800 dark:text-slate-200">Lending Management</h3>
+        <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs">
+          <div className="flex items-center justify-between pb-2 mb-2">
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 bg-brand-500 rounded-full" />
+              <h3 className="text-xs font-semibold text-slate-800 dark:text-slate-200">Lending Management</h3>
             </div>
-            <button 
+            <button
               onClick={() => onNavigate("lending")}
-              className="text-xs text-brand-600 hover:text-brand-800 flex items-center gap-1 font-medium"
+              className="text-[10px] text-brand-600 hover:text-brand-800 flex items-center gap-0.5 font-medium"
             >
-              Manage Module <ArrowRight className="w-3 h-3" />
+              Manage <ArrowRight className="w-3 h-3" />
             </button>
           </div>
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-2 text-center">
-            <div className="p-2 sm:p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-              <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500">Total Due</span>
-              <span className="block text-[11px] sm:text-sm font-bold text-slate-800 dark:text-slate-200 mt-1 break-words">{formatCurrency(lendingMetrics.totalDue)}</span>
+          <div className="grid grid-cols-3 gap-1.5 text-center">
+            <div className="p-1.5 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+              <span className="block text-[8px] uppercase font-semibold text-slate-400 dark:text-slate-500">Total Due</span>
+              <span className="block text-[10px] font-bold text-slate-800 dark:text-slate-200 mt-0.5 break-words">{formatCurrency(lendingMetrics.totalDue)}</span>
             </div>
-            <div className="p-2 sm:p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-              <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500">Interest Earned</span>
-              <span className="block text-[11px] sm:text-sm font-bold text-brand-600 mt-1 break-words">{formatCurrency(lendingMetrics.interestEarned)}</span>
+            <div className="p-1.5 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+              <span className="block text-[8px] uppercase font-semibold text-slate-400 dark:text-slate-500">Interest</span>
+              <span className="block text-[10px] font-bold text-brand-600 mt-0.5 break-words">{formatCurrency(lendingMetrics.interestEarned)}</span>
             </div>
-            <div className="p-2 sm:p-3 bg-brand-50/50 dark:bg-brand-950/20 rounded-lg">
-              <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-brand-700">Outstanding</span>
-              <span className="block text-[11px] sm:text-sm font-bold text-brand-600 mt-1 break-words">{formatCurrency(lendingMetrics.outstanding)}</span>
+            <div className="p-1.5 bg-brand-50/50 dark:bg-brand-950/20 rounded-lg">
+              <span className="block text-[8px] uppercase font-semibold text-brand-700">Outstanding</span>
+              <span className="block text-[10px] font-bold text-brand-600 mt-0.5 break-words">{formatCurrency(lendingMetrics.outstanding)}</span>
             </div>
           </div>
         </div>

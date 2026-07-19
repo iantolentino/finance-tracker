@@ -17,31 +17,58 @@ import {
   Clock,
   Eye,
   EyeOff,
-  Sparkles
+  Sparkles,
+  User
 } from "lucide-react";
 import { SystemSettings, ActivityLog, BackupRecord } from "../types";
 import { api } from "../api";
 
 interface SettingsProps {
   settings: SystemSettings;
+  displayName: string;
   logs: ActivityLog[];
   backups: BackupRecord[];
   onUpdateSettings: (settings: Partial<SystemSettings>) => Promise<any>;
   onChangePassword: (oldPass: string, newPass: string) => Promise<any>;
+  onUpdateDisplayName: (displayName: string) => Promise<any>;
   onRefreshBackups: () => Promise<any>;
   onRefreshLogs: () => Promise<any>;
 }
 
 export default function Settings({
   settings,
+  displayName,
   logs,
   backups,
   onUpdateSettings,
   onChangePassword,
+  onUpdateDisplayName,
   onRefreshBackups,
   onRefreshLogs
 }: SettingsProps) {
-  
+
+  // Profile name edit state
+  const [profileName, setProfileName] = useState(displayName);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+
+  useEffect(() => {
+    setProfileName(displayName);
+  }, [displayName]);
+
+  const handleSaveProfileName = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profileName.trim()) return;
+    setIsSavingProfile(true);
+    try {
+      await onUpdateDisplayName(profileName.trim());
+      alert("Profile name updated!");
+    } catch (err: any) {
+      alert(err.message || "Failed to update profile name.");
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
   // Settings edit state
   const [personalBusinessName, setPersonalBusinessName] = useState(settings.personalBusinessName);
   const [currency, setCurrency] = useState(settings.currency);
@@ -255,12 +282,12 @@ export default function Settings({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-        <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+      <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
           <SettingsIcon className="w-5 h-5 text-brand-500" />
           System Settings &amp; Backups
         </h2>
-        <p className="text-xs text-slate-500 mt-1">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
           Configure personal credentials, manage billing and due schedules, export reports, and control JSON database backups.
         </p>
       </div>
@@ -269,27 +296,27 @@ export default function Settings({
         {/* Left Side: Forms */}
         <div className="lg:col-span-2 space-y-6">
           {/* General Config */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-            <h3 className="font-bold text-slate-800 text-sm border-b border-slate-50 pb-2">System Profile Configuration</h3>
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
+            <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm border-b border-slate-50 dark:border-slate-800/50 pb-2">System Profile Configuration</h3>
             <form onSubmit={handleSaveSettings} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Personal / Business Name</label>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Personal / Business Name</label>
                 <input
                   type="text"
                   required
                   value={personalBusinessName}
                   onChange={(e) => setPersonalBusinessName(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800/50"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Default Currency Unit</label>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Default Currency Unit</label>
                   <select
                     value={currency}
                     onChange={(e) => setCurrency(e.target.value)}
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800/50"
                   >
                     <option value="PHP">Philippine Peso (₱)</option>
                     <option value="USD">US Dollar ($)</option>
@@ -297,11 +324,11 @@ export default function Settings({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Backup Synchronization Preferences</label>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Backup Synchronization Preferences</label>
                   <select
                     value={backupPreference}
                     onChange={(e) => setBackupPreference(e.target.value as any)}
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800/50"
                   >
                     <option value="manual">Manual Backup Operations Only</option>
                     <option value="daily">Trigger Automatic Daily Backups</option>
@@ -312,7 +339,7 @@ export default function Settings({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Default Billing Day</label>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Default Billing Day</label>
                   <input
                     type="number"
                     min={1}
@@ -321,11 +348,11 @@ export default function Settings({
                     value={defaultBillingDate}
                     onChange={(e) => setDefaultBillingDate(e.target.value)}
                     placeholder="15"
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800/50"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Default Payment Due Day</label>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Default Payment Due Day</label>
                   <input
                     type="number"
                     min={1}
@@ -334,7 +361,7 @@ export default function Settings({
                     value={defaultDueDate}
                     onChange={(e) => setDefaultDueDate(e.target.value)}
                     placeholder="30"
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800/50"
                   />
                 </div>
               </div>
@@ -351,15 +378,45 @@ export default function Settings({
             </form>
           </div>
 
+          {/* Profile Name Settings */}
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
+            <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm border-b border-slate-50 dark:border-slate-800/50 pb-2 flex items-center gap-1.5">
+              <User className="w-4 h-4 text-brand-500" />
+              Profile Name
+            </h3>
+            <form onSubmit={handleSaveProfileName} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Your Display Name</label>
+                <input
+                  type="text"
+                  required
+                  value={profileName}
+                  onChange={(e) => setProfileName(e.target.value)}
+                  placeholder="How your name appears throughout the app"
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800/50 dark:text-white"
+                />
+              </div>
+              <div className="pt-2 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={isSavingProfile || profileName.trim() === displayName}
+                  className="px-5 py-2.5 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-sm transition disabled:opacity-50"
+                >
+                  {isSavingProfile ? "Saving..." : "Save Display Name"}
+                </button>
+              </div>
+            </form>
+          </div>
+
           {/* Password Settings */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-            <h3 className="font-bold text-slate-800 text-sm border-b border-slate-50 pb-2 flex items-center gap-1.5 text-red-700">
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
+            <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm border-b border-slate-50 dark:border-slate-800/50 pb-2 flex items-center gap-1.5 text-red-700 dark:text-red-400">
               <Lock className="w-4 h-4 text-red-500" />
               Change Master Access Password
             </h3>
             <form onSubmit={handlePasswordChange} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Current Password</label>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Current Password</label>
                 <div className="relative">
                   <input
                     type={showPass ? "text" : "password"}
@@ -367,12 +424,12 @@ export default function Settings({
                     value={oldPassword}
                     onChange={(e) => setOldPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50 pr-10"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800/50 pr-10"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPass(!showPass)}
-                    className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                    className="absolute right-3 top-3 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
                   >
                     {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -381,25 +438,25 @@ export default function Settings({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">New Password</label>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">New Password</label>
                   <input
                     type="password"
                     required
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="Minimum 4 characters"
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800/50"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Confirm New Password</label>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Confirm New Password</label>
                   <input
                     type="password"
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Must match new password"
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800/50"
                   />
                 </div>
               </div>
@@ -417,11 +474,11 @@ export default function Settings({
           </div>
 
           {/* Activity logs section */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col">
-            <div className="flex items-center justify-between border-b border-slate-50 pb-2 mb-3">
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col">
+            <div className="flex items-center justify-between border-b border-slate-50 dark:border-slate-800/50 pb-2 mb-3">
               <div className="flex items-center gap-1.5">
-                <Activity className="w-4 h-4 text-slate-500" />
-                <h3 className="font-bold text-slate-800 text-sm">System Audit & Activity Logs</h3>
+                <Activity className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm">System Audit & Activity Logs</h3>
               </div>
               <button
                 onClick={onRefreshLogs}
@@ -432,14 +489,14 @@ export default function Settings({
             </div>
             <div className="space-y-3 overflow-y-auto max-h-[220px] pr-1">
               {logs.map((log) => (
-                <div key={log.id} className="text-xs border-b border-slate-50 pb-2 last:border-0 last:pb-0">
+                <div key={log.id} className="text-xs border-b border-slate-50 dark:border-slate-800/50 pb-2 last:border-0 last:pb-0">
                   <div className="flex justify-between items-start gap-2">
-                    <span className="font-bold text-slate-800">{log.action}</span>
-                    <span className="text-[9px] text-slate-400">
+                    <span className="font-bold text-slate-800 dark:text-slate-200">{log.action}</span>
+                    <span className="text-[9px] text-slate-400 dark:text-slate-500">
                       {new Date(log.timestamp).toLocaleString()}
                     </span>
                   </div>
-                  <p className="text-slate-500 mt-1 text-[11px] leading-relaxed">{log.details}</p>
+                  <p className="text-slate-500 dark:text-slate-400 mt-1 text-[11px] leading-relaxed">{log.details}</p>
                 </div>
               ))}
             </div>
@@ -448,8 +505,8 @@ export default function Settings({
 
         {/* Right Side: Backups panel */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-            <h3 className="font-bold text-slate-800 text-sm border-b border-slate-50 pb-2 flex items-center gap-1.5">
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
+            <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm border-b border-slate-50 dark:border-slate-800/50 pb-2 flex items-center gap-1.5">
               <Database className="w-4 h-4 text-brand-500" />
               Backup &amp; Restore
             </h3>
@@ -458,14 +515,14 @@ export default function Settings({
             <div className="grid grid-cols-2 gap-2 text-center">
               <button
                 onClick={handleExportData}
-                className="flex flex-col items-center justify-center p-3 border border-slate-200 hover:border-brand-500 rounded-xl bg-slate-50/50 hover:bg-white text-xs gap-1.5 transition font-semibold"
+                className="flex flex-col items-center justify-center p-3 border border-slate-200 dark:border-slate-700 hover:border-brand-500 rounded-xl bg-slate-50/50 dark:bg-slate-800/50 hover:bg-white dark:bg-slate-900 text-xs gap-1.5 transition font-semibold"
               >
                 <Download className="w-5 h-5 text-brand-500" />
                 Export DB JSON
               </button>
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="flex flex-col items-center justify-center p-3 border border-slate-200 hover:border-brand-500 rounded-xl bg-slate-50/50 hover:bg-white text-xs gap-1.5 transition font-semibold"
+                className="flex flex-col items-center justify-center p-3 border border-slate-200 dark:border-slate-700 hover:border-brand-500 rounded-xl bg-slate-50/50 dark:bg-slate-800/50 hover:bg-white dark:bg-slate-900 text-xs gap-1.5 transition font-semibold"
               >
                 <Upload className="w-5 h-5 text-brand-500" />
                 Import JSON
@@ -508,22 +565,22 @@ export default function Settings({
             </button>
 
             {/* Backups Lists */}
-            <div className="space-y-2 border-t border-slate-50 pt-3">
-              <h4 className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Backup Files ({backups.length})</h4>
+            <div className="space-y-2 border-t border-slate-50 dark:border-slate-800/50 pt-3">
+              <h4 className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider">Backup Files ({backups.length})</h4>
               
               <div className="space-y-2 overflow-y-auto max-h-[300px] pr-1">
                 {backups.length === 0 ? (
-                  <div className="text-center py-8 text-xs text-slate-300">
+                  <div className="text-center py-8 text-xs text-slate-300 dark:text-slate-600">
                     No backup records found.
                   </div>
                 ) : (
                   backups.map((bak) => (
-                    <div key={bak.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-2">
+                    <div key={bak.id} className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-2">
                       <div className="min-w-0">
-                        <span className="block text-xs font-bold text-slate-800 truncate" title={bak.filename}>
+                        <span className="block text-xs font-bold text-slate-800 dark:text-slate-200 truncate" title={bak.filename}>
                           {bak.filename}
                         </span>
-                        <span className="block text-[9px] text-slate-400 mt-0.5">
+                        <span className="block text-[9px] text-slate-400 dark:text-slate-500 mt-0.5">
                           {bak.type === "automatic" ? "Auto" : "Manual"} • {(bak.size / 1024).toFixed(1)} KB
                         </span>
                       </div>
@@ -531,7 +588,7 @@ export default function Settings({
                         <button
                           onClick={() => handleRestoreBackup(bak.id, bak.filename)}
                           disabled={!!isRestoringBackup}
-                          className="p-1 text-slate-500 hover:text-brand-600 hover:bg-white border border-transparent hover:border-slate-200 rounded transition"
+                          className="p-1 text-slate-500 dark:text-slate-400 hover:text-brand-600 hover:bg-white dark:bg-slate-900 border border-transparent hover:border-slate-200 dark:border-slate-700 rounded transition"
                           title="Restore System to this state"
                         >
                           {isRestoringBackup === bak.id ? (
@@ -543,7 +600,7 @@ export default function Settings({
                         <button
                           onClick={() => handleDeleteBackup(bak.id)}
                           disabled={!!isDeletingBackup}
-                          className="p-1 text-red-500 hover:text-red-700 hover:bg-white border border-transparent hover:border-red-100 rounded transition"
+                          className="p-1 text-red-500 hover:text-red-700 dark:text-red-400 hover:bg-white dark:bg-slate-900 border border-transparent hover:border-red-100 dark:border-red-900/40 rounded transition"
                           title="Delete backup file"
                         >
                           {isDeletingBackup === bak.id ? (

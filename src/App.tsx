@@ -21,21 +21,24 @@ import {
   Moon,
   Wallet,
   Plus,
-  Search
+  Search,
+  Landmark
 } from "lucide-react";
 
 import { api, getAuthToken, setAuthToken, getDisplayName, setDisplayName } from "./api";
-import { Customer, Purchase, Payment, Loan, SystemSettings, ActivityLog, BackupRecord } from "./types";
+import { Customer, Purchase, Payment, Loan, SystemSettings, ActivityLog, BackupRecord, CreditCardEntry } from "./types";
 
 // Components
 const Dashboard = React.lazy(() => import("./components/Dashboard"));
 const SPayLater = React.lazy(() => import("./components/SPayLater"));
 const Lending = React.lazy(() => import("./components/Lending"));
 const BudgetTracker = React.lazy(() => import("./components/BudgetTracker"));
+const CreditCardTracker = React.lazy(() => import("./components/CreditCardTracker"));
 const Archives = React.lazy(() => import("./components/Archives"));
 const Reports = React.lazy(() => import("./components/Reports"));
 const Settings = React.lazy(() => import("./components/Settings"));
 const QuickLogModal = React.lazy(() => import("./components/QuickLogModal"));
+const CreditCardQuickAddModal = React.lazy(() => import("./components/CreditCardQuickAddModal"));
 const GlobalSearchModal = React.lazy(() => import("./components/GlobalSearchModal"));
 
 export default function App() {
@@ -53,6 +56,8 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [quickLogOpen, setQuickLogOpen] = useState(false);
   const [quickLogPreset, setQuickLogPreset] = useState<{ customerId?: string; loanId?: string } | null>(null);
+  const [quickAddChoiceOpen, setQuickAddChoiceOpen] = useState(false);
+  const [creditCardQuickAddOpen, setCreditCardQuickAddOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchNavTarget, setSearchNavTarget] = useState<{ type: "customer" | "loan"; id: string } | null>(null);
 
@@ -61,6 +66,7 @@ export default function App() {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loans, setLoans] = useState<Loan[]>([]);
+  const [creditCardEntries, setCreditCardEntries] = useState<CreditCardEntry[]>([]);
   const [archives, setArchives] = useState<any[]>([]);
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [backups, setBackups] = useState<BackupRecord[]>([]);
@@ -74,6 +80,16 @@ export default function App() {
   });
   const [activeCycle, setActiveCycle] = useState<string>("July 2026");
   const [availableCycles, setAvailableCycles] = useState<string[]>(["July 2026"]);
+
+  // Monthly Budget's own calendar month - deliberately independent of
+  // activeCycle (SPayLater's billing cycle). Completing or resetting an
+  // SPayLater cycle must never reset or reassign Budget data, so Budget is
+  // keyed by the real calendar month instead of sharing SPayLater's cycle label.
+  const budgetMonth = React.useMemo(() => {
+    const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const now = new Date();
+    return `${MONTH_NAMES[now.getMonth()]} ${now.getFullYear()}`;
+  }, []);
 
   // Dynamic theme applier
   useEffect(() => {
@@ -149,6 +165,7 @@ export default function App() {
         purchasesList,
         paymentsList,
         loansList,
+        creditCardList,
         archivesList,
         logsList,
         backupsList,
@@ -159,6 +176,7 @@ export default function App() {
         api.getPurchases(),
         api.getPayments(),
         api.getLoans(),
+        api.getCreditCardEntries(),
         api.getArchives(),
         api.getLogs(),
         api.getBackups(),
@@ -171,6 +189,7 @@ export default function App() {
       setPurchases(purchasesList);
       setPayments(paymentsList);
       setLoans(loansList);
+      setCreditCardEntries(creditCardList);
       setArchives(archivesList);
       setLogs(logsList);
       setBackups(backupsList);
@@ -338,6 +357,29 @@ export default function App() {
   };
 
   // ==========================================
+  // CREDIT CARD OPERATIONS (a data type distinct from SPayLater/Lending/Budget)
+  // ==========================================
+  const handleAddCreditCardEntry = async (entry: Partial<CreditCardEntry>) => {
+    const newEntry = await api.createCreditCardEntry(entry);
+    setCreditCardEntries(prev => [...prev, newEntry]);
+    return newEntry;
+  };
+
+  const handleEditCreditCardEntry = async (id: string, entry: Partial<CreditCardEntry>) => {
+    const updatedEntry = await api.updateCreditCardEntry(id, entry);
+    setCreditCardEntries(prev => prev.map(e => e.id === id ? updatedEntry : e));
+    return updatedEntry;
+  };
+
+  const handleDeleteCreditCardEntry = async (id: string) => {
+    const res = await api.deleteCreditCardEntry(id);
+    if (res.success) {
+      setCreditCardEntries(prev => prev.filter(e => e.id !== id));
+    }
+    return res;
+  };
+
+  // ==========================================
   // QUICK LOG (one entry point for any of the 3 places money gets logged)
   // ==========================================
   const handleQuickLogCustomerPayment = async (customerId: string, amount: number) => {
@@ -361,7 +403,7 @@ export default function App() {
 
   const handleQuickLogBudgetExpense = async (allocationId: string, amount: number, itemName: string) => {
     return api.addBudgetExpense({
-      month: activeCycle,
+      month: budgetMonth,
       allocationId,
       itemName,
       amount,
@@ -418,6 +460,16 @@ export default function App() {
     const res = await api.changePassword({ oldPassword: oldPass, newPassword: newPass });
     if (res.success) {
       setAuthToken(res.token);
+    }
+    return res;
+  };
+
+  const handleUpdateDisplayName = async (newDisplayName: string) => {
+    const res = await api.updateDisplayName(newDisplayName);
+    if (res.success) {
+      setAuthToken(res.token);
+      setDisplayName(res.displayName);
+      setDisplayNameState(res.displayName);
     }
     return res;
   };
@@ -588,6 +640,7 @@ export default function App() {
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "spaylater", label: "SPayLater Tracker", icon: CreditCard },
     { id: "lending", label: "Lending Portfolio", icon: Calculator },
+    { id: "creditcard", label: "Credit Card Tracker", icon: Landmark },
     { id: "budget", label: "Monthly Budget", icon: Wallet },
     { id: "archives", label: "Monthly Archives", icon: Archive },
     { id: "reports", label: "Financial Reports", icon: FileText },
@@ -685,19 +738,12 @@ export default function App() {
             </div>
           </button>
 
-          <div className="bg-slate-100 dark:bg-slate-800/40 p-3 rounded-lg border border-slate-200 dark:border-slate-800/60 flex flex-col gap-1 text-xs text-slate-700 dark:text-slate-300">
-            <div className="flex items-center gap-2">
-              <User className="w-3.5 h-3.5 text-brand-500 dark:text-brand-400 shrink-0" />
-              <span className="truncate font-bold">{displayName || "PFMS User"}</span>
-            </div>
-            <span className="text-[10px] text-slate-400 font-medium ml-5">PFMS Workspace</span>
-          </div>
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300 transition"
           >
             <LogOut className="w-4 h-4" />
-            Logout Session
+            Logout
           </button>
         </div>
       </aside>
@@ -771,19 +817,12 @@ export default function App() {
                 </div>
               </button>
 
-              <div className="bg-slate-100 dark:bg-slate-800/40 p-3 rounded-lg border border-slate-200 dark:border-slate-800/60 flex flex-col gap-1 text-xs text-slate-700 dark:text-slate-300">
-                <div className="flex items-center gap-2">
-                  <User className="w-3.5 h-3.5 text-brand-500 dark:text-brand-400 shrink-0" />
-                  <span className="truncate font-bold">{displayName || "PFMS User"}</span>
-                </div>
-                <span className="text-[10px] text-slate-400 font-medium ml-5">PFMS Workspace</span>
-              </div>
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300 transition"
               >
                 <LogOut className="w-4 h-4" />
-                Logout Session
+                Logout
               </button>
             </div>
           </motion.aside>
@@ -865,9 +904,20 @@ export default function App() {
               />
             )}
 
+            {currentTab === "creditcard" && (
+              <CreditCardTracker
+                entries={creditCardEntries}
+                settings={settings}
+                onAddEntry={handleAddCreditCardEntry}
+                onEditEntry={handleEditCreditCardEntry}
+                onDeleteEntry={handleDeleteCreditCardEntry}
+              />
+            )}
+
             {currentTab === "budget" && (
               <BudgetTracker
                 settings={settings}
+                budgetMonth={budgetMonth}
                 activeCycle={activeCycle}
                 availableCycles={availableCycles}
                 customers={customers}
@@ -898,10 +948,12 @@ export default function App() {
             {currentTab === "settings" && (
               <Settings
                 settings={settings}
+                displayName={displayName}
                 logs={logs}
                 backups={backups}
                 onUpdateSettings={handleUpdateSettings}
                 onChangePassword={handleChangePassword}
+                onUpdateDisplayName={handleUpdateDisplayName}
                 onRefreshBackups={refreshBackups}
                 onRefreshLogs={refreshLogs}
               />
@@ -914,7 +966,7 @@ export default function App() {
       {/* Quick Log FAB - desktop only; mobile gets the elevated center button in the bottom nav below */}
       <button
         type="button"
-        onClick={() => setQuickLogOpen(true)}
+        onClick={() => setQuickAddChoiceOpen(true)}
         title="Log Money"
         className="hidden md:flex fixed bottom-5 right-5 z-40 w-14 h-14 rounded-full bg-brand-600 hover:bg-brand-700 text-white shadow-lg shadow-brand-600/30 items-center justify-center transition print:hidden"
       >
@@ -923,7 +975,10 @@ export default function App() {
 
       {/* Mobile Bottom Navigation - 1 tap to switch between the most-used
           tabs instead of hamburger-then-drawer, plus the Quick Log action
-          front and center. "More" reuses the existing drawer for the rest. */}
+          front and center. "More" reuses the existing drawer for the rest.
+          Hidden while the mobile drawer is open - otherwise this fixed bar
+          visually overlaps the drawer's own bottom content (e.g. Logout). */}
+      {!mobileMenuOpen && (
       <nav
         className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-stretch justify-around print:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
@@ -949,7 +1004,7 @@ export default function App() {
         })}
 
         <button
-          onClick={() => setQuickLogOpen(true)}
+          onClick={() => setQuickAddChoiceOpen(true)}
           className="flex-1 flex flex-col items-center justify-center"
           title="Log Money"
         >
@@ -985,6 +1040,49 @@ export default function App() {
           <span className="text-[9px] font-semibold">More</span>
         </button>
       </nav>
+      )}
+
+      {/* Quick Add choice sheet - pick between logging a payment against an
+          existing customer/loan/budget category, or a fresh Credit Card charge. */}
+      {quickAddChoiceOpen && (
+        <div
+          onClick={() => setQuickAddChoiceOpen(false)}
+          className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+        >
+          <motion.div
+            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full sm:max-w-sm bg-white dark:bg-slate-900 rounded-t-2xl sm:rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-4 space-y-2"
+          >
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white px-1 pb-1">What do you want to log?</h2>
+            <button
+              onClick={() => { setQuickAddChoiceOpen(false); setQuickLogOpen(true); }}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+            >
+              <Wallet className="w-4 h-4 text-brand-600 dark:text-brand-400" />
+              <span className="text-xs font-semibold">Log Payment (SPayLater, Loan, or Budget)</span>
+            </button>
+            <button
+              onClick={() => { setQuickAddChoiceOpen(false); setCreditCardQuickAddOpen(true); }}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+            >
+              <Landmark className="w-4 h-4 text-brand-600 dark:text-brand-400" />
+              <span className="text-xs font-semibold">Credit Card Charge</span>
+            </button>
+          </motion.div>
+        </div>
+      )}
+
+      {creditCardQuickAddOpen && (
+        <Suspense fallback={null}>
+          <CreditCardQuickAddModal
+            onClose={() => setCreditCardQuickAddOpen(false)}
+            settings={settings}
+            onAddEntry={handleAddCreditCardEntry}
+          />
+        </Suspense>
+      )}
 
       {quickLogOpen && (
         <Suspense fallback={null}>
@@ -992,7 +1090,7 @@ export default function App() {
             onClose={() => { setQuickLogOpen(false); setQuickLogPreset(null); }}
             customers={customers}
             loans={loans}
-            activeCycle={activeCycle}
+            budgetMonth={budgetMonth}
             settings={settings}
             onLogCustomerPayment={handleQuickLogCustomerPayment}
             onLogLoanPayment={handleQuickLogLoanPayment}

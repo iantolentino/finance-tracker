@@ -118,12 +118,12 @@ export default function Archives({ archives, settings, onRestoreArchive }: Archi
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-        <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+      <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
           <ArchiveIcon className="w-5 h-5 text-brand-500" />
           Completed Billing Archives (Read-Only)
         </h2>
-        <p className="text-xs text-slate-500 mt-1">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
           Review, analyze, or print detailed customer records and invoices of finalized billing months.
         </p>
       </div>
@@ -132,11 +132,11 @@ export default function Archives({ archives, settings, onRestoreArchive }: Archi
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Left Side: Archives List */}
         <div className="lg:col-span-1 space-y-4">
-          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-            <h3 className="font-semibold text-slate-800 text-sm mb-3">Archived Months ({archives.length})</h3>
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+            <h3 className="font-semibold text-slate-800 dark:text-slate-200 text-sm mb-3">Archived Months ({archives.length})</h3>
             
             {archives.length === 0 ? (
-              <div className="text-center py-12 text-xs text-slate-300">
+              <div className="text-center py-12 text-xs text-slate-300 dark:text-slate-600">
                 No archived billing cycles found. Finalize active billing cycles in the SPayLater tab to create archives.
               </div>
             ) : (
@@ -151,7 +151,7 @@ export default function Archives({ archives, settings, onRestoreArchive }: Archi
                     className={`p-4 rounded-xl border cursor-pointer transition relative overflow-hidden ${
                       selectedArchiveId === arch.id
                         ? "bg-slate-900 border-slate-900 text-white shadow"
-                        : "bg-white border-slate-100 hover:bg-slate-50"
+                        : "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                     }`}
                   >
                     <div className="flex justify-between items-start">
@@ -160,7 +160,7 @@ export default function Archives({ archives, settings, onRestoreArchive }: Archi
                           <Calendar className="w-3.5 h-3.5 text-brand-500 shrink-0" />
                           {arch.cycle}
                         </h4>
-                        <span className={`text-[10px] block mt-1 ${selectedArchiveId === arch.id ? "text-slate-300" : "text-slate-400"}`}>
+                        <span className={`text-[10px] block mt-1 ${selectedArchiveId === arch.id ? "text-slate-300 dark:text-slate-600" : "text-slate-400 dark:text-slate-500"}`}>
                           {arch.customersCount} Customers • {arch.purchasesCount} Purchases
                         </span>
                       </div>
@@ -170,10 +170,10 @@ export default function Archives({ archives, settings, onRestoreArchive }: Archi
                     </div>
 
                     <div className="flex justify-between items-center mt-3 text-[10px]">
-                      <span className={selectedArchiveId === arch.id ? "text-slate-400" : "text-slate-500"}>
+                      <span className={selectedArchiveId === arch.id ? "text-slate-400 dark:text-slate-500" : "text-slate-500 dark:text-slate-400"}>
                         Collected: <strong className={selectedArchiveId === arch.id ? "text-emerald-400" : "text-emerald-600"}>{formatCurrency(arch.totalPaid)}</strong>
                       </span>
-                      <span className={selectedArchiveId === arch.id ? "text-slate-400" : "text-slate-500"}>
+                      <span className={selectedArchiveId === arch.id ? "text-slate-400 dark:text-slate-500" : "text-slate-500 dark:text-slate-400"}>
                         Outstanding: <strong className={selectedArchiveId === arch.id ? "text-orange-400" : "text-orange-600"}>{formatCurrency(arch.outstanding)}</strong>
                       </span>
                     </div>
@@ -187,23 +187,23 @@ export default function Archives({ archives, settings, onRestoreArchive }: Archi
         {/* Right Side: Selected Archive Details */}
         <div className="lg:col-span-2">
           {!selectedArchive ? (
-            <div className="bg-white p-12 rounded-2xl border border-slate-100 shadow-sm text-center flex flex-col items-center justify-center min-h-[480px]">
-              <div className="p-4 bg-slate-50 text-slate-400 rounded-2xl mb-4">
+            <div className="bg-white dark:bg-slate-900 p-12 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm text-center flex flex-col items-center justify-center min-h-[480px]">
+              <div className="p-4 bg-slate-50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-500 rounded-2xl mb-4">
                 <ArchiveIcon className="w-8 h-8" />
               </div>
-              <h3 className="font-semibold text-slate-800 text-sm">No Archive Selected</h3>
-              <p className="text-xs text-slate-400 mt-1 max-w-sm">
+              <h3 className="font-semibold text-slate-800 dark:text-slate-200 text-sm">No Archive Selected</h3>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 max-w-sm">
                 Select an archived billing cycle from the left list to inspect customer profiles, purchase history grids, payments, or restore month records.
               </p>
             </div>
           ) : (
             <div className="space-y-6">
               {/* Archive Stats Header with Restore option */}
-              <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-                <div className="flex justify-between items-center border-b border-slate-50 pb-3">
+              <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
+                <div className="flex justify-between items-center border-b border-slate-50 dark:border-slate-800/50 pb-3">
                   <div>
-                    <span className="text-[10px] bg-brand-50 text-brand-600 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Archived Content</span>
-                    <h3 className="text-base font-bold text-slate-900 mt-1 flex items-center gap-1.5">
+                    <span className="text-[10px] bg-brand-50 dark:bg-brand-900/30 text-brand-600 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Archived Content</span>
+                    <h3 className="text-base font-bold text-slate-900 dark:text-white mt-1 flex items-center gap-1.5">
                       {selectedArchive.cycle} Summary
                     </h3>
                   </div>
@@ -211,7 +211,7 @@ export default function Archives({ archives, settings, onRestoreArchive }: Archi
                     <button
                       onClick={() => handleRestoreClick(selectedArchive.id, selectedArchive.cycle)}
                       disabled={isLoading}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition border border-red-100"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/30 rounded-xl transition border border-red-100 dark:border-red-900/40"
                     >
                       <RefreshCw className="w-3.5 h-3.5 animate-spin-hover" />
                       Restore Workspace
@@ -221,22 +221,22 @@ export default function Archives({ archives, settings, onRestoreArchive }: Archi
 
                 {/* Subgrid of statistics for selected archive */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center text-xs">
-                  <div className="p-3 bg-slate-50 rounded-xl">
-                    <span className="block text-slate-400 uppercase font-semibold text-[10px]">Total Billed</span>
-                    <span className="block text-sm font-bold mt-1 text-slate-800">
+                  <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                    <span className="block text-slate-400 dark:text-slate-500 uppercase font-semibold text-[10px]">Total Billed</span>
+                    <span className="block text-sm font-bold mt-1 text-slate-800 dark:text-slate-200">
                       {formatCurrency(
                         selectedArchive.data.purchases.reduce((sum, p) => sum + p.totalAmount, 0) +
                         selectedArchive.data.customers.reduce((sum, c) => sum + (c.carriedOverBalance || 0), 0)
                       )}
                     </span>
                   </div>
-                  <div className="p-3 bg-slate-50 rounded-xl">
-                    <span className="block text-slate-400 uppercase font-semibold text-[10px]">Total Collected</span>
+                  <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                    <span className="block text-slate-400 dark:text-slate-500 uppercase font-semibold text-[10px]">Total Collected</span>
                     <span className="block text-sm font-bold mt-1 text-emerald-600">
                       {formatCurrency(selectedArchive.data.payments.reduce((sum, p) => sum + p.amountPaid, 0))}
                     </span>
                   </div>
-                  <div className="p-3 bg-orange-50/50 rounded-xl">
+                  <div className="p-3 bg-orange-50/50 dark:bg-orange-950/20 rounded-xl">
                     <span className="block text-orange-700 uppercase font-semibold text-[10px]">Unpaid Outstanding</span>
                     <span className="block text-sm font-bold mt-1 text-orange-600">
                       {formatCurrency(
@@ -253,17 +253,17 @@ export default function Archives({ archives, settings, onRestoreArchive }: Archi
               {/* Customers inside this archive split */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
                 {/* Customers list inside archive */}
-                <div className="md:col-span-1 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-3">
-                  <h4 className="font-semibold text-xs text-slate-800 border-b border-slate-50 pb-2">Archived Customers</h4>
+                <div className="md:col-span-1 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-3">
+                  <h4 className="font-semibold text-xs text-slate-800 dark:text-slate-200 border-b border-slate-50 dark:border-slate-800/50 pb-2">Archived Customers</h4>
                   
                   <div className="relative">
-                    <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-slate-400" />
+                    <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
                     <input
                       type="text"
                       placeholder="Search..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-8 pr-3 py-1.5 text-[10px] rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
+                      className="w-full pl-8 pr-3 py-1.5 text-[10px] rounded-lg border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800/50"
                     />
                   </div>
 
@@ -282,12 +282,12 @@ export default function Archives({ archives, settings, onRestoreArchive }: Archi
                           onClick={() => setSelectedCustomerId(c.id)}
                           className={`p-2 rounded-lg text-xs cursor-pointer transition flex justify-between items-center ${
                             selectedCustomerId === c.id
-                              ? "bg-slate-100 text-slate-900 font-semibold"
-                              : "hover:bg-slate-50 text-slate-600"
+                              ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold"
+                              : "hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-400"
                           }`}
                         >
                           <span className="truncate max-w-[100px]">{c.fullName}</span>
-                          <span className="font-semibold text-slate-900 shrink-0">{formatCurrency(bal)}</span>
+                          <span className="font-semibold text-slate-900 dark:text-white shrink-0">{formatCurrency(bal)}</span>
                         </div>
                       );
                     })}
@@ -297,17 +297,17 @@ export default function Archives({ archives, settings, onRestoreArchive }: Archi
                 {/* Selected customer's archived records */}
                 <div className="md:col-span-2 space-y-4">
                   {!archiveCustomerDetails ? (
-                    <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm text-center text-slate-400 text-xs py-16">
+                    <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm text-center text-slate-400 dark:text-slate-500 text-xs py-16">
                       Select an archived customer profile to view purchases & payments.
                     </div>
                   ) : (
                     <div className="space-y-4">
                       {/* Customer summary inside archive */}
-                      <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-                        <div className="flex justify-between items-start border-b border-slate-50 pb-2 mb-3">
+                      <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                        <div className="flex justify-between items-start border-b border-slate-50 dark:border-slate-800/50 pb-2 mb-3">
                           <div>
-                            <h4 className="font-bold text-slate-900 text-xs">{archiveCustomerDetails.fullName}</h4>
-                            <span className="text-[10px] text-slate-400 block mt-0.5">Phone: {archiveCustomerDetails.contactNumber || "N/A"}</span>
+                            <h4 className="font-bold text-slate-900 dark:text-white text-xs">{archiveCustomerDetails.fullName}</h4>
+                            <span className="text-[10px] text-slate-400 dark:text-slate-500 block mt-0.5">Phone: {archiveCustomerDetails.contactNumber || "N/A"}</span>
                           </div>
                           <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
                             archiveCustomerDetails.status === "Fully Paid"
@@ -320,41 +320,41 @@ export default function Archives({ archives, settings, onRestoreArchive }: Archi
 
                         {/* Customer totals display */}
                         <div className="grid grid-cols-3 gap-1.5 text-center text-[10px]">
-                          <div className="p-2 bg-slate-50 rounded-lg">
-                            <span className="block text-slate-400">Total Charged</span>
-                            <span className="block font-bold text-slate-800 mt-0.5">{formatCurrency(archiveCustomerDetails.totalBuy)}</span>
+                          <div className="p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                            <span className="block text-slate-400 dark:text-slate-500">Total Charged</span>
+                            <span className="block font-bold text-slate-800 dark:text-slate-200 mt-0.5">{formatCurrency(archiveCustomerDetails.totalBuy)}</span>
                           </div>
-                          <div className="p-2 bg-slate-50 rounded-lg">
-                            <span className="block text-slate-400">Paid Amount</span>
+                          <div className="p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                            <span className="block text-slate-400 dark:text-slate-500">Paid Amount</span>
                             <span className="block font-bold text-emerald-600 mt-0.5">{formatCurrency(archiveCustomerDetails.totalPay)}</span>
                           </div>
-                          <div className="p-2 bg-slate-50 rounded-lg">
-                            <span className="block text-slate-400">Unpaid Balance</span>
+                          <div className="p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                            <span className="block text-slate-400 dark:text-slate-500">Unpaid Balance</span>
                             <span className="block font-bold text-brand-600 mt-0.5">{formatCurrency(archiveCustomerDetails.remaining)}</span>
                           </div>
                         </div>
                       </div>
 
                       {/* Purchased products list inside archive */}
-                      <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-2">
-                        <h5 className="text-[11px] font-bold text-slate-800">Purchased Items</h5>
+                      <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-2">
+                        <h5 className="text-[11px] font-bold text-slate-800 dark:text-slate-200">Purchased Items</h5>
                         <div className="divide-y divide-slate-50 text-[10px]">
                           {archiveCustomerDetails.carriedOverBalance > 0 && (
-                            <div className="py-1.5 flex justify-between text-slate-600">
+                            <div className="py-1.5 flex justify-between text-slate-600 dark:text-slate-400">
                               <span>Carried over balance from previous cycles</span>
-                              <span className="font-semibold text-slate-900">{formatCurrency(archiveCustomerDetails.carriedOverBalance)}</span>
+                              <span className="font-semibold text-slate-900 dark:text-white">{formatCurrency(archiveCustomerDetails.carriedOverBalance)}</span>
                             </div>
                           )}
                           {archiveCustomerDetails.purchases.length === 0 && archiveCustomerDetails.carriedOverBalance === 0 ? (
-                            <p className="py-2 text-slate-300 italic">No purchase items logged.</p>
+                            <p className="py-2 text-slate-300 dark:text-slate-600 italic">No purchase items logged.</p>
                           ) : (
                             archiveCustomerDetails.purchases.map(p => (
                               <div key={p.id} className="py-1.5 flex justify-between">
                                 <div>
-                                  <strong className="text-slate-800">{p.itemName}</strong>
-                                  {p.description && <span className="block text-[9px] text-slate-400">{p.description}</span>}
+                                  <strong className="text-slate-800 dark:text-slate-200">{p.itemName}</strong>
+                                  {p.description && <span className="block text-[9px] text-slate-400 dark:text-slate-500">{p.description}</span>}
                                 </div>
-                                <span className="font-semibold text-slate-900 shrink-0">{formatCurrency(p.totalAmount)}</span>
+                                <span className="font-semibold text-slate-900 dark:text-white shrink-0">{formatCurrency(p.totalAmount)}</span>
                               </div>
                             ))
                           )}
@@ -362,17 +362,17 @@ export default function Archives({ archives, settings, onRestoreArchive }: Archi
                       </div>
 
                       {/* Payments recorded inside archive */}
-                      <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-2">
-                        <h5 className="text-[11px] font-bold text-slate-800">Payments Recorded</h5>
+                      <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-2">
+                        <h5 className="text-[11px] font-bold text-slate-800 dark:text-slate-200">Payments Recorded</h5>
                         <div className="divide-y divide-slate-50 text-[10px]">
                           {archiveCustomerDetails.payments.length === 0 ? (
-                            <p className="py-2 text-slate-300 italic">No payments logged in this archive.</p>
+                            <p className="py-2 text-slate-300 dark:text-slate-600 italic">No payments logged in this archive.</p>
                           ) : (
                             archiveCustomerDetails.payments.map(py => (
                               <div key={py.id} className="py-1.5 flex justify-between">
-                                <div className="text-slate-600">
+                                <div className="text-slate-600 dark:text-slate-400">
                                   <span>{py.paymentDate} via <strong>{py.paymentMethod}</strong></span>
-                                  {py.notes && <span className="block text-[9px] text-slate-400">{py.notes}</span>}
+                                  {py.notes && <span className="block text-[9px] text-slate-400 dark:text-slate-500">{py.notes}</span>}
                                 </div>
                                 <span className="font-semibold text-emerald-600 shrink-0">{formatCurrency(py.amountPaid)}</span>
                               </div>

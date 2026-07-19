@@ -16,7 +16,6 @@ import {
 } from "recharts";
 import {
   Users,
-  CreditCard,
   DollarSign,
   TrendingUp,
   Clock,
@@ -301,27 +300,15 @@ export default function Dashboard({
 
   return (
     <div className="space-y-6">
-      {/* Welcome Banner */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between bg-white rounded-xl p-5 shadow-xs border border-slate-200/80">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-            {settings.personalBusinessName || "Personal Finance System"}
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Active Billing Cycle: <strong className="text-brand-600 font-medium">{activeCycle}</strong> • Keep track of everyone who owes you money.
-          </p>
-        </div>
-        <div className="flex gap-3 mt-4 md:mt-0">
-          <button 
-            onClick={() => onNavigate("spaylater")}
-            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition"
-          >
-            <CreditCard className="w-4 h-4 mr-2" />
-            SPayLater Customer
-          </button>
-          <button 
+      {/* Cycle context bar - the app title already lives in the sidebar/header, no need to repeat it here */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between bg-white dark:bg-slate-900 rounded-xl p-4 shadow-xs border border-slate-200/80 dark:border-slate-800/80">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          Active Billing Cycle: <strong className="text-brand-600 font-medium">{activeCycle}</strong> • Keep track of everyone who owes you money.
+        </p>
+        <div className="flex gap-3 mt-3 md:mt-0">
+          <button
             onClick={() => onNavigate("lending")}
-            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-slate-700 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 transition"
+            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
           >
             <DollarSign className="w-4 h-4 mr-2" />
             Grant Cash Loan
@@ -331,19 +318,19 @@ export default function Dashboard({
 
       {/* Needs Attention - what to actually act on right now */}
       {needsAttention.length > 0 && (
-        <div className="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
-          <div className="flex items-center gap-2 px-5 py-3 border-b border-slate-100 bg-red-50/40">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs overflow-hidden">
+          <div className="flex items-center gap-2 px-5 py-3 border-b border-slate-100 dark:border-slate-800 bg-red-50/40 dark:bg-red-950/20">
             <AlertTriangle className="w-4 h-4 text-red-500" />
-            <h2 className="text-sm font-bold text-slate-900">Needs Attention</h2>
-            <span className="text-[10px] font-semibold text-red-600 bg-red-100 px-1.5 py-0.5 rounded-full ml-auto">
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white">Needs Attention</h2>
+            <span className="text-[10px] font-semibold text-red-600 bg-red-100 dark:bg-red-900/30 px-1.5 py-0.5 rounded-full ml-auto">
               {needsAttention.length}
             </span>
           </div>
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-slate-100 dark:divide-slate-800">
             {needsAttention.slice(0, 6).map(item => (
               <div key={item.key} className="flex items-center justify-between gap-3 px-5 py-2.5">
                 <div className="min-w-0">
-                  <span className="block text-xs font-semibold text-slate-800 truncate">{item.title}</span>
+                  <span className="block text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">{item.title}</span>
                   <span className={`block text-[10px] font-medium ${item.urgencyRank === 0 ? "text-red-500" : "text-amber-600"}`}>
                     {item.detail} · {formatCurrency(item.amount)}
                   </span>
@@ -360,76 +347,77 @@ export default function Dashboard({
         </div>
       )}
 
-      {/* Grid of Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Grid of Stats Cards - 2-up even on the smallest phones, so at most
+          2 rows are visible before scrolling instead of 4 full-width cards. */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         {/* Card 1: Total Receivables */}
-        <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-xs relative overflow-hidden group hover:border-brand-200 transition">
+        <div className="bg-white dark:bg-slate-900 rounded-xl p-3 sm:p-5 border border-slate-200/80 dark:border-slate-800/80 shadow-xs relative overflow-hidden group hover:border-brand-200 transition">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Active Customers</span>
-            <div className="p-2 bg-brand-50 text-brand-600 rounded-lg">
-              <Users className="w-5 h-5" />
+            <span className="text-[10px] sm:text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">Total Customers</span>
+            <div className="p-1.5 sm:p-2 bg-brand-50 dark:bg-brand-900/30 text-brand-600 rounded-lg">
+              <Users className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="mt-4">
-            <h3 className="text-2xl font-bold text-slate-950">
+          <div className="mt-2 sm:mt-4">
+            <h3 className="text-lg sm:text-2xl font-bold text-slate-950 dark:text-white">
               {spayLaterMetrics.totalCustomers + lendingMetrics.activeLoansCount}
             </h3>
-            <p className="text-xs text-slate-500 mt-1">
-              {spayLaterMetrics.totalCustomers} SPayLater • {lendingMetrics.activeLoansCount} Lending Customers
+            <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1">
+              {spayLaterMetrics.totalCustomers} SPayLater • {lendingMetrics.activeLoansCount} Lending
             </p>
           </div>
         </div>
 
         {/* Card 2: Total Outstanding Balance */}
-        <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-xs relative overflow-hidden group hover:border-orange-200 transition">
+        <div className="bg-white dark:bg-slate-900 rounded-xl p-3 sm:p-5 border border-slate-200/80 dark:border-slate-800/80 shadow-xs relative overflow-hidden group hover:border-orange-200 transition">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Outstanding Balance</span>
-            <div className="p-2 bg-orange-50 text-orange-500 rounded-lg">
-              <TrendingUp className="w-5 h-5" />
+            <span className="text-[10px] sm:text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">Outstanding</span>
+            <div className="p-1.5 sm:p-2 bg-orange-50 dark:bg-orange-950/30 text-orange-500 rounded-lg">
+              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="mt-4">
-            <h3 className="text-2xl font-bold text-slate-950">
+          <div className="mt-2 sm:mt-4">
+            <h3 className="text-lg sm:text-2xl font-bold text-slate-950 dark:text-white break-words">
               {formatCurrency(totalOutstanding)}
             </h3>
-            <p className="text-xs text-slate-500 mt-1">
-              {formatCurrency(spayLaterMetrics.outstanding)} SPayLater • {formatCurrency(lendingMetrics.outstanding)} Lending
+            <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1">
+              {formatCurrency(spayLaterMetrics.outstanding)} SPayLater
             </p>
           </div>
         </div>
 
         {/* Card 3: Total Collections Paid */}
-        <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-xs relative overflow-hidden group hover:border-emerald-200 transition">
+        <div className="bg-white dark:bg-slate-900 rounded-xl p-3 sm:p-5 border border-slate-200/80 dark:border-slate-800/80 shadow-xs relative overflow-hidden group hover:border-emerald-200 transition">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Collected (Paid)</span>
-            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
-              <CheckCircle className="w-5 h-5" />
+            <span className="text-[10px] sm:text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">Collected</span>
+            <div className="p-1.5 sm:p-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 rounded-lg">
+              <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="mt-4">
-            <h3 className="text-2xl font-bold text-slate-950">
+          <div className="mt-2 sm:mt-4">
+            <h3 className="text-lg sm:text-2xl font-bold text-slate-950 dark:text-white break-words">
               {formatCurrency(totalPaidCombined)}
             </h3>
-            <p className="text-xs text-slate-500 mt-1">
-              Payment Completion Rate: <strong>{completionRate}%</strong>
+            <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Completion: <strong>{completionRate}%</strong>
             </p>
           </div>
         </div>
 
         {/* Card 4: Overdue Receivables */}
-        <div className={`rounded-xl p-5 border shadow-xs relative overflow-hidden group transition ${overdueMetrics.total > 0 ? "bg-red-50/50 border-red-100" : "bg-white border-slate-200/80"}`}>
+        <div className={`rounded-xl p-3 sm:p-5 border shadow-xs relative overflow-hidden group transition ${overdueMetrics.total > 0 ? "bg-red-50/50 dark:bg-red-950/20 border-red-100 dark:border-red-900/40" : "bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800/80"}`}>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Overdue Payments</span>
-            <div className={`p-2 rounded-lg ${overdueMetrics.total > 0 ? "bg-red-100 text-red-600" : "bg-slate-50 text-slate-400"}`}>
-              <AlertTriangle className="w-5 h-5" />
+            <span className="text-[10px] sm:text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">Overdue</span>
+            <div className={`p-1.5 sm:p-2 rounded-lg ${overdueMetrics.total > 0 ? "bg-red-100 dark:bg-red-900/30 text-red-600" : "bg-slate-50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-500"}`}>
+              <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="mt-4">
-            <h3 className={`text-2xl font-bold ${overdueMetrics.total > 0 ? "text-red-700" : "text-slate-950"}`}>
+          <div className="mt-2 sm:mt-4">
+            <h3 className={`text-lg sm:text-2xl font-bold break-words ${overdueMetrics.total > 0 ? "text-red-700 dark:text-red-400" : "text-slate-950 dark:text-white"}`}>
               {formatCurrency(overdueMetrics.total)}
             </h3>
-            <p className="text-xs text-slate-500 mt-1">
-              Requires immediate collection focus.
+            <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Needs collection.
             </p>
           </div>
         </div>
@@ -438,11 +426,11 @@ export default function Dashboard({
       {/* Sub-grid: Lending vs SPayLater Split cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* SPayLater Panel Summary */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 bg-orange-500 rounded-full" />
-              <h3 className="font-semibold text-slate-800">SPayLater Tracker</h3>
+              <h3 className="font-semibold text-slate-800 dark:text-slate-200">SPayLater Tracker</h3>
             </div>
             <button 
               onClick={() => onNavigate("spaylater")}
@@ -452,15 +440,15 @@ export default function Dashboard({
             </button>
           </div>
           <div className="grid grid-cols-3 gap-1.5 sm:gap-2 text-center">
-            <div className="p-2 sm:p-3 bg-slate-50 rounded-lg">
-              <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-slate-400">Receivables</span>
-              <span className="block text-[11px] sm:text-sm font-bold text-slate-800 mt-1 break-words">{formatCurrency(spayLaterMetrics.receivables)}</span>
+            <div className="p-2 sm:p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+              <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500">Receivables</span>
+              <span className="block text-[11px] sm:text-sm font-bold text-slate-800 dark:text-slate-200 mt-1 break-words">{formatCurrency(spayLaterMetrics.receivables)}</span>
             </div>
-            <div className="p-2 sm:p-3 bg-slate-50 rounded-lg">
-              <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-slate-400">Total Paid</span>
+            <div className="p-2 sm:p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+              <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500">Total Paid</span>
               <span className="block text-[11px] sm:text-sm font-bold text-emerald-600 mt-1 break-words">{formatCurrency(spayLaterMetrics.paid)}</span>
             </div>
-            <div className="p-2 sm:p-3 bg-orange-50/50 rounded-lg">
+            <div className="p-2 sm:p-3 bg-orange-50/50 dark:bg-orange-950/20 rounded-lg">
               <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-orange-700">Remaining</span>
               <span className="block text-[11px] sm:text-sm font-bold text-orange-600 mt-1 break-words">{formatCurrency(spayLaterMetrics.outstanding)}</span>
             </div>
@@ -468,11 +456,11 @@ export default function Dashboard({
         </div>
 
         {/* Lending Panel Summary */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 bg-brand-500 rounded-full" />
-              <h3 className="font-semibold text-slate-800">Lending Management</h3>
+              <h3 className="font-semibold text-slate-800 dark:text-slate-200">Lending Management</h3>
             </div>
             <button 
               onClick={() => onNavigate("lending")}
@@ -482,15 +470,15 @@ export default function Dashboard({
             </button>
           </div>
           <div className="grid grid-cols-3 gap-1.5 sm:gap-2 text-center">
-            <div className="p-2 sm:p-3 bg-slate-50 rounded-lg">
-              <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-slate-400">Total Due</span>
-              <span className="block text-[11px] sm:text-sm font-bold text-slate-800 mt-1 break-words">{formatCurrency(lendingMetrics.totalDue)}</span>
+            <div className="p-2 sm:p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+              <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500">Total Due</span>
+              <span className="block text-[11px] sm:text-sm font-bold text-slate-800 dark:text-slate-200 mt-1 break-words">{formatCurrency(lendingMetrics.totalDue)}</span>
             </div>
-            <div className="p-2 sm:p-3 bg-slate-50 rounded-lg">
-              <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-slate-400">Interest Earned</span>
+            <div className="p-2 sm:p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+              <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500">Interest Earned</span>
               <span className="block text-[11px] sm:text-sm font-bold text-brand-600 mt-1 break-words">{formatCurrency(lendingMetrics.interestEarned)}</span>
             </div>
-            <div className="p-2 sm:p-3 bg-brand-50/50 rounded-lg">
+            <div className="p-2 sm:p-3 bg-brand-50/50 dark:bg-brand-950/20 rounded-lg">
               <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-brand-700">Outstanding</span>
               <span className="block text-[11px] sm:text-sm font-bold text-brand-600 mt-1 break-words">{formatCurrency(lendingMetrics.outstanding)}</span>
             </div>
@@ -501,16 +489,16 @@ export default function Dashboard({
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Chart 1: Customer Outstanding Balance Bar Chart */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs lg:col-span-2">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h4 className="font-semibold text-slate-800">Top Outstanding Balances</h4>
-              <p className="text-xs text-slate-400 mt-0.5">Top 6 customers with highest pending payments</p>
+              <h4 className="font-semibold text-slate-800 dark:text-slate-200">Top Outstanding Balances</h4>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Top 6 customers with highest pending payments</p>
             </div>
           </div>
-          <div className="h-64">
+          <div className="h-52 sm:h-64">
             {customerOutstandingData.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-slate-300 text-sm">
+              <div className="h-full flex items-center justify-center text-slate-300 dark:text-slate-600 text-sm">
                 No active outstanding customer records found.
               </div>
             ) : (
@@ -531,7 +519,7 @@ export default function Dashboard({
                   <Tooltip 
                     contentStyle={{ backgroundColor: "#0f172a", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.08)", color: "#fff", fontSize: "12px" }}
                     itemStyle={{ color: "#fff" }}
-                    labelClassName="text-slate-400 font-medium"
+                    labelClassName="text-slate-400 dark:text-slate-500 font-medium"
                   />
                   <Legend wrapperStyle={{ fontSize: "11px" }} />
                   <Bar dataKey="Outstanding" name="Outstanding Balance" fill="#a855f7" radius={[4, 4, 0, 0]} />
@@ -543,12 +531,12 @@ export default function Dashboard({
         </div>
 
         {/* Chart 2: Lending vs SPayLater Receivables Allocation Pie Chart */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs">
-          <h4 className="font-semibold text-slate-800 mb-1">Receivables Split</h4>
-          <p className="text-xs text-slate-400 mb-4">Total active outstanding comparison</p>
-          <div className="h-48 relative">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs">
+          <h4 className="font-semibold text-slate-800 dark:text-slate-200 mb-1">Receivables Split</h4>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">Total active outstanding comparison</p>
+          <div className="h-40 sm:h-48 relative">
             {totalOutstanding === 0 ? (
-              <div className="h-full flex items-center justify-center text-slate-300 text-sm">
+              <div className="h-full flex items-center justify-center text-slate-300 dark:text-slate-600 text-sm">
                 No outstanding balance.
               </div>
             ) : (
@@ -573,19 +561,19 @@ export default function Dashboard({
             )}
             {totalOutstanding > 0 && (
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-2">
-                <span className="text-[10px] text-slate-400 uppercase tracking-widest">Total Active</span>
-                <span className="text-base font-bold text-slate-800">{formatCurrency(totalOutstanding)}</span>
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest">Total Active</span>
+                <span className="text-base font-bold text-slate-800 dark:text-slate-200">{formatCurrency(totalOutstanding)}</span>
               </div>
             )}
           </div>
           <div className="space-y-2 mt-2">
             {sourceComparisonData.map((item, index) => (
               <div key={index} className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2 text-slate-600">
+                <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
                   <div className="w-3 h-3 rounded" style={{ backgroundColor: item.color }} />
                   <span>{item.name}</span>
                 </div>
-                <span className="font-semibold text-slate-800">
+                <span className="font-semibold text-slate-800 dark:text-slate-200">
                   {formatCurrency(item.value)} ({totalOutstanding > 0 ? Math.round((item.value / totalOutstanding) * 100) : 0}%)
                 </span>
               </div>
@@ -597,10 +585,10 @@ export default function Dashboard({
       {/* Grid: Collection trends & Activity Feed */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Trend line */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs lg:col-span-2">
-          <h4 className="font-semibold text-slate-800 mb-1">Collection Summary Trend</h4>
-          <p className="text-xs text-slate-400 mb-4">Recent tracking of payment receipts</p>
-          <div className="h-60">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs lg:col-span-2">
+          <h4 className="font-semibold text-slate-800 dark:text-slate-200 mb-1">Collection Summary Trend</h4>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">Recent tracking of payment receipts</p>
+          <div className="h-52 sm:h-60">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={collectionTrendData} margin={{ top: 10, right: 10, left: -10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255, 255, 255, 0.06)" />
@@ -616,31 +604,31 @@ export default function Dashboard({
         </div>
 
         {/* Activity feed */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs flex flex-col">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs flex flex-col">
           <div className="flex items-center gap-2 mb-4">
             <Activity className="w-4 h-4 text-brand-500" />
-            <h4 className="font-semibold text-slate-800">Recent Activity Log</h4>
+            <h4 className="font-semibold text-slate-800 dark:text-slate-200">Recent Activity Log</h4>
           </div>
           <div className="space-y-4 overflow-y-auto max-h-[240px] pr-1 flex-1">
             {logs.length === 0 ? (
-              <div className="text-center text-slate-300 text-xs py-8">
+              <div className="text-center text-slate-300 dark:text-slate-600 text-xs py-8">
                 No recent activity records.
               </div>
             ) : (
               logs.slice(0, 10).map((log) => (
-                <div key={log.id} className="text-xs border-b border-slate-50 pb-2 last:border-b-0">
+                <div key={log.id} className="text-xs border-b border-slate-50 dark:border-slate-800/50 pb-2 last:border-b-0">
                   <div className="flex justify-between items-start gap-2">
-                    <span className="font-semibold text-slate-800">{log.action}</span>
-                    <span className="text-[10px] text-slate-400 shrink-0">
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">{log.action}</span>
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500 shrink-0">
                       {new Date(log.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </span>
                   </div>
-                  <p className="text-slate-500 mt-1 leading-relaxed">{log.details}</p>
+                  <p className="text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">{log.details}</p>
                 </div>
               ))
             )}
           </div>
-          <div className="border-t border-slate-50 pt-3 mt-4 text-center">
+          <div className="border-t border-slate-50 dark:border-slate-800/50 pt-3 mt-4 text-center">
             <button 
               onClick={() => onNavigate("settings")} 
               className="text-xs text-brand-600 hover:text-brand-800 font-medium inline-flex items-center gap-1"

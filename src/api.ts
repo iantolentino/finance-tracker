@@ -7,7 +7,8 @@ import {
   SystemSettings,
   ActivityLog,
   BackupRecord,
-  MonthlyBudget
+  MonthlyBudget,
+  CreditCardEntry
 } from "./types";
 
 const API_BASE = "/api";
@@ -85,6 +86,15 @@ export const api = {
       method: "POST",
       headers: getHeaders(),
       body: JSON.stringify(data)
+    });
+    return handleResponse(res);
+  },
+
+  async updateDisplayName(displayName: string): Promise<{ success: boolean; token: string; displayName: string }> {
+    const res = await fetch(`${API_BASE}/auth/display-name`, {
+      method: "PUT",
+      headers: getHeaders(),
+      body: JSON.stringify({ displayName })
     });
     return handleResponse(res);
   },
@@ -403,6 +413,38 @@ export const api = {
       method: "POST",
       headers: getHeaders(),
       body: JSON.stringify(data)
+    });
+    return handleResponse(res);
+  },
+
+  // Credit Card API - a data type distinct from SPayLater/Lending/Budget
+  async getCreditCardEntries(): Promise<CreditCardEntry[]> {
+    const res = await fetch(`${API_BASE}/credit-card`, { headers: getHeaders() });
+    return handleResponse(res);
+  },
+
+  async createCreditCardEntry(entry: Partial<CreditCardEntry>): Promise<CreditCardEntry> {
+    const res = await fetch(`${API_BASE}/credit-card`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify(entry)
+    });
+    return handleResponse(res);
+  },
+
+  async updateCreditCardEntry(id: string, entry: Partial<CreditCardEntry>): Promise<CreditCardEntry> {
+    const res = await fetch(`${API_BASE}/credit-card/${id}`, {
+      method: "PUT",
+      headers: getHeaders(),
+      body: JSON.stringify(entry)
+    });
+    return handleResponse(res);
+  },
+
+  async deleteCreditCardEntry(id: string): Promise<{ success: boolean }> {
+    const res = await fetch(`${API_BASE}/credit-card/${id}`, {
+      method: "DELETE",
+      headers: getHeaders()
     });
     return handleResponse(res);
   },

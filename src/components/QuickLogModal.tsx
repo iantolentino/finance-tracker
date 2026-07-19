@@ -8,7 +8,7 @@ interface QuickLogModalProps {
   onClose: () => void;
   customers: Customer[];
   loans: Loan[];
-  activeCycle: string;
+  budgetMonth: string;
   settings: SystemSettings;
   onLogCustomerPayment: (customerId: string, amount: number) => Promise<any>;
   onLogLoanPayment: (loanId: string, amount: number) => Promise<any>;
@@ -30,7 +30,7 @@ export default function QuickLogModal({
   onClose,
   customers,
   loans,
-  activeCycle,
+  budgetMonth,
   settings,
   onLogCustomerPayment,
   onLogLoanPayment,
@@ -58,7 +58,7 @@ export default function QuickLogModal({
   useEffect(() => {
     api.getBudgets()
       .then(budgets => {
-        const active = budgets.find(b => b.month === activeCycle);
+        const active = budgets.find(b => b.month === budgetMonth);
         if (active) {
           setBudgetCategories(active.allocations.map(a => ({
             id: a.id,
@@ -68,7 +68,7 @@ export default function QuickLogModal({
         }
       })
       .catch(() => { /* Budget categories are optional in this picker - fine if unavailable */ });
-  }, [activeCycle]);
+  }, [budgetMonth]);
 
   const destinations = useMemo<Destination[]>(() => {
     const customerDests: Destination[] = [...customers]

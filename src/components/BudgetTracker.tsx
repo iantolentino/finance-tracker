@@ -26,6 +26,9 @@ import { api } from "../api";
 
 interface BudgetTrackerProps {
   settings: SystemSettings;
+  // The budget's own calendar month - independent of SPayLater's billing
+  // cycle, so completing/resetting an SPayLater cycle never touches Budget data.
+  budgetMonth: string;
   activeCycle: string;
   availableCycles: string[];
   customers: Customer[];
@@ -35,6 +38,7 @@ interface BudgetTrackerProps {
 
 export default function BudgetTracker({
   settings,
+  budgetMonth,
   activeCycle,
   availableCycles,
   customers,
@@ -84,15 +88,14 @@ export default function BudgetTracker({
 
   useEffect(() => {
     fetchBudgets();
-    // Refetch when the active cycle changes (e.g. after completing a billing
-    // cycle or restoring an archive) so a newly auto-created budget for the
-    // new cycle actually shows up without requiring a full page reload.
-  }, [activeCycle]);
+    // Refetch when the calendar month rolls over so a newly-needed budget
+    // record shows up without requiring a full page reload.
+  }, [budgetMonth]);
 
   // Find the current active month's budget, or fall back to a default-initialized local one if not saved yet
-  const activeBudget = budgets.find(b => b.month === activeCycle) || {
+  const activeBudget = budgets.find(b => b.month === budgetMonth) || {
     id: "temp-active",
-    month: activeCycle,
+    month: budgetMonth,
     salary: 0,
     additionalIncome: 0,
     allocations: [],
@@ -113,17 +116,17 @@ export default function BudgetTracker({
     setIsSaving(true);
     try {
       const updated = await api.updateBudgetConfig({
-        month: activeCycle,
+        month: budgetMonth,
         salary: Number(tempSalary) || 0,
         additionalIncome: Number(tempAdditional) || 0
       });
       // Update budgets list
       setBudgets(prev => {
-        const idx = prev.findIndex(b => b.month === activeCycle);
+        const idx = prev.findIndex(b => b.month === budgetMonth);
         if (idx === -1) {
           return [...prev, updated];
         }
-        return prev.map(b => b.month === activeCycle ? updated : b);
+        return prev.map(b => b.month === budgetMonth ? updated : b);
       });
       setIncomeModalOpen(false);
     } catch (err: any) {
@@ -158,23 +161,23 @@ export default function BudgetTracker({
       if (selectedAlloc) {
         // Edit existing
         updated = await api.updateBudgetAllocation(selectedAlloc.id, {
-          month: activeCycle,
+          month: budgetMonth,
           category: allocCategory,
           allocatedAmount: Number(allocAmount) || 0
         });
       } else {
         // Create new
         updated = await api.addBudgetAllocation({
-          month: activeCycle,
+          month: budgetMonth,
           category: allocCategory,
           allocatedAmount: Number(allocAmount) || 0
         });
       }
 
       setBudgets(prev => {
-        const idx = prev.findIndex(b => b.month === activeCycle);
+        const idx = prev.findIndex(b => b.month === budgetMonth);
         if (idx === -1) return [...prev, updated];
-        return prev.map(b => b.month === activeCycle ? updated : b);
+        return prev.map(b => b.month === budgetMonth ? updated : b);
       });
       setAllocModalOpen(false);
     } catch (err: any) {
@@ -189,8 +192,8 @@ export default function BudgetTracker({
     if (!confirm("Are you sure you want to delete this budget category? This will also remove any logged expenses in this category!")) return;
     setIsSaving(true);
     try {
-      const updated = await api.deleteBudgetAllocation(id, activeCycle);
-      setBudgets(prev => prev.map(b => b.month === activeCycle ? updated : b));
+      const updated = await api.deleteBudgetAllocation(id, budgetMonth);
+      setBudgets(prev => prev.map(b => b.month === budgetMonth ? updated : b));
     } catch (err: any) {
       alert(err.message || "Failed to delete allocation.");
     } finally {
@@ -216,7 +219,7 @@ export default function BudgetTracker({
     setIsSaving(true);
     try {
       const updated = await api.addBudgetExpense({
-        month: activeCycle,
+        month: budgetMonth,
         allocationId: expenseAllocId,
         itemName: expenseName,
         amount: Number(expenseAmount) || 0,
@@ -224,7 +227,7 @@ export default function BudgetTracker({
         notes: expenseNotes
       });
 
-      setBudgets(prev => prev.map(b => b.month === activeCycle ? updated : b));
+      setBudgets(prev => prev.map(b => b.month === budgetMonth ? updated : b));
       setExpenseModalOpen(false);
     } catch (err: any) {
       alert(err.message || "Failed to log expense.");
@@ -238,8 +241,8 @@ export default function BudgetTracker({
     if (!confirm("Are you sure you want to delete this expense transaction?")) return;
     setIsSaving(true);
     try {
-      const updated = await api.deleteBudgetExpense(id, activeCycle);
-      setBudgets(prev => prev.map(b => b.month === activeCycle ? updated : b));
+      const updated = await api.deleteBudgetExpense(id, budgetMonth);
+      setBudgets(prev => prev.map(b => b.month === budgetMonth ? updated : b));
     } catch (err: any) {
       alert(err.message || "Failed to delete expense.");
     } finally {
@@ -256,13 +259,13 @@ export default function BudgetTracker({
     try {
       const updated = await api.rolloverBudget({
         sourceMonth: rolloverSource,
-        targetMonth: activeCycle
+        targetMonth: budgetMonth
       });
 
       setBudgets(prev => {
-        const idx = prev.findIndex(b => b.month === activeCycle);
+        const idx = prev.findIndex(b => b.month === budgetMonth);
         if (idx === -1) return [...prev, updated];
-        return prev.map(b => b.month === activeCycle ? updated : b);
+        return prev.map(b => b.month === budgetMonth ? updated : b);
       });
       setRolloverModalOpen(false);
     } catch (err: any) {
@@ -297,11 +300,11 @@ export default function BudgetTracker({
     setIsSaving(true);
     try {
       const updated = await api.addBudgetAllocation({
-        month: activeCycle,
+        month: budgetMonth,
         category: `SPayLater Bill (${activeCycle})`,
         allocatedAmount: totalSPayLaterDue
       });
-      setBudgets(prev => prev.map(b => b.month === activeCycle ? updated : b));
+      setBudgets(prev => prev.map(b => b.month === budgetMonth ? updated : b));
       alert(`Success! Added 'SPayLater Bill (${activeCycle})' with a budget of ${settings.currency} ${totalSPayLaterDue.toLocaleString()}!`);
     } catch (err: any) {
       alert(err.message || "Failed to add allocation.");
@@ -333,7 +336,7 @@ export default function BudgetTracker({
   // currently-live month - a past or future cycle has no "pace" to compare against.
   const cycleProgress = useMemo(() => {
     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    const parts = activeCycle.split(" ");
+    const parts = budgetMonth.split(" ");
     const monthIndex = monthNames.indexOf(parts[0]);
     const year = parseInt(parts[1], 10);
     if (monthIndex === -1 || Number.isNaN(year)) return null;
@@ -343,7 +346,7 @@ export default function BudgetTracker({
 
     const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
     return { percentElapsed: (now.getDate() / daysInMonth) * 100 };
-  }, [activeCycle]);
+  }, [budgetMonth]);
 
   // "On track" / "Spending faster than usual" label for a given spent%,
   // relative to how far through the cycle we are.
@@ -389,7 +392,7 @@ export default function BudgetTracker({
           </div>
           <h2 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
             Salary & Monthly Budgeting Tracker
-            <span className="text-brand-600 dark:text-brand-400 font-medium">({activeCycle})</span>
+            <span className="text-brand-600 dark:text-brand-400 font-medium">({budgetMonth})</span>
           </h2>
           <p className="text-xs text-slate-400 dark:text-slate-500 max-w-xl">
             Design dynamic budget allocations, track actual daily transactions, and configure recurring salaries.
@@ -733,7 +736,7 @@ export default function BudgetTracker({
 
         {activeBudget.expenses.length === 0 ? (
           <div className="py-12 text-center text-slate-400 dark:text-slate-500 text-xs">
-            No expenses logged for {activeCycle} yet. Keep tracking your spending.
+            No expenses logged for {budgetMonth} yet. Keep tracking your spending.
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -797,7 +800,7 @@ export default function BudgetTracker({
             className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-2xl w-full max-w-sm overflow-hidden shadow-xl"
           >
             <div className="p-4 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between">
-              <h4 className="font-bold text-slate-950 dark:text-white text-xs">Setup Cash Income ({activeCycle})</h4>
+              <h4 className="font-bold text-slate-950 dark:text-white text-xs">Setup Cash Income ({budgetMonth})</h4>
               <button onClick={() => setIncomeModalOpen(false)} className="text-slate-400 hover:text-slate-600">
                 <X className="w-4 h-4" />
               </button>
@@ -1046,7 +1049,7 @@ export default function BudgetTracker({
               <div className="p-3 bg-brand-50 dark:bg-brand-950/30 text-brand-700 dark:text-brand-300 text-[11px] rounded-xl border border-brand-100 dark:border-brand-900/50 leading-relaxed flex gap-2">
                 <Info className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>
-                  This action copies your previous budget category limits and income settings from the chosen month into your current active month ({activeCycle}), starting fresh with 0 spent.
+                  This action copies your previous budget category limits and income settings from the chosen month into your current active month ({budgetMonth}), starting fresh with 0 spent.
                 </span>
               </div>
 
@@ -1062,14 +1065,14 @@ export default function BudgetTracker({
                 >
                   <option value="">-- Choose past budget cycle --</option>
                   {budgets
-                    .filter(b => b.month !== activeCycle)
+                    .filter(b => b.month !== budgetMonth)
                     .map(b => (
                       <option key={b.id} value={b.month}>
                         {b.month} (Salary: {settings.currency} {b.salary.toLocaleString()})
                       </option>
                     ))}
                 </select>
-                {budgets.filter(b => b.month !== activeCycle).length === 0 && (
+                {budgets.filter(b => b.month !== budgetMonth).length === 0 && (
                   <p className="text-[10px] text-red-500 mt-1">
                     No other monthly budgets exist yet in the database.
                   </p>

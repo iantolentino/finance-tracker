@@ -149,14 +149,14 @@ export default function Reports({
   return (
     <div className="space-y-6">
       {/* Header with control filters */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between bg-white p-5 rounded-2xl border border-slate-100 shadow-sm gap-4 print:hidden">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm gap-4 print:hidden">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <FileText className="w-5 h-5 text-brand-500" />
             Financial Report Center
           </h2>
-          <p className="text-xs text-slate-500 mt-1">
-            Active Cycle: <strong className="text-slate-800">{activeCycle}</strong> • View summaries, outstanding ledgers, collections logs, or export.
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Active Cycle: <strong className="text-slate-800 dark:text-slate-200">{activeCycle}</strong> • View summaries, outstanding ledgers, collections logs, or export.
           </p>
         </div>
         <div className="flex gap-2">
@@ -187,11 +187,11 @@ export default function Reports({
             className={`p-4 rounded-2xl border text-left transition relative overflow-hidden group ${
               reportType === rep.id
                 ? "bg-slate-900 border-slate-900 text-white shadow-md"
-                : "bg-white border-slate-100 hover:bg-slate-50"
+                : "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"
             }`}
           >
             <h4 className="font-bold text-xs">{rep.title}</h4>
-            <p className={`text-[10px] mt-1 ${reportType === rep.id ? "text-slate-300" : "text-slate-400"}`}>
+            <p className={`text-[10px] mt-1 ${reportType === rep.id ? "text-slate-300 dark:text-slate-600" : "text-slate-400 dark:text-slate-500"}`}>
               {rep.desc}
             </p>
           </button>
@@ -199,19 +199,19 @@ export default function Reports({
       </div>
 
       {/* Filter bar - Hide on print */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between gap-4 print:hidden">
+      <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-center justify-between gap-4 print:hidden">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400 dark:text-slate-500" />
           <input
             type="text"
             placeholder={`Filter report records by name...`}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50"
+            className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-slate-50/50 dark:bg-slate-800/50"
           />
         </div>
-        <div className="text-right text-xs text-slate-500">
-          Showing <strong className="text-slate-800">{
+        <div className="text-right text-xs text-slate-500 dark:text-slate-400">
+          Showing <strong className="text-slate-800 dark:text-slate-200">{
             reportType === "outstanding" ? outstandingReportData.length :
             reportType === "collections" ? collectionsReportData.length :
             reportType === "overdue" ? overdueReportData.length : loansReportData.length
@@ -220,12 +220,12 @@ export default function Reports({
       </div>
 
       {/* Active Print Canvas Area */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm print:shadow-none print:border-none print:p-0">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm print:shadow-none print:border-none print:p-0">
         {/* Print Header details */}
-        <div className="hidden print:flex justify-between items-start border-b border-slate-200 pb-4 mb-6">
+        <div className="hidden print:flex justify-between items-start border-b border-slate-200 dark:border-slate-700 pb-4 mb-6">
           <div>
-            <h1 className="text-xl font-bold text-slate-900">{settings.personalBusinessName}</h1>
-            <span className="text-xs text-slate-400 block mt-0.5">Automated System Financial Ledger Report</span>
+            <h1 className="text-xl font-bold text-slate-900 dark:text-white">{settings.personalBusinessName}</h1>
+            <span className="text-xs text-slate-400 dark:text-slate-500 block mt-0.5">Automated System Financial Ledger Report</span>
           </div>
           <div className="text-right">
             <span className="text-sm font-bold uppercase text-brand-600 block">
@@ -234,21 +234,21 @@ export default function Reports({
               {reportType === "overdue" && "Overdue Receivables Report"}
               {reportType === "loans" && "Cash Loans (Lending) Summary"}
             </span>
-            <span className="text-[10px] text-slate-500 block mt-1">Billing Cycle: {activeCycle}</span>
-            <span className="text-[10px] text-slate-500 block">Date Printed: {new Date().toLocaleDateString()}</span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-1">Billing Cycle: {activeCycle}</span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Date Printed: {new Date().toLocaleDateString()}</span>
           </div>
         </div>
 
         {/* Section title */}
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">
+            <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm uppercase tracking-wide">
               {reportType === "outstanding" && "Outstanding Receivables Report"}
               {reportType === "collections" && "Monthly Collection Logs"}
               {reportType === "overdue" && "Overdue Collection Targets"}
               {reportType === "loans" && "Lending Portfolio Ledger"}
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5 print:hidden">
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 print:hidden">
               {reportType === "outstanding" && "List of customers with active remaining SPayLater dues for this billing month."}
               {reportType === "collections" && "Payment transactions logged by customers in this billing cycle."}
               {reportType === "overdue" && "Warning: Active customers with missed payment schedules or overdue items."}
@@ -256,8 +256,8 @@ export default function Reports({
             </p>
           </div>
           <div className="text-right">
-            <span className="text-[10px] uppercase font-bold text-slate-400 block">Report Summary Sum:</span>
-            <span className="text-lg font-bold text-slate-950">{formatCurrency(reportTotals)}</span>
+            <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 block">Report Summary Sum:</span>
+            <span className="text-lg font-bold text-slate-950 dark:text-white">{formatCurrency(reportTotals)}</span>
           </div>
         </div>
 
@@ -266,7 +266,7 @@ export default function Reports({
           {reportType === "outstanding" && (
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-slate-200 text-slate-400 font-medium bg-slate-50/50 print:bg-transparent">
+                <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500 font-medium bg-slate-50/50 dark:bg-slate-800/50 print:bg-transparent">
                   <th className="py-2.5 px-2">Customer Full Name</th>
                   <th className="py-2.5">Contact Number</th>
                   <th className="py-2.5 text-right">Total Charged</th>
@@ -274,17 +274,17 @@ export default function Reports({
                   <th className="py-2.5 text-right px-2">Outstanding Due</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {outstandingReportData.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-8 text-center text-slate-300">No active outstanding receivables.</td>
+                    <td colSpan={5} className="py-8 text-center text-slate-300 dark:text-slate-600">No active outstanding receivables.</td>
                   </tr>
                 ) : (
                   outstandingReportData.map((row) => (
                     <tr key={row.id}>
-                      <td className="py-3 px-2 font-bold text-slate-900">{row.fullName}</td>
-                      <td className="py-3 text-slate-500">{row.contactNumber || "—"}</td>
-                      <td className="py-3 text-right text-slate-600">{formatCurrency(row.totalBuy)}</td>
+                      <td className="py-3 px-2 font-bold text-slate-900 dark:text-white">{row.fullName}</td>
+                      <td className="py-3 text-slate-500 dark:text-slate-400">{row.contactNumber || "—"}</td>
+                      <td className="py-3 text-right text-slate-600 dark:text-slate-400">{formatCurrency(row.totalBuy)}</td>
                       <td className="py-3 text-right text-emerald-600">{formatCurrency(row.totalPaid)}</td>
                       <td className="py-3 text-right font-extrabold text-brand-600 px-2">{formatCurrency(row.remainingBalance)}</td>
                     </tr>
@@ -297,7 +297,7 @@ export default function Reports({
           {reportType === "collections" && (
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-slate-200 text-slate-400 font-medium bg-slate-50/50 print:bg-transparent">
+                <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500 font-medium bg-slate-50/50 dark:bg-slate-800/50 print:bg-transparent">
                   <th className="py-2.5 px-2">Payment Date</th>
                   <th className="py-2.5">Customer Name</th>
                   <th className="py-2.5">Method</th>
@@ -305,22 +305,22 @@ export default function Reports({
                   <th className="py-2.5 text-right px-2">Amount Collected</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {collectionsReportData.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-8 text-center text-slate-300">No collections transactions recorded this month.</td>
+                    <td colSpan={5} className="py-8 text-center text-slate-300 dark:text-slate-600">No collections transactions recorded this month.</td>
                   </tr>
                 ) : (
                   collectionsReportData.map((row) => (
                     <tr key={row.id}>
-                      <td className="py-3 px-2 text-slate-600 font-medium">{row.paymentDate}</td>
-                      <td className="py-3 font-bold text-slate-900">{row.customerName}</td>
+                      <td className="py-3 px-2 text-slate-600 dark:text-slate-400 font-medium">{row.paymentDate}</td>
+                      <td className="py-3 font-bold text-slate-900 dark:text-white">{row.customerName}</td>
                       <td className="py-3">
-                        <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-bold text-[9px] uppercase">
+                        <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-[9px] uppercase">
                           {row.paymentMethod}
                         </span>
                       </td>
-                      <td className="py-3 text-slate-400 max-w-xs truncate">{row.notes || "—"}</td>
+                      <td className="py-3 text-slate-400 dark:text-slate-500 max-w-xs truncate">{row.notes || "—"}</td>
                       <td className="py-3 text-right font-extrabold text-emerald-600 px-2">{formatCurrency(row.amountPaid)}</td>
                     </tr>
                   ))
@@ -332,7 +332,7 @@ export default function Reports({
           {reportType === "overdue" && (
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-slate-200 text-slate-400 font-medium bg-slate-50/50 print:bg-transparent">
+                <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500 font-medium bg-slate-50/50 dark:bg-slate-800/50 print:bg-transparent">
                   <th className="py-2.5 px-2">Overdue Customer</th>
                   <th className="py-2.5">Dues Breakdown</th>
                   <th className="py-2.5 text-right">Total Charged</th>
@@ -340,23 +340,23 @@ export default function Reports({
                   <th className="py-2.5 text-right px-2">Urgent Overdue Balance</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {overdueReportData.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-8 text-center text-slate-300">Congratulations! No overdue customers.</td>
+                    <td colSpan={5} className="py-8 text-center text-slate-300 dark:text-slate-600">Congratulations! No overdue customers.</td>
                   </tr>
                 ) : (
                   overdueReportData.map((row) => (
                     <tr key={row.id} className="bg-red-50/20 print:bg-transparent">
-                      <td className="py-3 px-2 font-bold text-slate-900">
+                      <td className="py-3 px-2 font-bold text-slate-900 dark:text-white">
                         {row.fullName}
                         <span className="block text-[9px] text-red-500 font-semibold mt-0.5 flex items-center gap-1">
                           <AlertTriangle className="w-3 h-3 shrink-0" /> Overdue Status Tagged
                         </span>
                       </td>
-                      <td className="py-3 text-slate-500 text-[10px] max-w-xs whitespace-pre-line">{row.notes || "No remarks"}</td>
-                      <td className="py-3 text-right text-slate-600">{formatCurrency(row.totalBuy)}</td>
-                      <td className="py-3 text-right text-slate-500">{formatCurrency(row.totalPaid)}</td>
+                      <td className="py-3 text-slate-500 dark:text-slate-400 text-[10px] max-w-xs whitespace-pre-line">{row.notes || "No remarks"}</td>
+                      <td className="py-3 text-right text-slate-600 dark:text-slate-400">{formatCurrency(row.totalBuy)}</td>
+                      <td className="py-3 text-right text-slate-500 dark:text-slate-400">{formatCurrency(row.totalPaid)}</td>
                       <td className="py-3 text-right font-extrabold text-red-600 px-2">{formatCurrency(row.remainingBalance)}</td>
                     </tr>
                   ))
@@ -368,7 +368,7 @@ export default function Reports({
           {reportType === "loans" && (
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-slate-200 text-slate-400 font-medium bg-slate-50/50 print:bg-transparent">
+                <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500 font-medium bg-slate-50/50 dark:bg-slate-800/50 print:bg-transparent">
                   <th className="py-2.5 px-2">Borrower Name</th>
                   <th className="py-2.5">Loan & Due Dates</th>
                   <th className="py-2.5 text-right">Principal</th>
@@ -377,25 +377,25 @@ export default function Reports({
                   <th className="py-2.5 text-right px-2">Outstanding Dues</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {loansReportData.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-slate-300">No lending profiles on record.</td>
+                    <td colSpan={6} className="py-8 text-center text-slate-300 dark:text-slate-600">No lending profiles on record.</td>
                   </tr>
                 ) : (
                   loansReportData.map((row) => (
                     <tr key={row.id}>
-                      <td className="py-3 px-2 font-bold text-slate-900">
+                      <td className="py-3 px-2 font-bold text-slate-900 dark:text-white">
                         {row.borrowerName}
-                        <span className={`block mt-0.5 text-[9px] font-semibold text-slate-400`}>
+                        <span className={`block mt-0.5 text-[9px] font-semibold text-slate-400 dark:text-slate-500`}>
                           Terms: {row.paymentSchedule}
                         </span>
                       </td>
-                      <td className="py-3 text-slate-500">
+                      <td className="py-3 text-slate-500 dark:text-slate-400">
                         <span className="block">Granted: {row.loanDate}</span>
                         <span className="block text-[10px] text-red-500 font-medium mt-0.5">Due: {row.dueDate || "N/A"}</span>
                       </td>
-                      <td className="py-3 text-right text-slate-600">{formatCurrency(row.principalAmount)}</td>
+                      <td className="py-3 text-right text-slate-600 dark:text-slate-400">{formatCurrency(row.principalAmount)}</td>
                       <td className="py-3 text-right text-brand-600 font-medium">+{formatCurrency(row.interestAmount)}</td>
                       <td className="py-3 text-right text-emerald-600">{formatCurrency(row.totalPaid)}</td>
                       <td className="py-3 text-right font-extrabold text-brand-600 px-2">{formatCurrency(row.remainingBalance)}</td>
@@ -409,27 +409,27 @@ export default function Reports({
 
         {/* Extra Lending stats block */}
         {reportType === "loans" && loansReportData.length > 0 && (
-          <div className="mt-6 p-4 bg-brand-50/50 rounded-2xl border border-brand-100 flex flex-col sm:flex-row justify-between items-center text-xs gap-4 print:hidden">
+          <div className="mt-6 p-4 bg-brand-50/50 dark:bg-brand-950/20 rounded-2xl border border-brand-100 flex flex-col sm:flex-row justify-between items-center text-xs gap-4 print:hidden">
             <div>
               <span className="font-bold text-brand-900">Computed Lending Interest Summary:</span>
-              <p className="text-slate-500 text-[10px]">Total revenue interest generated across all cash loans granted.</p>
+              <p className="text-slate-500 dark:text-slate-400 text-[10px]">Total revenue interest generated across all cash loans granted.</p>
             </div>
             <div className="text-right">
-              <span className="text-[10px] text-slate-400 block font-semibold">Total Revenue Interest:</span>
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 block font-semibold">Total Revenue Interest:</span>
               <span className="text-sm font-black text-brand-700">{formatCurrency(totalInterestEarnedOnLoans)}</span>
             </div>
           </div>
         )}
 
         {/* Printed Footer Signatures */}
-        <div className="hidden print:grid grid-cols-2 gap-12 pt-16 text-center text-[10px] text-slate-400">
-          <div className="border-t border-dashed border-slate-200 pt-2">
+        <div className="hidden print:grid grid-cols-2 gap-12 pt-16 text-center text-[10px] text-slate-400 dark:text-slate-500">
+          <div className="border-t border-dashed border-slate-200 dark:border-slate-700 pt-2">
              Juan dela Cruz <br />
-            <span className="font-medium text-slate-300">PFMS Report Comptroller</span>
+            <span className="font-medium text-slate-300 dark:text-slate-600">PFMS Report Comptroller</span>
           </div>
-          <div className="border-t border-dashed border-slate-200 pt-2">
+          <div className="border-t border-dashed border-slate-200 dark:border-slate-700 pt-2">
             Signature of Verification <br />
-            <span className="font-medium text-slate-300">Lending & SPayLater Auditor</span>
+            <span className="font-medium text-slate-300 dark:text-slate-600">Lending & SPayLater Auditor</span>
           </div>
         </div>
       </div>

@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import seedData from "../spaylater_import.json" with { type: "json" };
 import {
   readDb, writeDb, writeDbBatch, listBackups, readBackup, writeBackup, deleteBackup,
-  runWithAccount, findAccountByUsername, findAccountById, updateAccountPassword
+  runWithAccount, findAccountByUsername, findAccountById, updateAccountPassword, updateAccountDisplayName
 } from "./postgresStore.js";
 
 export const app = express();
@@ -93,7 +93,7 @@ const createSystemBackup = async (isAuto = false) => {
   const dateString = new Date().toISOString().split("T")[0];
   const filename = `${prefix}${dateString}_${timestamp.substring(11, 19).replace(/-/g, "")}.json`;
 
-  const [settings, billingCycles, customers, purchases, payments, loans, budgets, archives, activityLogs] =
+  const [settings, billingCycles, customers, purchases, payments, loans, budgets, creditCardEntries, archives, activityLogs] =
     await Promise.all([
       readDb("settings.json", DEFAULT_SETTINGS),
       readDb("billing_cycles.json", defaultBillingCycles()),
@@ -102,6 +102,7 @@ const createSystemBackup = async (isAuto = false) => {
       readDb("payments.json", []),
       readDb("loans.json", []),
       readDb("budgets.json", []),
+      readDb("credit_card_entries.json", []),
       readDb("archives.json", []),
       readDb("activity_logs.json", defaultActivityLogs())
     ]);
@@ -116,6 +117,7 @@ const createSystemBackup = async (isAuto = false) => {
     payments,
     loans,
     budgets,
+    creditCardEntries,
     archives,
     activityLogs
   };
@@ -246,6 +248,28 @@ app.post("/api/auth/change-password", verifyToken, h(async (req, res) => {
   res.json({ success: true, token });
 }));
 
+app.put("/api/auth/display-name", verifyToken, h(async (req, res) => {
+  const { displayName } = req.body;
+  const accountId = (req as any).accountId as string;
+
+  if (!displayName || !displayName.trim()) {
+    return res.status(400).json({ error: "Display name cannot be empty." });
+  }
+
+  const account = await findAccountById(accountId);
+  if (!account) {
+    return res.status(404).json({ error: "Account not found." });
+  }
+
+  const trimmedName = displayName.trim();
+  await updateAccountDisplayName(accountId, trimmedName);
+  await addLog("Profile Updated", `Display name changed to "${trimmedName}".`);
+
+  // Re-sign the token since displayName is embedded in it.
+  const token = jwt.sign({ accountId, displayName: trimmedName }, requireSessionSecret(), { expiresIn: "90d" });
+  res.json({ success: true, token, displayName: trimmedName });
+}));
+
 // 2. SETTINGS API
 app.get("/api/settings", verifyToken, h(async (req, res) => {
   res.json(await readDb("settings.json", DEFAULT_SETTINGS));
@@ -271,12 +295,11 @@ app.post("/api/billing-cycles/complete", verifyToken, h(async (req, res) => {
   const billingCycleData = await readDb("billing_cycles.json", defaultBillingCycles());
   const activeCycle = billingCycleData.activeCycle;
 
-  const [customers, purchases, payments, archives, budgets] = await Promise.all([
+  const [customers, purchases, payments, archives] = await Promise.all([
     readDb("customers.json", []),
     readDb("purchases.json", []),
     readDb("payments.json", []),
-    readDb("archives.json", []),
-    readDb("budgets.json", [])
+    readDb("archives.json", [])
   ]);
 
   const newArchive = {
@@ -331,39 +354,15 @@ app.post("/api/billing-cycles/complete", verifyToken, h(async (req, res) => {
     billingCycleData.cycles.push(nextCycle);
   }
 
-  // Carry the budget layout (income + allocation categories, not expenses)
-  // forward automatically, same as customer balances already do - otherwise
-  // the Budget tab silently shows a blank month with no warning.
-  const sourceBudget = budgets.find((b: any) => b.month === activeCycle);
-  const targetBudgetExists = budgets.some((b: any) => b.month === nextCycle);
-  let updatedBudgets = budgets;
-  if (sourceBudget && !targetBudgetExists) {
-    const copiedAllocations = sourceBudget.allocations.map((a: any) => ({
-      id: "alloc-" + Date.now() + "-" + Math.random().toString(36).substring(2, 6),
-      category: a.category,
-      allocatedAmount: a.allocatedAmount,
-      spentAmount: 0
-    }));
-    updatedBudgets = [
-      ...budgets,
-      {
-        id: "budget-" + Date.now(),
-        month: nextCycle,
-        salary: sourceBudget.salary,
-        additionalIncome: sourceBudget.additionalIncome,
-        allocations: copiedAllocations,
-        expenses: [],
-        createdAt: new Date().toISOString()
-      }
-    ];
-  }
-
+  // Monthly Budget is intentionally NOT touched here - it's keyed by its own
+  // calendar month (see budgetMonth on the frontend), never by SPayLater's
+  // billing cycle, so completing/archiving an SPayLater cycle can never
+  // reset, mutate, or otherwise affect Budget data.
   await writeDbBatch([
     ["customers.json", activeCustomers],
     ["purchases.json", remainingPurchases],
     ["payments.json", remainingPayments],
-    ["billing_cycles.json", billingCycleData],
-    ["budgets.json", updatedBudgets]
+    ["billing_cycles.json", billingCycleData]
   ]);
 
   await addLog("Billing Cycle Completed", `Archived cycle ${activeCycle}. Shifted active workspace to ${nextCycle}.`);
@@ -757,6 +756,72 @@ app.delete("/api/loans/:loanId/payments/:paymentId", verifyToken, h(async (req, 
   res.json(loans[lIndex]);
 }));
 
+// ==========================================
+// 7.5. CREDIT CARD API
+// ==========================================
+// A distinct data type/module - stored in its own "credit_card_entries.json"
+// key, never mixed with SPayLater, Lending, or Budget data. Each entry is a
+// single charge made on the personal credit card, on behalf of a named
+// person, categorized for tracking.
+
+app.get("/api/credit-card", verifyToken, h(async (req, res) => {
+  res.json(await readDb("credit_card_entries.json", []));
+}));
+
+app.post("/api/credit-card", verifyToken, h(async (req, res) => {
+  const entries = await readDb("credit_card_entries.json", []);
+
+  const newEntry = {
+    id: "cc-" + Date.now(),
+    personName: req.body.personName || "",
+    itemName: req.body.itemName || "",
+    category: req.body.category || "Other",
+    amount: parseFloat(req.body.amount) || 0,
+    date: req.body.date || new Date().toISOString().split("T")[0],
+    notes: req.body.notes || "",
+    createdAt: new Date().toISOString()
+  };
+
+  entries.push(newEntry);
+  await writeDb("credit_card_entries.json", entries);
+
+  await addLog("Credit Card Charge Logged", `Logged ${newEntry.amount} PHP charge for ${newEntry.personName || "unspecified"}: ${newEntry.itemName}`);
+  res.json(newEntry);
+}));
+
+app.put("/api/credit-card/:id", verifyToken, h(async (req, res) => {
+  const entries = await readDb("credit_card_entries.json", []);
+  const index = entries.findIndex((e: any) => e.id === req.params.id);
+
+  if (index === -1) {
+    return res.status(404).json({ error: "Credit card entry not found" });
+  }
+
+  entries[index] = {
+    ...entries[index],
+    ...req.body,
+    amount: numOrExisting(req.body.amount, entries[index].amount)
+  };
+
+  await writeDb("credit_card_entries.json", entries);
+  await addLog("Credit Card Charge Updated", `Updated charge entry: ${entries[index].itemName}`);
+  res.json(entries[index]);
+}));
+
+app.delete("/api/credit-card/:id", verifyToken, h(async (req, res) => {
+  let entries = await readDb("credit_card_entries.json", []);
+  const entry = entries.find((e: any) => e.id === req.params.id);
+
+  if (!entry) {
+    return res.status(404).json({ error: "Credit card entry not found" });
+  }
+
+  entries = entries.filter((e: any) => e.id !== req.params.id);
+  await writeDb("credit_card_entries.json", entries);
+  await addLog("Credit Card Charge Deleted", `Deleted charge entry: ${entry.itemName}`);
+  res.json({ success: true });
+}));
+
 const recalculateLoanStatus = (loan: any) => {
   const principal = loan.principalAmount;
   const interestType = loan.interestType;
@@ -1093,6 +1158,7 @@ app.post("/api/backups/:id/restore", verifyToken, h(async (req, res) => {
     ["payments.json", data.payments],
     ["loans.json", data.loans],
     ["budgets.json", data.budgets || []],
+    ["credit_card_entries.json", data.creditCardEntries || []],
     ["archives.json", data.archives || []],
     ["activity_logs.json", data.activityLogs || []]
   ]);
@@ -1127,6 +1193,7 @@ app.post("/api/backups/import", verifyToken, h(async (req, res) => {
     ["payments.json", data.payments || []],
     ["loans.json", data.loans || []],
     ["budgets.json", data.budgets || []],
+    ["credit_card_entries.json", data.creditCardEntries || []],
     ["archives.json", data.archives || []],
     ["activity_logs.json", data.activityLogs || []]
   ]);
@@ -1157,7 +1224,7 @@ app.post("/api/backups/seed-spaylater", verifyToken, h(async (req, res) => {
 
 // Export complete system state as a direct download
 app.get("/api/backups/export", verifyToken, h(async (req, res) => {
-  const [settings, billingCycles, customers, purchases, payments, loans, budgets, archives, activityLogs] =
+  const [settings, billingCycles, customers, purchases, payments, loans, budgets, creditCardEntries, archives, activityLogs] =
     await Promise.all([
       readDb("settings.json", DEFAULT_SETTINGS),
       readDb("billing_cycles.json", defaultBillingCycles()),
@@ -1166,6 +1233,7 @@ app.get("/api/backups/export", verifyToken, h(async (req, res) => {
       readDb("payments.json", []),
       readDb("loans.json", []),
       readDb("budgets.json", []),
+      readDb("credit_card_entries.json", []),
       readDb("archives.json", []),
       readDb("activity_logs.json", defaultActivityLogs())
     ]);
@@ -1180,6 +1248,7 @@ app.get("/api/backups/export", verifyToken, h(async (req, res) => {
     payments,
     loans,
     budgets,
+    creditCardEntries,
     archives,
     activityLogs
   };

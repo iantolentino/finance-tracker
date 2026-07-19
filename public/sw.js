@@ -1,7 +1,13 @@
-// Minimal app-shell cache for fast repeat loads and offline fallback.
-// Deliberately does NOT cache /api/* - financial data must always come
-// from the network, never a stale cache.
-const CACHE_NAME = "pfms-shell-v2";
+// Minimal app-shell cache for offline fallback only. Deliberately does NOT
+// cache /api/* - financial data must always come from the network, never a
+// stale cache.
+//
+// Network-first (not cache-first): a mobile home-screen PWA install is
+// rarely fully closed, so a cache-first strategy could keep serving an old
+// JS/CSS bundle indefinitely across deploys - stale theme logic, stale
+// layout fixes - even while a fresh browser tab on desktop gets the latest
+// build. Always try the network first; only fall back to cache when offline.
+const CACHE_NAME = "pfms-shell-v3";
 
 self.addEventListener("install", () => {
   self.skipWaiting();
@@ -25,14 +31,15 @@ self.addEventListener("fetch", (event) => {
 
   event.respondWith(
     caches.open(CACHE_NAME).then(async (cache) => {
-      const cached = await cache.match(request);
-      const networkFetch = fetch(request)
-        .then((response) => {
-          if (response.ok) cache.put(request, response.clone());
-          return response;
-        })
-        .catch(() => cached);
-      return cached || networkFetch;
+      try {
+        const response = await fetch(request);
+        if (response.ok) cache.put(request, response.clone());
+        return response;
+      } catch {
+        const cached = await cache.match(request);
+        if (cached) return cached;
+        throw new Error("offline and not cached");
+      }
     })
   );
 });

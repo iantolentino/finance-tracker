@@ -121,3 +121,14 @@ export interface MonthlyBudget {
   createdAt: string;
 }
 
+export interface CreditCardEntry {
+  id: string;
+  personName: string;
+  itemName: string;
+  category: string;
+  amount: number;
+  date: string;
+  notes: string;
+  createdAt: string;
+}
+

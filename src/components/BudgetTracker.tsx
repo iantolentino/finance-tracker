@@ -417,21 +417,23 @@ export default function BudgetTracker({
         </div>
       </div>
 
-      {/* 2. Visual Statistics & Bento Grid Indicators */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 2. Visual Statistics & Bento Grid Indicators - 2-up even on the
+          smallest phones, 3-up from small tablets, so this doesn't take up
+          the whole screen in a single stacked column. */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4">
         {/* Total Income Card */}
-        <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800/80 shadow-sm space-y-3 relative overflow-hidden">
+        <div className="p-3 sm:p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800/80 shadow-sm space-y-2 sm:space-y-3 relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Total Monthly Cashflow</span>
-            <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-xl">
-              <TrendingUp className="w-4 h-4" />
+            <span className="text-[10px] sm:text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Cashflow</span>
+            <div className="p-1.5 sm:p-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-xl">
+              <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
           <div>
-            <h3 className="text-xl font-black text-slate-900 dark:text-white">
+            <h3 className="text-base sm:text-xl font-black text-slate-900 dark:text-white break-words">
               {settings.currency} {totalIncome.toLocaleString()}
             </h3>
-            <p className="text-[10px] text-slate-400 mt-1">
+            <p className="text-[9px] sm:text-[10px] text-slate-400 mt-1">
               Salary: {settings.currency} {activeBudget.salary.toLocaleString()} • Addl: {settings.currency} {activeBudget.additionalIncome.toLocaleString()}
             </p>
           </div>
@@ -439,42 +441,42 @@ export default function BudgetTracker({
         </div>
 
         {/* Allocated Budget Card */}
-        <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800/80 shadow-sm space-y-3 relative overflow-hidden">
+        <div className="p-3 sm:p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800/80 shadow-sm space-y-2 sm:space-y-3 relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Allocated to Budget</span>
-            <div className="p-2 bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400 rounded-xl">
-              <ArrowUpRight className="w-4 h-4" />
+            <span className="text-[10px] sm:text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Allocated</span>
+            <div className="p-1.5 sm:p-2 bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400 rounded-xl">
+              <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
           <div>
-            <h3 className="text-xl font-black text-slate-900 dark:text-white">
+            <h3 className="text-base sm:text-xl font-black text-slate-900 dark:text-white break-words">
               {settings.currency} {totalAllocated.toLocaleString()}
             </h3>
-            <div className="flex items-center gap-1.5 mt-1 text-[10px]">
+            <div className="flex items-center gap-1.5 mt-1 text-[9px] sm:text-[10px]">
               <span className="text-brand-600 dark:text-brand-400 font-bold">{allocationProgress.toFixed(0)}%</span>
-              <span className="text-slate-400">of total cash flow allocated</span>
+              <span className="text-slate-400">of cash flow allocated</span>
             </div>
           </div>
           <div className="absolute bottom-0 inset-x-0 h-1 bg-brand-500" />
         </div>
 
         {/* Actual Spent Card */}
-        <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800/80 shadow-sm space-y-3 relative overflow-hidden">
+        <div className="p-3 sm:p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800/80 shadow-sm space-y-2 sm:space-y-3 relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Total Actual Spending</span>
-            <div className="p-2 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-xl">
-              <Receipt className="w-4 h-4" />
+            <span className="text-[10px] sm:text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Spending</span>
+            <div className="p-1.5 sm:p-2 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-xl">
+              <Receipt className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
           <div>
-            <h3 className="text-xl font-black text-slate-900 dark:text-white">
+            <h3 className="text-base sm:text-xl font-black text-slate-900 dark:text-white break-words">
               {settings.currency} {totalSpent.toLocaleString()}
             </h3>
-            <div className="flex items-center gap-1.5 mt-1 text-[10px]">
+            <div className="flex items-center gap-1.5 mt-1 text-[9px] sm:text-[10px]">
               <span className={`${spendingProgress > 100 ? "text-red-500 font-extrabold" : "text-emerald-500 font-bold"}`}>
                 {spendingProgress.toFixed(0)}%
               </span>
-              <span className="text-slate-400">spent of budgeted target</span>
+              <span className="text-slate-400">spent of target</span>
             </div>
             {spendingProgress <= 100 && pacingLabel(spendingProgress) && (
               <span className={`inline-block mt-1 text-[9px] font-bold uppercase tracking-wide ${pacingLabel(spendingProgress)!.tone === "warn" ? "text-amber-600" : "text-slate-400"}`}>
@@ -486,19 +488,19 @@ export default function BudgetTracker({
         </div>
 
         {/* Safe to Spend - nets out committed SPayLater dues, not just raw remaining cash */}
-        <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800/80 shadow-sm space-y-3 relative overflow-hidden">
+        <div className="p-3 sm:p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800/80 shadow-sm space-y-2 sm:space-y-3 relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Safe to Spend</span>
-            <div className="p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-xl">
-              <Sparkles className="w-4 h-4" />
+            <span className="text-[10px] sm:text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Safe to Spend</span>
+            <div className="p-1.5 sm:p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-xl">
+              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
           <div>
-            <h3 className="text-xl font-black text-slate-900 dark:text-white">
+            <h3 className="text-base sm:text-xl font-black text-slate-900 dark:text-white break-words">
               {settings.currency} {safeToSpend.toLocaleString()}
             </h3>
-            <p className="text-[10px] text-slate-400 mt-1">
-              {settings.currency} {remainingCash.toLocaleString()} remaining − {settings.currency} {totalSPayLaterDue.toLocaleString()} SPayLater dues this cycle
+            <p className="text-[9px] sm:text-[10px] text-slate-400 mt-1">
+              {settings.currency} {remainingCash.toLocaleString()} remaining − {settings.currency} {totalSPayLaterDue.toLocaleString()} SPayLater dues
             </p>
           </div>
           <div className="absolute bottom-0 inset-x-0 h-1 bg-amber-500" />

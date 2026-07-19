@@ -91,13 +91,18 @@ export default function App() {
     return `${MONTH_NAMES[now.getMonth()]} ${now.getFullYear()}`;
   }, []);
 
-  // Dynamic theme applier
+  // Dynamic theme applier - also keeps the mobile browser/PWA status bar
+  // color (theme-color meta tag) in sync, since it's otherwise static and
+  // was hardcoded to dark navy, making the app look "stuck dark" at the
+  // very top of the screen on mobile even after switching to light mode.
   useEffect(() => {
     if (settings.theme === "dark") {
       document.documentElement.classList.add("dark");
     } else {
       document.documentElement.classList.remove("dark");
     }
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", settings.theme === "dark" ? "#08090f" : "#ffffff");
   }, [settings.theme]);
 
   // Activity logs are an audit trail, not something that needs to stay live
@@ -684,8 +689,7 @@ export default function App() {
             <Building className="w-5 h-5" />
           </div>
           <div className="min-w-0">
-            <h2 className="text-xs font-black truncate">{settings.personalBusinessName}</h2>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">{displayName || "Workspace"}</span>
+            <span className="text-xs font-black truncate block">{displayName || "Workspace"}</span>
           </div>
         </div>
 
@@ -765,8 +769,7 @@ export default function App() {
                   <Building className="w-5 h-5" />
                 </div>
                 <div className="min-w-0">
-                  <h2 className="text-xs font-black truncate">{settings.personalBusinessName}</h2>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">{displayName || "Workspace"}</span>
+                  <span className="text-xs font-black truncate block">{displayName || "Workspace"}</span>
                 </div>
               </div>
               <button

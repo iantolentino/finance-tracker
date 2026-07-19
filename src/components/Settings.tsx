@@ -301,6 +301,9 @@ export default function Settings({
             <form onSubmit={handleSaveSettings} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Personal / Business Name</label>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 mb-1.5">
+                  Appears on printed receipts and loan agreements as the lender/business name. For your own display name (shown in the sidebar), use "Profile Name" below instead.
+                </p>
                 <input
                   type="text"
                   required
@@ -387,6 +390,9 @@ export default function Settings({
             <form onSubmit={handleSaveProfileName} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Your Display Name</label>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 mb-1.5">
+                  Just for this account's identity in the sidebar and navigation - separate from the Personal/Business Name above, which is only used on printed documents.
+                </p>
                 <input
                   type="text"
                   required

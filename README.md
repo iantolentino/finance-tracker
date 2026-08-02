@@ -7,7 +7,7 @@ A full-stack personal finance application for tracking **SPayLater** customer ba
 1. **SPayLater Tracker** 
    - Manage multiple customer profiles.
    - Track purchases, quantity, original costs, and installment plans.
-   - Record GCash/cash/Maya payments, automatically calculating outstanding balances versus total settled transactions.
+   - Record GCash/cash/Maya payments, automatically calculating outstanding balances versus total settled transactions. 
    - Profile notes, messenger communication shortcuts, and status badges (`Active`, `Fully Paid`, `Overdue`).
 
 2. **Lending / Cash Loans Module**

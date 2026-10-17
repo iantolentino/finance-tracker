@@ -20,7 +20,6 @@ import {
   TrendingUp,
   Download
 } from "lucide-react";
-import html2canvas from "html2canvas-pro";
 import { Customer, Purchase, Payment, SystemSettings } from "../types";
 
 interface SPayLaterProps {
@@ -335,87 +334,156 @@ export default function SPayLater({
     window.print();
   };
 
-  // Save the invoice as a PNG image (for sending via Messenger/Viber etc.).
-  // Captures the full scrollHeight of the statement, not just what's
-  // currently visible in the modal's scrollable viewport.
-  const invoiceRef = useRef<HTMLDivElement>(null);
+  // Render directly from invoice data rather than screenshotting a scrollable
+  // modal. DOM capture can silently produce an all-white canvas in Safari,
+  // Android browsers and when the user has enabled dark mode.
   const [isSavingImage, setIsSavingImage] = useState(false);
   const handleSaveAsImage = async () => {
-    if (!invoiceRef.current) return;
+    const invoice = selectedCustomerInfo;
+    if (!invoice || isSavingImage) return;
     setIsSavingImage(true);
-
-    // A printed statement should always look the same (black text on white)
-    // regardless of whether the app is currently in dark mode. Toggling
-    // .dark off the live <html> (same code path the working theme switch
-    // already uses) rather than only inside html2canvas's cloned document
-    // avoids a class-recalculation race that can otherwise leave the
-    // capture blank.
-    const wasDark = document.documentElement.classList.contains("dark");
-    if (wasDark) document.documentElement.classList.remove("dark");
-
     try {
-      await document.fonts.ready;
-      await new Promise(requestAnimationFrame);
+      const width = 960;
+      const pad = 64;
+      const usable = width - pad * 2;
+      const measure = document.createElement("canvas").getContext("2d");
+      if (!measure) throw new Error("Canvas is not supported by this browser.");
 
-      const node = invoiceRef.current;
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-      const isMobile = isIOS || /Android/.test(navigator.userAgent);
-      const canvas = await html2canvas(node, {
-        // iOS Safari specifically has a tighter canvas memory ceiling than
-        // desktop or Android Chrome - only cap resolution there, not on
-        // Android (which doesn't have this limit and was getting an
-        // unnecessarily blurry capture from being lumped in as "mobile").
-        scale: isIOS ? 1 : 2,
-        backgroundColor: "#ffffff",
-        useCORS: true,
-        imageTimeout: 0,
-        height: node.scrollHeight,
-        windowHeight: node.scrollHeight,
-        scrollY: 0,
-        onclone: (clonedDocument) => { const cloned = clonedDocument.querySelector(".print-area [data-statement-content]") as HTMLElement | null; if (cloned) { cloned.style.height = "auto"; cloned.style.maxHeight = "none"; cloned.style.overflow = "visible"; } }
+      // Build a display list first to ensure the PNG is exactly as tall as
+      // the statement, regardless of how many purchased items it contains.
+      type Draw = (ctx: CanvasRenderingContext2D) => void;
+      const draws: Draw[] = [];
+      let y = pad;
+      const ink = "#111028";
+      const muted = "#5d5775";
+      const purple = "#5029ae";
+      const line = "#dcd9e8";
+      const currency = (amount: number) => formatCurrency(amount);
+      const textLine = (value: string, x: number, baseline: number, font: string, color: string, align: CanvasTextAlign = "left") => {
+        draws.push(ctx => {
+          ctx.font = font;
+          ctx.fillStyle = color;
+          ctx.textAlign = align;
+          ctx.fillText(value, x, baseline);
+        });
+      };
+      const rule = (baseline: number) => draws.push(ctx => {
+        ctx.strokeStyle = line;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(pad, baseline);
+        ctx.lineTo(width - pad, baseline);
+        ctx.stroke();
       });
+      const wrap = (value: string, font: string, maxWidth: number): string[] => {
+        measure.font = font;
+        const output: string[] = [];
+        for (const paragraph of String(value || "").split("\\n")) {
+          let row = "";
+          for (const word of paragraph.split(/\\s+/).filter(Boolean)) {
+            const test = row ? row + " " + word : word;
+            if (row && measure.measureText(test).width > maxWidth) {
+              output.push(row);
+              row = word;
+            } else {
+              row = test;
+            }
+          }
+          output.push(row);
+        }
+        return output;
+      };
+      const section = (heading: string) => {
+        y += 22;
+        textLine(heading, pad, y, '700 22px "Spectral", serif', purple);
+        y += 26;
+        rule(y);
+        y += 20;
+      };
 
-      const filename = `SOA-${(selectedCustomerInfo?.fullName || "statement").replace(/\s+/g, "-")}-${new Date().toISOString().split("T")[0]}.png`;
-      const blob: Blob | null = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
-      if (!blob) throw new Error("Canvas produced no image data");
+      textLine(invoice.fullName, pad, y + 38, '700 42px "Lora", serif', ink);
+      y += 77;
+      textLine("Generated " + new Date().toLocaleDateString("en-PH") + "  •  " + activeCycle, pad, y, '22px "Spectral", serif', muted);
+      y += 30;
+      rule(y);
+      y += 48;
 
-      // The blank-on-iOS failure doesn't throw - it "succeeds" with an
-      // empty image - so a normal try/catch gives no signal. Only the
-      // canvas dimensions are a reliable "did this actually fail" check;
-      // file size is NOT (a sparse statement with no purchases/payments is
-      // legitimately a small, mostly-white PNG - a byte-size threshold here
-      // was flagging real, correct output as broken).
-      console.log("Save as Image diagnostics:", { canvasWidth: canvas.width, canvasHeight: canvas.height, blobSize: blob.size, nodeScrollHeight: node.scrollHeight, isMobile });
-      if (canvas.width === 0 || canvas.height === 0) {
-        alert(`Image came out empty (canvas ${canvas.width}x${canvas.height}). Please screenshot this message and send it - it'll help pin down the exact cause.`);
-        return;
+      const summaryTop = y;
+      draws.push(ctx => {
+        ctx.fillStyle = "#f5f4fb";
+        ctx.fillRect(pad, summaryTop, usable, 116);
+        ctx.strokeStyle = line;
+        ctx.strokeRect(pad, summaryTop, usable, 116);
+        ctx.beginPath();
+        ctx.moveTo(width / 2, summaryTop + 14);
+        ctx.lineTo(width / 2, summaryTop + 102);
+        ctx.stroke();
+      });
+      textLine("PAID", pad + 24, y + 34, '700 20px "Spectral", serif', muted);
+      textLine(currency(invoice.totalPaid), pad + 24, y + 82, '700 34px "Lora", serif', ink);
+      textLine("UNPAID BALANCE", width / 2 + 24, y + 34, '700 20px "Spectral", serif', muted);
+      textLine(currency(invoice.remainingBalance), width / 2 + 24, y + 82, '700 34px "Lora", serif', purple);
+      y += 140;
+
+      section("Items to pay");
+      const items = invoice.purchases.map(p => ({
+        title: p.itemName,
+        detail: "Qty " + p.quantity,
+        amount: p.totalAmount
+      }));
+      if (invoice.carriedOverBalance > 0) {
+        items.push({ title: "Previous balance", detail: "", amount: invoice.carriedOverBalance });
+      }
+      if (items.length === 0) {
+        textLine("No items for this cycle.", pad, y + 26, '23px "Spectral", serif', muted);
+        y += 56;
+      }
+      for (const item of items) {
+        const rows = wrap(item.title, '700 24px "Spectral", serif', usable - 255);
+        for (const [index, row] of rows.entries()) {
+          textLine(row, pad, y + 28 + index * 33, '700 24px "Spectral", serif', ink);
+        }
+        textLine(currency(item.amount), width - pad, y + 29, '700 24px "Spectral", serif', ink, "right");
+        y += rows.length * 33 + 4;
+        if (item.detail) {
+          textLine(item.detail, pad, y + 15, '20px "Spectral", serif', muted);
+          y += 29;
+        }
+        rule(y + 10);
+        y += 30;
+      }
+      y += 20;
+      for (const row of wrap("Payments are deducted from the total due. The unpaid balance is the amount remaining; item amounts show original charges.", '19px "Spectral", serif', usable)) {
+        textLine(row, pad, y + 23, '19px "Spectral", serif', muted);
+        y += 29;
       }
 
-      const file = new File([blob], filename, { type: "image/png" });
+      const canvas = document.createElement("canvas");
+      const scale = Math.min(2, Math.max(1, 3200 / Math.max(y + pad, width)));
+      canvas.width = Math.round(width * scale);
+      canvas.height = Math.round((y + pad) * scale);
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Unable to draw the statement.");
+      ctx.scale(scale, scale);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width, y + pad);
+      draws.forEach(draw => draw(ctx));
+      const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
+      if (!blob || blob.size === 0) throw new Error("The statement PNG could not be generated.");
 
-      // Desktop browsers (Windows Edge/Chrome included) also implement
-      // navigator.share for files - but on desktop that opens the OS share
-      // flyout instead of just saving, which isn't what "Save as Image"
-      // should do there. Only use the share sheet on actual mobile devices;
-      // desktop always gets a normal file download to Downloads.
-      if (isMobile && typeof navigator.share === "function" && typeof navigator.canShare === "function" && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: filename });
-      } else {
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.download = filename;
-        link.href = url;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        setTimeout(() => URL.revokeObjectURL(url), 10000);
-      }
-    } catch (err: any) {
-      if (err?.name === "AbortError") return; // user cancelled the share sheet
-      console.error("Save as Image failed:", err);
-      alert("Failed to generate image. Please try Print instead.");
+      const filename = "SOA-" + invoice.fullName.replace(/[^a-z0-9_-]+/gi, "-") + "-" + new Date().toISOString().slice(0, 10) + ".png";
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+    } catch (error) {
+      console.error("Statement image export failed:", error);
+      alert("Could not save the statement image. Please try again or use Print Statement.");
     } finally {
-      if (wasDark) document.documentElement.classList.add("dark");
       setIsSavingImage(false);
     }
   };

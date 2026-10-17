@@ -72,7 +72,7 @@ export default function App() {
   const [backups, setBackups] = useState<BackupRecord[]>([]);
   const [settings, setSettings] = useState<SystemSettings>({
     currency: "PHP",
-    theme: "light",
+    theme: "dark",
     personalBusinessName: "Personal Finance Management System",
     defaultBillingDate: "15",
     defaultDueDate: "30",
@@ -102,7 +102,7 @@ export default function App() {
       document.documentElement.classList.remove("dark");
     }
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute("content", settings.theme === "dark" ? "#08090f" : "#ffffff");
+    if (meta) meta.setAttribute("content", settings.theme === "dark" ? "#111028" : "#f5f4fb");
   }, [settings.theme]);
 
   // Activity logs are an audit trail, not something that needs to stay live
@@ -198,7 +198,7 @@ export default function App() {
       setArchives(archivesList);
       setLogs(logsList);
       setBackups(backupsList);
-      setSettings(settingsData);
+      setSettings({ ...settingsData, theme: (() => { try { return localStorage.getItem("pfms-theme") === "light" ? "light" : "dark"; } catch { return "dark"; } })() });
     } catch (err) {
       console.error("Failed to load records:", err);
     }
@@ -453,6 +453,7 @@ export default function App() {
   const handleToggleTheme = async () => {
     const nextTheme = settings.theme === "dark" ? "light" : "dark";
     setSettings(prev => ({ ...prev, theme: nextTheme }));
+    try { localStorage.setItem("pfms-theme", nextTheme); } catch { /* Storage may be disabled. */ }
     try {
       await handleUpdateSettings({ theme: nextTheme });
     } catch (err: any) {

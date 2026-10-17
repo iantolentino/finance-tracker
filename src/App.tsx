@@ -1059,6 +1059,10 @@ export default function App() {
               <Landmark className="w-4 h-4 text-brand-600 dark:text-brand-400" />
               <span className="text-xs font-semibold">Credit Card Charge</span>
             </button>
+            <button onClick={() => { setQuickAddChoiceOpen(false); setCurrentTab("lending"); }} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+              <Landmark className="w-4 h-4 text-brand-600 dark:text-brand-400" />
+              <span className="text-xs font-semibold">Grant Cash Loan</span>
+            </button>
           </motion.div>
         </div>
       )}

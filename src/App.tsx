@@ -1044,15 +1044,29 @@ export default function App() {
             onClick={(e) => e.stopPropagation()}
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            className="w-full sm:max-w-sm bg-white dark:bg-slate-900 rounded-t-2xl sm:rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-4 space-y-2"
+            className="w-full sm:max-w-sm bg-white dark:bg-slate-900 rounded-t-2xl sm:rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-4 space-y-2 max-h-[85dvh] overflow-y-auto"
           >
-            <h2 className="text-sm font-bold text-slate-900 dark:text-white px-1 pb-1">What would you like to add?</h2>
+            <div className="flex justify-between items-center px-1 pb-1"><h2 className="text-sm font-bold text-slate-900 dark:text-white">What would you like to add?</h2><button type="button" onClick={() => setQuickAddChoiceOpen(false)} aria-label="Close quick actions" className="min-h-11 min-w-11 flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-300"><X className="w-5 h-5" /></button></div>
             <button
               onClick={() => { setQuickAddChoiceOpen(false); setQuickLogOpen(true); }}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+              className="w-full min-h-12 flex items-center gap-3 px-4 py-3 rounded-xl text-left text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
             >
               <Wallet className="w-4 h-4 text-brand-600 dark:text-brand-400" />
               <span className="text-xs font-semibold">Log Payment (SPayLater, Loan, or Budget)</span>
+            </button>
+            <button
+              onClick={() => { setQuickAddChoiceOpen(false); setCurrentTab("spaylater"); }}
+              className="w-full min-h-12 flex items-center gap-3 px-4 py-3 rounded-xl text-left text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+            >
+              <Plus className="w-5 h-5 text-brand-600 dark:text-brand-400" />
+              <span className="text-sm font-semibold">Add Purchase <span className="block text-xs font-normal text-slate-500">Choose a customer in SPayLater</span></span>
+            </button>
+            <button
+              onClick={() => { setQuickAddChoiceOpen(false); setCurrentTab("budget"); }}
+              className="w-full min-h-12 flex items-center gap-3 px-4 py-3 rounded-xl text-left text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+            >
+              <Wallet className="w-5 h-5 text-brand-600 dark:text-brand-400" />
+              <span className="text-sm font-semibold">Log Expense <span className="block text-xs font-normal text-slate-500">Open monthly budget</span></span>
             </button>
             <button
               onClick={() => { setQuickAddChoiceOpen(false); setCreditCardQuickAddOpen(true); }}

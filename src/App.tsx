@@ -110,7 +110,8 @@ export default function App() {
   // displays them) is actually opened, instead of after every mutation.
   useEffect(() => {
     if (currentTab === "settings" && isAuthenticated) {
-      refreshLogs();
+      // These administrative lists are not required to draw the dashboard.
+      void Promise.allSettled([refreshLogs(), refreshBackups()]);
     }
   }, [currentTab, isAuthenticated]);
 
@@ -172,8 +173,6 @@ export default function App() {
         loansList,
         creditCardList,
         archivesList,
-        logsList,
-        backupsList,
         settingsData
       ] = await Promise.all([
         api.getBillingCycles(),
@@ -183,8 +182,6 @@ export default function App() {
         api.getLoans(),
         api.getCreditCardEntries(),
         api.getArchives(),
-        api.getLogs(),
-        api.getBackups(),
         api.getSettings()
       ]);
 
@@ -196,8 +193,6 @@ export default function App() {
       setLoans(loansList);
       setCreditCardEntries(creditCardList);
       setArchives(archivesList);
-      setLogs(logsList);
-      setBackups(backupsList);
       setSettings({ ...settingsData, theme: (() => { try { return localStorage.getItem("pfms-theme") === "light" ? "light" : "dark"; } catch { return "dark"; } })() });
     } catch (err) {
       console.error("Failed to load records:", err);

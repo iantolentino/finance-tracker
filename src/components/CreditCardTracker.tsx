@@ -160,8 +160,27 @@ export default function CreditCardTracker({ entries, settings, onAddEntry, onEdi
             No credit card charges logged yet.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
+          <>
+            <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+              {filteredEntries.map(entry => (
+                <div key={entry.id} className="p-4 space-y-2">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-bold text-sm text-slate-900 dark:text-white break-words">{entry.personName}</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-300 break-words">{entry.itemName}</p>
+                      <p className="text-[11px] text-slate-500 mt-1">{entry.date} · {entry.category}</p>
+                    </div>
+                    <strong className="text-sm text-brand-600 dark:text-brand-400 shrink-0">{formatCurrency(entry.amount)}</strong>
+                  </div>
+                  <div className="flex justify-end gap-2 pt-1">
+                    <button type="button" onClick={() => openEditModal(entry)} className="min-h-10 px-3 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold inline-flex items-center gap-2"><Edit2 className="w-4 h-4" />Edit</button>
+                    <button type="button" onClick={() => handleDelete(entry.id)} className="min-h-10 px-3 rounded-lg bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 text-xs font-semibold inline-flex items-center gap-2"><Trash2 className="w-4 h-4" />Delete</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-500 uppercase font-bold text-[10px]">
                   <th className="py-2.5 px-4">Date</th>
@@ -207,6 +226,7 @@ export default function CreditCardTracker({ entries, settings, onAddEntry, onEdi
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
 

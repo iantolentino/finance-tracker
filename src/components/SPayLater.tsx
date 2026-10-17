@@ -337,6 +337,7 @@ export default function SPayLater({
   // Render directly from invoice data rather than screenshotting a scrollable
   // modal. DOM capture can silently produce an all-white canvas in Safari,
   // Android browsers and when the user has enabled dark mode.
+  const invoiceRef = useRef<HTMLDivElement>(null);
   const [isSavingImage, setIsSavingImage] = useState(false);
   const handleSaveAsImage = async () => {
     const invoice = selectedCustomerInfo;
@@ -378,9 +379,9 @@ export default function SPayLater({
       const wrap = (value: string, font: string, maxWidth: number): string[] => {
         measure.font = font;
         const output: string[] = [];
-        for (const paragraph of String(value || "").split("\\n")) {
+        for (const paragraph of String(value || "").split("\n")) {
           let row = "";
-          for (const word of paragraph.split(/\\s+/).filter(Boolean)) {
+          for (const word of paragraph.split(/\s+/).filter(Boolean)) {
             const test = row ? row + " " + word : word;
             if (row && measure.measureText(test).width > maxWidth) {
               output.push(row);

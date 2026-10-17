@@ -71,8 +71,10 @@ export default function SPayLater({
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(initialSelectedCustomerId ?? null);
   const customerDetailRef = useRef<HTMLDivElement>(null);
+  const [mobileDetailOpen, setMobileDetailOpen] = useState(Boolean(initialSelectedCustomerId));
   const selectCustomer = (id: string) => {
     setSelectedCustomerId(id);
+    setMobileDetailOpen(true);
     if (window.innerWidth < 1024) requestAnimationFrame(() => customerDetailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
   };
 
@@ -423,7 +425,7 @@ export default function SPayLater({
       {/* Main Split Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Left Side: Customers list & tools */}
-        <div className="lg:col-span-1 space-y-4">
+        <div className={`${mobileDetailOpen ? "hidden lg:block" : ""} lg:col-span-1 space-y-4`}>
           <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-3">
             {/* Action Bar */}
             <div className="flex items-center justify-between">
@@ -543,7 +545,8 @@ export default function SPayLater({
         </div>
 
         {/* Right Side: Detailed Profile & Purchases / Payments lists */}
-        <div className="lg:col-span-2 scroll-mt-20" ref={customerDetailRef}>
+        <div className={`${mobileDetailOpen ? "" : "hidden lg:block"} lg:col-span-2 scroll-mt-20`} ref={customerDetailRef}>
+          {mobileDetailOpen && <button type="button" onClick={() => setMobileDetailOpen(false)} className="lg:hidden mb-3 min-h-11 px-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-white">← All customers</button>}
           {!selectedCustomerInfo ? (
             <div className="bg-white p-12 rounded-2xl border border-slate-100 shadow-sm text-center flex flex-col items-center justify-center min-h-[480px]">
               <div className="p-4 bg-slate-50 text-slate-400 rounded-2xl mb-4">

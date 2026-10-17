@@ -992,8 +992,9 @@ export default function App() {
 
         <button
           onClick={() => setQuickAddChoiceOpen(true)}
-          className="flex-1 flex flex-col items-center justify-center"
-          title="Log Money"
+          className="flex-1 flex flex-col items-center justify-center min-h-[56px]"
+          title="Add transaction"
+          aria-label="Add transaction"
         >
           <span className="-mt-6 w-12 h-12 rounded-full bg-brand-600 text-white shadow-lg shadow-brand-600/30 flex items-center justify-center">
             <Plus className="w-6 h-6" />
@@ -1001,7 +1002,7 @@ export default function App() {
         </button>
 
         {[
-          { id: "budget", label: "Budget", icon: Wallet }
+          { id: "lending", label: "Loans", icon: Calculator }
         ].map(item => {
           const Icon = item.icon;
           const active = currentTab === item.id;
@@ -1020,13 +1021,13 @@ export default function App() {
         })}
 
         <button
-          onClick={() => setCurrentTab("reports")}
+          onClick={() => setMobileMenuOpen(true)}
           className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 min-h-[56px] ${
-            currentTab === "reports" ? "text-brand-600 dark:text-brand-400" : "text-slate-500 dark:text-slate-400"
+            ["budget", "reports", "creditcard", "archives", "settings"].includes(currentTab) ? "text-brand-600 dark:text-brand-400" : "text-slate-500 dark:text-slate-400"
           }`}
         >
-          <FileText className="w-5 h-5" />
-          <span className="text-[9px] font-semibold">Reports</span>
+          <Menu className="w-5 h-5" />
+          <span className="text-[9px] font-semibold">More</span>
         </button>
       </nav>
       )}
@@ -1039,12 +1040,13 @@ export default function App() {
           className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
         >
           <motion.div
+            role="dialog" aria-modal="true" aria-label="Quick actions"
             onClick={(e) => e.stopPropagation()}
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             className="w-full sm:max-w-sm bg-white dark:bg-slate-900 rounded-t-2xl sm:rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-4 space-y-2"
           >
-            <h2 className="text-sm font-bold text-slate-900 dark:text-white px-1 pb-1">What do you want to log?</h2>
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white px-1 pb-1">What would you like to add?</h2>
             <button
               onClick={() => { setQuickAddChoiceOpen(false); setQuickLogOpen(true); }}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition"

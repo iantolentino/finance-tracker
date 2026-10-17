@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Spectral:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 /* Without this, Tailwind v4's dark: variant defaults to the OS/browser
@@ -10,21 +10,39 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-sans: "Spectral", serif;
+  --font-display: "Lora", serif;
+  --font-mono: "Spectral", serif;
 
-  /* Brand palette: pale yellow-green -> sage -> teal -> deep navy-purple */
-  --color-brand-50: #fafce7;
-  --color-brand-100: #edf7bd;
-  --color-brand-200: #d6eca0;
-  --color-brand-300: #b3db9d;
-  --color-brand-400: #85c79a;
-  --color-brand-500: #67ac9f;
-  --color-brand-600: #457c8c; /* darkened from #4e8d9c: original failed WCAG AA (3.74:1 on white), this passes at 4.65:1 */
-  --color-brand-700: #3d6f82;
-  --color-brand-800: #33506a;
-  --color-brand-900: #281c59;
-  --color-brand-950: #190f3d;
+  /* Pension Registry: a single, paper-led financial identity. */
+  --color-brand-50: #f5f4fb;
+  --color-brand-100: #eae7f5;
+  --color-brand-200: #dcd9e8;
+  --color-brand-300: #bdb4d7;
+  --color-brand-400: #9a94b4;
+  --color-brand-500: #704cc0;
+  --color-brand-600: #5029ae;
+  --color-brand-700: #432191;
+  --color-brand-800: #30166c;
+  --color-brand-900: #211047;
+  --color-brand-950: #111028;
+  --color-slate-50: #f5f4fb;
+  --color-slate-100: #eeecf6;
+  --color-slate-200: #dcd9e8;
+  --color-slate-300: #cbc6dc;
+  --color-slate-400: #9a94b4;
+  --color-slate-500: #77718f;
+  --color-slate-600: #5d5775;
+  --color-slate-700: #413b58;
+  --color-slate-800: #2d2744;
+  --color-slate-850: #211a35;
+  --color-slate-900: #17132e;
+  --color-slate-950: #111028;
+  --color-emerald-500: #22c55e;
+  --color-emerald-600: #17883f;
+  --color-green-500: #22c55e;
+  --color-green-600: #17883f;
+
 }
 
 /* ==========================================
@@ -88,261 +106,6 @@ input:focus, select:focus, textarea:focus {
   background: rgba(0, 0, 0, 0.2);
 }
 
-/* ==========================================
-   DARK MODE OVERRIDES (When html has .dark class)
-   ========================================== */
-html.dark {
-  --bg-primary: #08090f;
-  --bg-secondary: #0f1220;
-  --bg-card: rgba(16, 18, 32, 0.75);
-  --bg-card-hover: rgba(22, 25, 42, 0.85);
-  --border-color: rgba(255, 255, 255, 0.07);
-  --border-color-hover: rgba(69, 124, 140, 0.35);
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --accent-brand: #457c8c;
-}
-
-html.dark body {
-  background-color: var(--bg-primary);
-  background-image:
-    radial-gradient(at 0% 0%, rgba(40, 28, 89, 0.35) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(69, 124, 140, 0.12) 0px, transparent 50%);
-  background-attachment: fixed;
-  color: var(--text-primary);
-}
-
-/* Background replacements in dark mode */
-html.dark .bg-slate-50,
-html.dark .bg-slate-100 {
-  background-color: var(--bg-primary) !important;
-  background-image:
-    radial-gradient(at 0% 0%, rgba(40, 28, 89, 0.35) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(69, 124, 140, 0.12) 0px, transparent 50%) !important;
-  background-attachment: fixed !important;
-}
-
-/* Card panels - conversion to high-fidelity glassmorphism in dark mode */
-html.dark .bg-white {
-  background-color: var(--bg-card) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border: 1px solid var(--border-color) !important;
-  box-shadow: 
-    0 10px 30px -10px rgba(0, 0, 0, 0.5), 
-    inset 0 1px 1px rgba(255, 255, 255, 0.05) !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-html.dark .bg-white:hover {
-  box-shadow: 
-    0 15px 35px -5px rgba(0, 0, 0, 0.6), 
-    inset 0 1px 1px rgba(255, 255, 255, 0.07) !important;
-}
-
-/* Modals glassmorphic container overrides in dark mode */
-html.dark .fixed.inset-0.bg-black\/40, 
-html.dark .fixed.inset-0.bg-black\/50,
-html.dark .fixed.inset-0.bg-slate-900\/50 {
-  background-color: rgba(3, 5, 10, 0.8) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-}
-
-/* Custom shadow cards and dynamic alerts in dark mode */
-html.dark .bg-red-50\/50, 
-html.dark .bg-red-50 {
-  background-color: rgba(239, 68, 68, 0.08) !important;
-  border-color: rgba(239, 68, 68, 0.2) !important;
-}
-
-html.dark .bg-brand-50 {
-  background-color: rgba(69, 124, 140, 0.12) !important;
-  color: #8fd6c9 !important;
-}
-
-html.dark .bg-orange-50 {
-  background-color: rgba(249, 115, 22, 0.1) !important;
-  color: #fb923c !important;
-}
-
-html.dark .bg-emerald-50 {
-  background-color: rgba(16, 185, 129, 0.1) !important;
-  color: #34d399 !important;
-}
-
-html.dark .bg-slate-50\/50 {
-  background-color: rgba(255, 255, 255, 0.03) !important;
-}
-
-html.dark .bg-slate-800\/40 {
-  background-color: rgba(255, 255, 255, 0.04) !important;
-  border-color: rgba(255, 255, 255, 0.06) !important;
-}
-
-/* Border overrides in dark mode */
-html.dark .border,
-html.dark .border-slate-100, 
-html.dark .border-slate-200, 
-html.dark .border-slate-300,
-html.dark .border-slate-50 {
-  border-color: var(--border-color) !important;
-}
-
-/* Custom interactive input elements styling in dark mode */
-html.dark input[type="text"], 
-html.dark input[type="password"], 
-html.dark input[type="number"], 
-html.dark input[type="date"], 
-html.dark select, 
-html.dark textarea {
-  background-color: rgba(15, 21, 36, 0.75) !important;
-  border: 1px solid rgba(255, 255, 255, 0.09) !important;
-  color: #ffffff !important;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
-}
-
-html.dark input:focus, html.dark select:focus, html.dark textarea:focus {
-  border-color: var(--border-color-hover) !important;
-  outline: none !important;
-  box-shadow: 0 0 15px rgba(69, 124, 140, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-}
-
-/* Dropdown list item style for select in dark mode */
-html.dark select option {
-  background-color: #0f1524 !important;
-  color: #f8fafc !important;
-}
-
-/* Text elements color system mapping in dark mode */
-html.dark .text-slate-950, 
-html.dark .text-slate-900, 
-html.dark .text-slate-800 {
-  color: var(--text-primary) !important;
-}
-
-html.dark .text-slate-700, 
-html.dark .text-slate-600, 
-html.dark .text-slate-500 {
-  color: var(--text-secondary) !important;
-}
-
-html.dark .text-slate-400 {
-  color: #64748b !important;
-}
-
-/* Text accent colors to keep theme intact in dark mode */
-html.dark .text-brand-600 {
-  color: #7ec8d9 !important;
-}
-
-html.dark .text-brand-700 {
-  color: #6bb8ca !important;
-}
-
-html.dark .text-brand-800 {
-  color: #8fd6c9 !important;
-}
-
-html.dark .text-brand-900 {
-  color: #b3a6e8 !important;
-}
-
-html.dark .text-emerald-600 {
-  color: #34d399 !important;
-}
-
-html.dark .text-orange-600 {
-  color: #fb923c !important;
-}
-
-/* Badge tags color correction in dark mode */
-html.dark .text-emerald-800 {
-  color: #34d399 !important;
-}
-
-html.dark .bg-emerald-100 {
-  background-color: rgba(16, 185, 129, 0.15) !important;
-  border: 1px solid rgba(16, 185, 129, 0.2) !important;
-}
-
-html.dark .bg-brand-100 {
-  background-color: rgba(69, 124, 140, 0.15) !important;
-  border: 1px solid rgba(69, 124, 140, 0.25) !important;
-}
-
-html.dark .text-red-800 {
-  color: #f87171 !important;
-}
-
-html.dark .bg-red-100 {
-  background-color: rgba(239, 68, 68, 0.15) !important;
-  border: 1px solid rgba(239, 68, 68, 0.2) !important;
-}
-
-html.dark .text-orange-800 {
-  color: #fb923c !important;
-}
-
-html.dark .bg-orange-100 {
-  background-color: rgba(249, 115, 22, 0.15) !important;
-  border: 1px solid rgba(249, 115, 22, 0.2) !important;
-}
-
-/* Table layout polishing in dark mode */
-html.dark table {
-  width: 100% !important;
-  border-collapse: separate !important;
-  border-spacing: 0 !important;
-}
-
-html.dark thead th {
-  background-color: rgba(15, 21, 36, 0.85) !important;
-  color: #cbd5e1 !important;
-  font-weight: 600 !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-}
-
-html.dark tbody tr {
-  background-color: transparent !important;
-}
-
-html.dark tbody tr:hover {
-  background-color: rgba(255, 255, 255, 0.02) !important;
-}
-
-html.dark tbody td {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
-  color: #e2e8f0 !important;
-}
-
-/* High Contrast Scrollbar system for Sleek design in dark mode */
-html.dark ::-webkit-scrollbar-track {
-  background: rgba(15, 21, 36, 0.2);
-}
-
-html.dark ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-html.dark ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.18);
-}
-
-/* Modal sizing & drop shadow correction in dark mode */
-html.dark .max-w-md.bg-white, 
-html.dark .max-w-lg.bg-white, 
-html.dark .max-w-xl.bg-white, 
-html.dark .max-w-2xl.bg-white, 
-html.dark .max-w-3xl.bg-white, 
-html.dark .max-w-sm.bg-white, 
-html.dark .max-w-4xl.bg-white, 
-html.dark .max-w-5xl.bg-white {
-  background-color: #0f1524 !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
-}
-
 /* Printing styling configurations */
 @media print {
   body, .bg-slate-50, .bg-slate-100, .bg-white {
@@ -384,3 +147,83 @@ html.dark .max-w-5xl.bg-white {
     border-radius: 0 !important;
   }
 }
+
+/* PENSION REGISTRY — PROFESSIONAL
+   Presentation-only theme; never alters finance state or calculations. */
+:root {
+  --registry-primary: #5029ae;
+  --registry-secondary: #9a94b4;
+  --registry-accent: #22c55e;
+  --registry-rule: #11102821;
+  --registry-neutral: #dcd9e8;
+  --registry-paper: #f5f4fb;
+  --registry-ink: #111028;
+  color-scheme: light;
+}
+html, body, #root { font-family: "Spectral", serif !important; }
+html:not(.dark) body { background: #f5f4fb !important; color: #111028 !important; }
+html:not(.dark) .bg-white { background-color: #ffffff !important; }
+html:not(.dark) .bg-slate-50 { background-color: #f5f4fb !important; }
+html:not(.dark) .bg-slate-100 { background-color: #eeecf6 !important; }
+html:not(.dark) .text-slate-950, html:not(.dark) .text-slate-900,
+html:not(.dark) .text-slate-800 { color: #111028 !important; }
+h1,h2,h3,h4,h5,h6 { font-family: "Lora", serif !important; letter-spacing: -.01em; line-height: 1.1; }
+body { line-height: 1.62; letter-spacing: .005em; font-size: 16px; }
+button, input, select, textarea, option { font-family: "Spectral", serif !important; letter-spacing: .005em; }
+button { line-height: 1.2; }
+:where(button, input, select, textarea, [role="button"], a):focus-visible {
+  outline: 3px solid #5029ae !important; outline-offset: 0 !important;
+}
+:where(button, a, input, select, textarea) { transition: color 340ms ease-out, background-color 340ms ease-out, border-color 340ms ease-out, opacity 340ms ease-out, transform 340ms ease-out, filter 340ms ease-out; }
+:where(button, a):hover { filter: brightness(1.045); }
+:where(button, a) { text-underline-offset: 4px; }
+:where(button, a):not(:disabled):active { transform: translateY(1px); }
+:where(button, input, select, textarea) { border-radius: 0 !important; }
+:where(.rounded, .rounded-sm, .rounded-md, .rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl) { border-radius: 4px !important; }
+:where(.rounded-full) { border-radius: 9999px; }
+button[class*="bg-brand-"], .bg-brand-600 { background-color: #5029ae !important; color: #ffffff !important; }
+button[class*="bg-brand-"]:hover, button.bg-brand-600:hover { background-color: #432191 !important; }
+button[class*="bg-slate-"]:not([class*="bg-brand-"]):not([class*="bg-red-"]):not([class*="bg-emerald-"]) { border-color: #11102821; }
+:where(input:not([type="checkbox"]):not([type="radio"]),select,textarea) {
+  min-height: 42px; border: 1px solid #11102829 !important;
+  background: #f5f4fb80 !important; color: #111028 !important;
+  box-shadow: none !important;
+}
+:where(input,select,textarea)::placeholder { color: #77718f; }
+:where(.shadow,.shadow-sm,.shadow-md,.shadow-lg,.shadow-xl,.shadow-2xl,.shadow-xs) { box-shadow: none !important; }
+:where(.border,.border-slate-100,.border-slate-200,.border-slate-300) { border-color: #11102821; }
+:where(.bg-white.rounded-xl,.bg-white.rounded-2xl,.bg-white.rounded-lg,.bg-white.rounded-3xl) { border: 1px solid #11102821; }
+:where(nav,aside) { box-shadow: none !important; }
+:where(nav) { border-color: #11102821; }
+:where(thead) { border-bottom: 1px solid #11102821; }
+:where(th) { font-size: 12px; text-transform: uppercase; letter-spacing: .12em; }
+:where(.uppercase.tracking-wider) { letter-spacing: .2em; }
+:where(.text-brand-600,.text-brand-700) { color: #5029ae; }
+:where(.text-emerald-600) { color: #17883f; }
+:where(.fixed.inset-0 > div, .fixed.inset-0 > form) { border-top: 3px solid #5029ae; }
+@media (min-width: 861px) {
+  :where(.bg-white.rounded-xl,.bg-white.rounded-2xl,.bg-white.rounded-lg) { border-radius: 4px !important; }
+}
+@media (max-width: 860px) {
+  h1 { font-size: clamp(28px, 7vw, 56px); }
+  :where(button) { min-height: 42px; }
+  :where(.fixed.bottom-0) { border-top: 1px solid #11102821; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  main > div { animation: registry-enter 520ms cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes registry-enter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,*::before,*::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+/* Dark preference retains the same visual language using ink and plum paper. */
+html.dark { color-scheme: dark; --registry-rule: #dcd9e833; }
+html.dark body { background: #111028 !important; color: #f5f4fb !important; }
+html.dark .bg-white, html.dark .dark\\:bg-slate-900 { background-color: #211a35 !important; border-color: #dcd9e833 !important; box-shadow: none !important; backdrop-filter: none !important; }
+html.dark .bg-slate-50, html.dark .bg-slate-100 { background-color: #111028 !important; }
+html.dark :where(input:not([type="checkbox"]):not([type="radio"]),select,textarea) { color: #f5f4fb !important; background: #211a35 !important; border-color: #dcd9e84d !important; }
+html.dark :where(.text-slate-950,.text-slate-900,.text-slate-800,.text-slate-700) { color: #f5f4fb !important; }
+html.dark :where(.text-slate-600,.text-slate-500,.text-slate-400) { color: #cbc6dc !important; }
+html.dark :where(.text-brand-600,.text-brand-700) { color: #bdb4d7 !important; }
+html.dark :where(.border,.border-slate-100,.border-slate-200,.border-slate-800) { border-color: #dcd9e833 !important; }
+@media print { html.dark body, html.dark .bg-white { color: #111028 !important; background: white !important; } }

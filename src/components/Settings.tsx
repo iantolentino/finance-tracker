@@ -281,6 +281,11 @@ export default function Settings({
 
   return (
     <div className="space-y-6">
+      <nav aria-label="Settings sections" className="flex gap-2 overflow-x-auto pb-1">
+        {[["profile", "Profile & billing"], ["security", "Security"], ["data", "Data & backups"], ["activity", "Activity"]].map(([id, label]) => (
+          <a key={id} href={`#settings-${id}`} className="min-h-11 shrink-0 inline-flex items-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 text-xs font-semibold text-slate-700 dark:text-slate-200">{label}</a>
+        ))}
+      </nav>
       {/* Header */}
       <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
         <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -297,7 +302,7 @@ export default function Settings({
         <div className="lg:col-span-2 space-y-6">
           {/* General Config */}
           <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
-            <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm border-b border-slate-50 dark:border-slate-800/50 pb-2">System Profile Configuration</h3>
+            <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm border-b border-slate-50 dark:border-slate-800/50 pb-2"><span id="settings-profile" className="scroll-mt-20">System Profile Configuration</span></h3>
             <form onSubmit={handleSaveSettings} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Personal / Business Name</label>
@@ -414,6 +419,7 @@ export default function Settings({
             </form>
           </div>
 
+          <span id="settings-security" className="block scroll-mt-20" />
           {/* Password Settings */}
           <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
             <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm border-b border-slate-50 dark:border-slate-800/50 pb-2 flex items-center gap-1.5 text-red-700 dark:text-red-400">
@@ -484,7 +490,7 @@ export default function Settings({
             <div className="flex items-center justify-between border-b border-slate-50 dark:border-slate-800/50 pb-2 mb-3">
               <div className="flex items-center gap-1.5">
                 <Activity className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-                <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm">System Audit & Activity Logs</h3>
+                <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm"><span id="settings-activity" className="scroll-mt-20">System Audit & Activity Logs</span></h3>
               </div>
               <button
                 onClick={onRefreshLogs}
@@ -509,7 +515,8 @@ export default function Settings({
           </div>
         </div>
 
-        {/* Right Side: Backups panel */}
+        <span id="settings-data" className="block scroll-mt-20" />
+          {/* Right Side: Backups panel */}
         <div className="lg:col-span-1 space-y-6">
           <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
             <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm border-b border-slate-50 dark:border-slate-800/50 pb-2 flex items-center gap-1.5">

@@ -55,6 +55,8 @@ export default function Lending({
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [selectedLoanId, setSelectedLoanId] = useState<string | null>(initialSelectedLoanId ?? null);
+  const [mobileDetailOpen, setMobileDetailOpen] = useState(Boolean(initialSelectedLoanId));
+  const selectLoan = (id: string) => { setSelectedLoanId(id); setMobileDetailOpen(true); };
 
   useEffect(() => {
     if (initialSelectedLoanId) onConsumeInitialSelection?.();
@@ -348,7 +350,7 @@ export default function Lending({
       {/* Split layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Left Side: Borrowers List */}
-        <div className="lg:col-span-1 space-y-4">
+        <div className={`${mobileDetailOpen ? "hidden lg:block" : ""} lg:col-span-1 space-y-4`}>
           <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold text-slate-800 dark:text-slate-200 text-sm">Active Loans ({filteredLoans.length})</h3>
@@ -393,7 +395,7 @@ export default function Lending({
                 filteredLoans.map((l) => (
                   <div
                     key={l.id}
-                    onClick={() => setSelectedLoanId(l.id)}
+                    onClick={() => selectLoan(l.id)}
                     className={`p-3 rounded-xl border cursor-pointer transition flex items-center justify-between ${
                       selectedLoanId === l.id
                         ? "bg-slate-900 border-slate-900 text-white shadow-sm"
@@ -460,7 +462,8 @@ export default function Lending({
         </div>
 
         {/* Right Side: Loan Details / Borrower Profile */}
-        <div className="lg:col-span-2">
+        <div className={`${mobileDetailOpen ? "" : "hidden lg:block"} lg:col-span-2`}>
+          {mobileDetailOpen && <button type="button" onClick={() => setMobileDetailOpen(false)} className="lg:hidden mb-3 min-h-11 px-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-white">← All borrowers</button>}
           {!selectedLoanInfo ? (
             <div className="bg-white dark:bg-slate-900 p-12 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm text-center flex flex-col items-center justify-center min-h-[480px]">
               <div className="p-4 bg-slate-50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-500 rounded-2xl mb-4">

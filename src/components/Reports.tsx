@@ -261,8 +261,15 @@ export default function Reports({
           </div>
         </div>
 
+        {/* Mobile summaries avoid horizontal scrolling. Print keeps the full tables. */}
+        <div className="md:hidden print:hidden divide-y divide-slate-100 dark:divide-slate-800">
+          {reportType === "outstanding" && outstandingReportData.map(row => <div key={row.id} className="py-3 flex justify-between gap-3"><div><p className="font-bold text-sm text-slate-900 dark:text-white">{row.fullName}</p><p className="text-xs text-slate-500">{row.contactNumber || "No contact"}</p><p className="text-xs text-slate-500">Paid: {formatCurrency(row.totalPaid)}</p></div><div className="text-right"><p className="text-xs text-slate-500">Unpaid</p><strong className="text-brand-600">{formatCurrency(row.remainingBalance)}</strong></div></div>)}
+          {reportType === "collections" && collectionsReportData.map(row => <div key={row.id} className="py-3 flex justify-between gap-3"><div><p className="font-bold text-sm text-slate-900 dark:text-white">{row.customerName}</p><p className="text-xs text-slate-500">{row.paymentDate} · {row.paymentMethod}</p>{row.notes && <p className="text-xs text-slate-500">{row.notes}</p>}</div><strong className="text-emerald-600 shrink-0">{formatCurrency(row.amountPaid)}</strong></div>)}
+          {reportType === "overdue" && overdueReportData.map(row => <div key={row.id} className="py-3 flex justify-between gap-3"><div><p className="font-bold text-sm text-slate-900 dark:text-white">{row.fullName}</p><p className="text-xs text-red-600">Overdue</p></div><strong className="text-red-600 shrink-0">{formatCurrency(row.remainingBalance)}</strong></div>)}
+          {reportType === "loans" && loansReportData.map(row => <div key={row.id} className="py-3 flex justify-between gap-3"><div><p className="font-bold text-sm text-slate-900 dark:text-white">{row.borrowerName}</p><p className="text-xs text-slate-500">Paid {formatCurrency(row.totalPaid)}</p></div><div className="text-right"><p className="text-xs text-slate-500">Remaining</p><strong className="text-brand-600">{formatCurrency(row.remainingBalance)}</strong></div></div>)}
+        </div>
         {/* Tables based on report selection */}
-        <div className="overflow-x-auto">
+        <div className="hidden md:block print:block overflow-x-auto">
           {reportType === "outstanding" && (
             <table className="w-full text-left border-collapse text-xs">
               <thead>

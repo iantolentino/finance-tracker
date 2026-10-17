@@ -26,6 +26,7 @@ export default function Archives({ archives, settings, onRestoreArchive }: Archi
   
   // States
   const [selectedArchiveId, setSelectedArchiveId] = useState<string | null>(null);
+  const [mobileArchiveOpen, setMobileArchiveOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -131,7 +132,7 @@ export default function Archives({ archives, settings, onRestoreArchive }: Archi
       {/* Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Left Side: Archives List */}
-        <div className="lg:col-span-1 space-y-4">
+        <div className={`${mobileArchiveOpen ? "hidden lg:block" : ""} lg:col-span-1 space-y-4`}>
           <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
             <h3 className="font-semibold text-slate-800 dark:text-slate-200 text-sm mb-3">Archived Months ({archives.length})</h3>
             
@@ -147,6 +148,7 @@ export default function Archives({ archives, settings, onRestoreArchive }: Archi
                     onClick={() => {
                       setSelectedArchiveId(arch.id);
                       setSelectedCustomerId(null);
+                      setMobileArchiveOpen(true);
                     }}
                     className={`p-4 rounded-xl border cursor-pointer transition relative overflow-hidden ${
                       selectedArchiveId === arch.id
@@ -185,7 +187,8 @@ export default function Archives({ archives, settings, onRestoreArchive }: Archi
         </div>
 
         {/* Right Side: Selected Archive Details */}
-        <div className="lg:col-span-2">
+        <div className={`${mobileArchiveOpen ? "" : "hidden lg:block"} lg:col-span-2`}>
+          {mobileArchiveOpen && <button type="button" onClick={() => setMobileArchiveOpen(false)} className="lg:hidden mb-3 min-h-11 px-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-white">← Archived months</button>}
           {!selectedArchive ? (
             <div className="bg-white dark:bg-slate-900 p-12 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm text-center flex flex-col items-center justify-center min-h-[480px]">
               <div className="p-4 bg-slate-50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-500 rounded-2xl mb-4">

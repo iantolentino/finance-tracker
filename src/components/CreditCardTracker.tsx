@@ -185,17 +185,17 @@ export default function CreditCardTracker({ entries, settings, onAddEntry, onEdi
                     </td>
                     <td className="py-3 px-4 text-right font-black text-brand-600 dark:text-brand-400">{formatCurrency(entry.amount)}</td>
                     <td className="py-3 px-4 text-right">
-                      <div className="flex items-center justify-end gap-1">
+                      <div className="flex items-center justify-end gap-2 min-w-[100px]">
                         <button
                           onClick={() => openEditModal(entry)}
-                          className="p-1.5 text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg transition"
+                          className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-700 hover:text-brand-600 dark:bg-slate-800 dark:text-slate-200 transition" aria-label={`Edit ${entry.itemName} for ${entry.personName}`}
                           title="Edit entry"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => handleDelete(entry.id)}
-                          className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg transition"
+                          className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-lg bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-950/30 dark:text-red-400 transition" aria-label={`Delete ${entry.itemName} for ${entry.personName}`}
                           title="Delete entry"
                         >
                           <Trash2 className="w-3.5 h-3.5" />

@@ -741,7 +741,26 @@ export default function BudgetTracker({
             No expenses logged for {budgetMonth} yet. Keep tracking your spending.
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+          <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+            {activeBudget.expenses.slice().sort((a,b) => b.date.localeCompare(a.date)).map(exp => {
+              const category = activeBudget.allocations.find(a => a.id === exp.allocationId)?.category || "Unassigned";
+              return <div key={exp.id} className="py-3 space-y-2">
+                <div className="flex justify-between gap-3 items-start">
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-slate-900 dark:text-white break-words">{exp.itemName}</p>
+                    <p className="text-xs text-slate-500 mt-1">{exp.date} · {category}</p>
+                    {exp.notes && <p className="text-xs text-slate-500 mt-1 break-words">{exp.notes}</p>}
+                  </div>
+                  <strong className="text-sm text-rose-600 dark:text-rose-400 shrink-0">{settings.currency} {exp.amount.toLocaleString()}</strong>
+                </div>
+                <div className="flex justify-end">
+                  <button type="button" onClick={() => handleDeleteExpense(exp.id)} disabled={isSaving} className="min-h-11 px-4 inline-flex items-center gap-2 rounded-lg bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400 text-xs font-semibold disabled:opacity-50"><Trash2 className="w-4 h-4" />Delete expense</button>
+                </div>
+              </div>;
+            })}
+          </div>
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400 uppercase font-bold text-[10px]">
@@ -788,6 +807,7 @@ export default function BudgetTracker({
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
 

@@ -115,6 +115,17 @@ export default function App() {
     }
   }, [currentTab, isAuthenticated]);
 
+  // Archive history can grow large. Do not download it for every login;
+  // fetch it only when the user actually visits the Archives screen.
+  useEffect(() => {
+    if (!isAuthenticated || currentTab !== "archives") return;
+    let cancelled = false;
+    void api.getArchives()
+      .then(items => { if (!cancelled) setArchives(items); })
+      .catch(error => { if (!cancelled) console.error("Could not load archives:", error); });
+    return () => { cancelled = true; };
+  }, [currentTab, isAuthenticated]);
+
   // Global Session Check
   useEffect(() => {
     const checkAuth = async () => {
@@ -172,7 +183,6 @@ export default function App() {
         paymentsList,
         loansList,
         creditCardList,
-        archivesList,
         settingsData
       ] = await Promise.all([
         api.getBillingCycles(),
@@ -181,7 +191,6 @@ export default function App() {
         api.getPayments(),
         api.getLoans(),
         api.getCreditCardEntries(),
-        api.getArchives(),
         api.getSettings()
       ]);
 
@@ -192,7 +201,6 @@ export default function App() {
       setPayments(paymentsList);
       setLoans(loansList);
       setCreditCardEntries(creditCardList);
-      setArchives(archivesList);
       setSettings({ ...settingsData, theme: (() => { try { return localStorage.getItem("pfms-theme") === "light" ? "light" : "dark"; } catch { return "dark"; } })() });
     } catch (err) {
       console.error("Failed to load records:", err);
